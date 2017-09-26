@@ -5,7 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
+var demo = require('./routes/demo');
+var professor = require('./routes/professor');
 
 var app = express();
 var server = require('http').Server(app);
@@ -15,7 +16,6 @@ var io = require('socket.io')();
 io.on('connection', function(socket) {
     //TODO: Authentication
     console.log('A user connected');
-    socket.emit('start', 'Connection received');
     socket.on('test', function(message) {
         console.log('Received test message');
         socket.emit('test', `Hi, it's the server! You said: \'${message}\'`);
@@ -35,7 +35,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
+app.use('/demo', demo);
+app.use('/professor', professor)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
