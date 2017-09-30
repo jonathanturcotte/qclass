@@ -1,4 +1,4 @@
-drop database SISystem;
+drop database if exists SISystem;
 create database SISystem;
 
 use SISystem;

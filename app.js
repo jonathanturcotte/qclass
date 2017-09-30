@@ -12,23 +12,7 @@ var student = require('./routes/student');
 var app = express();
 var server = require('http').Server(app);
 
-var mysql = require('mysql');
-
-var con = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "password"
-  database: "SISystem"
-});
-
-con.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected!");
-  con.query("CREATE DATABASE SISystem", function (err, result) {
-    if (err) throw err;
-    console.log("Database created");
-  });
-});
+var db = require('./api/db'); // Call solely to initialize db pool as app starts 
 
 // Socket.IO 
 var io = require('socket.io')();
