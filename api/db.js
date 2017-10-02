@@ -10,17 +10,17 @@ var pool = mysql.createPool({
 
 exports.addClass = function(code, name, defLocation, callback) {
     var id = uuid();
-    var queryString = 
+    var query = 
         `INSERT INTO course (cID, cCode, cName, regNum, defLocation)
         VALUES ('${id}', '${code}', '${name}', '${id.substring(0, 5)}', '${defLocation}')`;
-    query(queryString, callback, 'addClass');
+    runQuery(query, callback);
 };
 
 exports.addStudent = function(netId, firstName, lastName, studentNumber, callback) {
-    var queryString = 
+    var query = 
         `INSERT INTO student (sNetID, fname, lName, stdNum)
         VALUES ('${netId}', '${firstName}', '${lastName}', '${studentNumber}'`;
-    query(queryString, callback, 'addStudent');   
+    runQuery(query, callback);   
 };
 
 exports.enroll = function(classId, students, callback) {
@@ -29,37 +29,23 @@ exports.enroll = function(classId, students, callback) {
         values[i] = [ students[i], classId ];
     }
     useConnection(callback, function(con) {
-        var queryString = `INSERT INTO enrolled (sNetID, cID) VALUES (?, ?)`;
-        con.query(queryString, [values], function(err, result, fields) {
-            if (err) {
-                console.log('Error running enrollment query');
-                callback(err, null, null);
-            } else {
-                callback(null, result, fields);
-            }
-        });
+        var query = `INSERT INTO enrolled (sNetID, cID) VALUES ?)`;
+        con.query(query, [values], callback);
     });
 };
 
 exports.getClasses = function(studentId, callback) {
-    var queryString = 
+    var query = 
         `SELECT course.cID, course.cName, course.cCode
         FROM student
             INNER JOIN enrolled ON student.sNetID = enrolled.sNetID AND student.sNetID = '${studentId}'
             INNER JOIN course ON enrolled.cID = course.cID`;
-    query(queryString, callback, 'getClasses');
+    runQuery(query, callback);
 };
 
-function query(queryString, callback, queryName) {
+function runQuery(query, callback) {
     useConnection(callback, function(con) {
-        con.query(queryString, function(err, result, fields) {
-            if (err) {
-                console.log(`Error running ${queryName || '\'unnamed\''} query`);
-                callback(err, null, null);
-            } else {
-                callback(null, result, fields);
-            }
-        });
+        con.query(query, callback(err, result, fields));
     });
 }
 

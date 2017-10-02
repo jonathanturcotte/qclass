@@ -7,7 +7,7 @@ var db = require('../api/db');
 // GET all classes associated with a specific student 
 router.get('/classes', function(req, res, next) {
     var netId = req.cookies.netId; 
-    if (!netId) res.send(403, 'Net ID required');
+    if (!netId) res.status(403).send('Net ID required');
     db.getClasses(netId, function(err, results, fields) {
         if (err) helper.sendError(res, err, `Error getting classes for student ${studentId}`);
         for (var result in results) {

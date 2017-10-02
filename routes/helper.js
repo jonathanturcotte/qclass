@@ -5,12 +5,11 @@ exports.getRenderName = function(prefix, suffix) {
 /**
  * Send an error from a route back to the client. 
  * The errMsg is returned to the client, and the http code is specified in status.
- * If err is defined, it will be thrown and the request will stop executing.
  */
 exports.sendError = function (res, err, errMsg = 'Error - Unspecified', status = 500) {
     console.log(errMsg);
-    res.send(status, errMsg);
-    if (err) throw err;
+    res.status(status).send(errMsg);
+    throw err;
 }
 
 /**
@@ -19,7 +18,7 @@ exports.sendError = function (res, err, errMsg = 'Error - Unspecified', status =
  */
 exports.paramRegex = function(res, value, regex, errMsg = 'Invalid parameter') {
     if (!regex.test(value)) {
-        res.send(422, errMsg);
+        res.status(422).send(errMsg);
         return false;
     }
     return true;
@@ -29,5 +28,6 @@ exports.paramRegex = function(res, value, regex, errMsg = 'Invalid parameter') {
  * Common regular expressions
  */
 exports.regex = {
-    classId: /^[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[a-z0-9]{4}-[a-z0-9]{12}$/
+    classId: /^[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[a-z0-9]{4}-[a-z0-9]{12}$/,
+    studentNetId: /.*/ 
 };
