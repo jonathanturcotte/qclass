@@ -23,6 +23,24 @@ exports.addStudent = function(netId, firstName, lastName, studentNumber, callbac
     query(queryString, callback, 'addStudent');   
 };
 
+exports.enroll = function(classId, students, callback) {
+    var values = [];
+    for (let i = 0; i < students.length; i++) {
+        values[i] = [ students[i], classId ];
+    }
+    useConnection(callback, function(con) {
+        var queryString = `INSERT INTO enrolled (sNetID, cID) VALUES (?, ?)`;
+        con.query(queryString, [values], function(err, result, fields) {
+            if (err) {
+                console.log('Error running enrollment query');
+                callback(err, null, null);
+            } else {
+                callback(null, result, fields);
+            }
+        });
+    });
+};
+
 exports.getClasses = function(studentId, callback) {
     var queryString = 
         `SELECT course.cID, course.cName, course.cCode
@@ -36,7 +54,7 @@ function query(queryString, callback, queryName) {
     useConnection(callback, function(con) {
         con.query(queryString, function(err, result, fields) {
             if (err) {
-                console.log(`Error running db.${queryName || '\'unnamed\''} query`);
+                console.log(`Error running ${queryName || '\'unnamed\''} query`);
                 callback(err, null, null);
             } else {
                 callback(null, result, fields);
@@ -54,4 +72,4 @@ function useConnection(callback, queryFunc) {
             queryFunc(con);
         }
     });
-};
+}; 
