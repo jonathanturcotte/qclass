@@ -1,5 +1,6 @@
 var mysql = require('mysql');
 var uuid = require('uuid/v4');
+var async = require('async');
 
 var pool = mysql.createPool({
     host: "localhost",
@@ -16,21 +17,50 @@ exports.addClass = function(code, name, defLocation, callback) {
     runQuery(query, callback);
 };
 
-exports.addStudent = function(netId, firstName, lastName, studentNumber, callback) {
-    var query = 
-        `INSERT INTO student (sNetID, fname, lName, stdNum)
-        VALUES ('${netId}', '${firstName}', '${lastName}', '${studentNumber}'`;
-    runQuery(query, callback);   
-};
-
 exports.enroll = function(classId, students, callback) {
-    var values = [];
-    for (let i = 0; i < students.length; i++) {
-        values[i] = [ students[i], classId ];
-    }
     useConnection(callback, function(con) {
-        var query = `INSERT INTO enrolled (sNetID, cID) VALUES ?)`;
-        con.query(query, [values], callback);
+        var values = [];
+        var newStudents = [];
+        var errorStudents = [];
+        async.forEachOf(students, function(student, i, innerCallback) {
+            var studentQuery = `SELECT 1 FROM student WHERE sNetID = ${student}`;
+            con.query(studentQuery, function(err, result, fields) {
+                if (err) {
+                    errorStudents.push(student);
+                    innerCallback(err);
+                } else {
+                    if (!Array.isArray(result)) { 
+                        errorStudents.push(student);
+                        innerCallback(new Error('Select query did not return an array'));
+                    } else if (result.length > 1) {
+                        errorStudents.push(student);
+                        innerCallback(new Error('Selct query returned more than 1 row'));
+                    } else if (result.length == 1) { // student does not exist, insert student
+                            con.query(`INSERT INTO student (sNetID) VALUES (${student})`, function(err, results, fields) {
+                                if (err) {
+                                    errorStudents.push(student);
+                                    innerCallback(err);
+                                } else {
+                                    values.push([ student, classId ]);
+                                    innerCallback();
+                                }
+                            });
+                    } else { // student already exists
+                        values.push([ student, classId ]);
+                        innerCallback();
+                    }
+                }
+            });
+        }, function (err) { 
+                if (err) {
+                    err.errorStudents = errorStudents;
+                    console.log(err.message);
+                    callback(err);
+                } else {
+                    var enrollQuery = `INSERT INTO enrolled (sNetID, cID) VALUES ?`;
+                    con.query(enrollQuery, [values], callback);
+                }
+        })
     });
 };
 
@@ -45,7 +75,7 @@ exports.getClasses = function(studentId, callback) {
 
 function runQuery(query, callback) {
     useConnection(callback, function(con) {
-        con.query(query, callback(err, result, fields));
+        con.query(query, callback);
     });
 }
 
@@ -53,7 +83,7 @@ function useConnection(callback, queryFunc) {
     pool.getConnection(function(err, con) {
         if (err) {
             console.log('Error getting connection from pool');
-            callback(err, null, null);
+            callback(err);
         } else {
             queryFunc(con);
         }

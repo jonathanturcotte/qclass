@@ -14,9 +14,9 @@ create table course (
 
 create table student (
 	sNetID		varchar(10) not null,
-	fname 		varchar(20) not null,
-	lName		varchar(20) not null,
-	stdNum		char(8) not null,
+	fname 		varchar(20),
+	lName		varchar(20,
+	stdNum		char(8),
 	primary key (sNetID)
 );
 

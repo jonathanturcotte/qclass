@@ -5,19 +5,14 @@ var helper = require('../api/helper');
 var db = require('../api/db');
 var prefix = 'professor';
 
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res, next) { Request
     res.render(routeHelper.getRenderName(prefix, 'index'));
 });
 
 router.post('/class/add', function(req, res, next) {
     db.addClass(req.body.code, req.body.name, req.body.defLocation, function(err, results, fields) {
         if (err) routeHelper.sendError(res, err, 'Error adding class');
-        if (results && results[0]) {
-            res.send(results);
-        } else {
-            console.log(`Error adding class ${req.body.code}`);
-            res.send(500, { message: 'Error adding class', results: results });
-        }
+        res.status(201).send();
     });
 });
 
@@ -40,9 +35,13 @@ router.post('/class/:classId/enroll', function(req, res, next) {
             }
         }
         db.enroll(classId, students, function(err, results, fields) {
-            if (err) routeHelper.sendError(res, err, 'Error running enroll');
-            console.log(`Inserted ${results.affectedRows}, students added: ${helper.printArray(results)}`)
-            res.send({ added: results });
+            if (err)  {
+                console.log(`Error enrolling: ${err.message}`);
+                res.status(500).send(`Error enrolling students. ${error.errorStudents ? `Students that caused errors: ${helper.printArray(error.errorStudents)}` : ''}`);
+            } else {
+                console.log(`Inserted ${results.affectedRows} students`);
+                res.status(201).send({ added: results });
+            }
         });
     } else return;
 });
