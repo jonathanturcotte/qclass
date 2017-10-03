@@ -5,7 +5,7 @@ var helper = require('../api/helper');
 var db = require('../api/db');
 var prefix = 'professor';
 
-router.get('/', function(req, res, next) { Request
+router.get('/', function(req, res, next) { 
     res.render(routeHelper.getRenderName(prefix, 'index'));
 });
 
