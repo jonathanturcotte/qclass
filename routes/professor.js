@@ -16,6 +16,30 @@ router.post('/class/add', function(req, res, next) {
     });
 });
 
+// get lectures for a prof
+router.get('/class/:classId/lectures', function(req, res, next) {
+    var classId = req.params.classId;
+    
+    if (routeHelper.paramRegex(res, classId, routeHelper.regex.classId, 'classId must be a valid token')) {
+        var netId = '12cjd2'; //req.cookies.netId; 
+        db.ownsClass(classId, netId, function(err, result) {
+            if(err) routeHelper.sendError(res, err, 'Permission not granted');
+            if(!result)
+                res.status(403).send();
+            else {
+                db.getLectures(classId, function(err, results, fields) {
+                    if(err) routeHelper.sendError(res, err, 'Error fetching lectures');
+                    for(var i = 0; i < results.length; i++) {
+                        results[i].cID = undefined;
+                    }
+                    console.log(`Founds ${results.length} lectures`);
+                    res.json(results);
+                });
+            }
+        });
+    } else return;
+});
+
 router.post('/class/:classId/enroll', function(req, res, next) {
     var classId = req.params.classId;
     if (routeHelper.paramRegex(res, classId, routeHelper.regex.classId, 'classId must be a valid token')) {

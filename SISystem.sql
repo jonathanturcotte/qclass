@@ -15,7 +15,7 @@ create table course (
 create table student (
 	sNetID		varchar(10) not null,
 	fname 		varchar(20),
-	lName		varchar(20,
+	lName		varchar(20),
 	stdNum		char(8),
 	primary key (sNetID)
 );
@@ -79,10 +79,9 @@ create table response (
 	sNetID		varchar(10),
 	qNum		int not null,
 	lecNum		int not null,
-	cID			char(36)course not null,
+	cID			char(36) not null,
 	resp		int not null,
 	correct		tinyint(1),
 	primary key (qNum, lecNum, cID, sNetID)
 );
-	
 	

@@ -64,6 +64,30 @@ exports.enroll = function(classId, students, callback) {
     });
 };
 
+// need 2 calls
+// one for verification and one for lecture retrival
+exports.getLectures = function(classId, callback) {
+    var query = 
+        `SELECT *
+         FROM lecture
+         WHERE lecture.cID = '${classId}'`;
+    runQuery(query, callback);
+};
+
+exports.ownsClass = function(classId, netId, callback) {
+    var query =
+        `SELECT 1
+         FROM  teaches
+         WHERE pNetID = '${netId}' AND cID = '${classId}'`;
+    runQuery(query, function(err, results, fields) {
+        if(err) callback(err);
+        else {
+            if(results.length != 0) callback(undefined, true);
+            else callback(undefined, false);
+        }
+    });
+};
+
 exports.getClasses = function(studentId, callback) {
     var query = 
         `SELECT course.cID, course.cName, course.cCode
