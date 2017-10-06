@@ -10,10 +10,10 @@ exports.sendError = function (res, err, errMsg = 'Error - Unspecified', status =
     console.err(`db.sendError: ${errMsg} ;; ${err || '' }`);
     if (isNaN(status)) {
         status = 500;
-        console.log('db.sendError status not a number, changed to 500');
+        console.log('routes/helper.sendError status not a number, changed to 500');
     } else if (status >= 200 && status <= 299) {
         status = 500;
-        console.log('db.sendError status cannot be a 2xx code, changed to 500');
+        console.log('routes/helper.sendError status cannot be a 2xx code, changed to 500');
     }
     res.status(status).send(errMsg);
 }
