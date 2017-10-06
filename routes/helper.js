@@ -7,7 +7,7 @@ exports.getRenderName = function(prefix, suffix) {
  * The errMsg is returned to the client, and the http code is specified in status.
  */
 exports.sendError = function (res, err, errMsg = 'Error - Unspecified', status = 500) {
-    console.err(`db.sendError: ${errMsg} ;; ${err || '' }`);
+    console.err(`db.sendError: ${errMsg} ;; ${err || 'No error thrown' }`);
     if (isNaN(status)) {
         status = 500;
         console.log('routes/helper.sendError status not a number, changed to 500');

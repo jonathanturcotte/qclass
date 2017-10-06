@@ -5,28 +5,43 @@ var helper = require('../api/helper');
 var db = require('../api/db');
 var prefix = 'professor';
 
-router.get('/', function(req, res, next) { 
+var authenticate = function(req, res, next) {
+    var netId = req.cookies.netId;
+    if (!netId) {
+        routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
+    } else {
+        db.profExists(netId, function(err, result) {
+            if (err)
+                routeHelper.sendError(res, err, 'Error checking netID');
+            else if (!result)
+                routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
+            else 
+                next();
+        });
+    }
+};
+
+router.get('/', authenticate, function(req, res, next) { 
     res.render(routeHelper.getRenderName(prefix, 'index'));
 });
 
-router.post('/class/add', function(req, res, next) {
+router.post('/class/add', authenticate, function(req, res, next) {
     db.addClass(req.body.code, req.body.name, req.body.defLocation, function(err, results, fields) {
         if (err) 
             routeHelper.sendError(res, err, 'Error adding class');
         else
-            res.status(201).send();
+            res.status(201).send('Class added!'); 
     });
 });
 
 // get lectures for a prof
-router.get('/class/:classId/lectures', function(req, res, next) {
+router.get('/class/:classId/lectures', authenticate, function(req, res, next) {
     var classId = req.params.classId;
-    
     if (routeHelper.paramRegex(res, classId, routeHelper.regex.classId, 'classId must be a valid token')) {
-        var netId = '12cjd2'; //req.cookies.netId; 
+        var netId = req.cookies.netId; 
         db.ownsClass(classId, netId, function(err, result) {
             if (err) 
-                routeHelper.sendError(res, err, 'Permission not granted');
+                routeHelper.sendError(res, err, 'Permission not granted', 403);
             else {
                 if (!result)
                     res.status(403).send();
@@ -48,7 +63,7 @@ router.get('/class/:classId/lectures', function(req, res, next) {
     }  else return;
 });
 
-router.post('/class/:classId/enroll', function(req, res, next) {
+router.post('/class/:classId/enroll', authenticate, function(req, res, next) {
     var classId = req.params.classId;
     if (routeHelper.paramRegex(res, classId, routeHelper.regex.classId, 'classId must be a valid token')) {
         var reqStudents = req.body.students;
