@@ -22,19 +22,24 @@ var authenticate = function(req, res, next) {
 };
 
 router.get('/', authenticate, function(req, res, next) { 
-    res.render(routeHelper.getRenderName(prefix, 'index'));
+    res.render('professor/index');
 });
 
-router.post('/class/add', authenticate, function(req, res, next) {
+router.get('/class/add', authenticate, function(req, res, next) {
+    res.render('professor/class/add', { netId: req.cookies.netId });
+});
+
+router.post('/class/add', authenticate, function(req, res, next) { 
+    // TODO: Add validation
     db.addClass(req.body.code, req.body.name, req.body.defLocation, function(err, results, fields) {
         if (err) 
             routeHelper.sendError(res, err, 'Error adding class');
         else
-            res.status(201).send('Class added!'); 
+            res.status(201).render('professor/class/add', { status: 201 }); 
     });
 });
 
-// get lectures for a prof
+// GET lectures for a prof
 router.get('/class/:classId/lectures', authenticate, function(req, res, next) {
     var classId = req.params.classId;
     if (routeHelper.paramRegex(res, classId, routeHelper.regex.classId, 'classId must be a valid token')) {
