@@ -64,8 +64,6 @@ exports.enroll = function(classId, students, callback) {
     });
 };
 
-// need 2 calls
-// one for verification and one for lecture retrival
 exports.getLectures = function(classId, callback) {
     var query = 
         `SELECT *
@@ -79,15 +77,15 @@ exports.profExists = function(netId, callback) {
         `SELECT 1
         FROM professor
         WHERE pNetID = '${netId}'`;
-    runQuery(query, function(err, results, fields) {
-        if (err) callback (err);
-        else {
-            if (results.length > 0) 
-                callback(undefined, true);
-            else
-                callback(undefined, false);
-        }
-    });
+    runExistenceQuery(query, callback);
+};
+
+exports.studentExists = function(netId, callback) {
+    var query = 
+        `SELECT 1
+        FROM professor
+        WHERE pNetID = '${netId}'`;
+    runExistenceQuery(query, callback);
 };
 
 exports.ownsClass = function(classId, netId, callback) {
@@ -95,18 +93,18 @@ exports.ownsClass = function(classId, netId, callback) {
         `SELECT 1
          FROM  teaches
          WHERE pNetID = '${netId}' AND cID = '${classId}'`;
-    runQuery(query, function(err, results, fields) {
-        if (err) callback(err);
-        else {
-            if (results.length > 0) 
-                callback(undefined, true);
-            else 
-                callback(undefined, false);
-        }
-    });
+    runExistenceQuery(query, callback);
 };
 
-exports.getClasses = function(studentId, callback) {
+exports.isEnrolled(netId, classId, callback) {
+    var query =
+        `SELECT 1
+        FROM  enrolled
+        WHERE sNetID = '${netId}' AND cID = '${classId}'`;
+    runExistenceQuery(query, callback);
+};
+
+exports.getEnrolledClasses = function(studentId, callback) {
     var query = 
         `SELECT course.cID, course.cName, course.cCode
         FROM student
@@ -114,6 +112,18 @@ exports.getClasses = function(studentId, callback) {
             INNER JOIN course ON enrolled.cID = course.cID`;
     runQuery(query, callback);
 };
+
+function runExistenceQuery(query, callback) {
+    runQuery(query, function(err, results, fields) {
+        if (err) callback(err);
+        else {
+            if (results.length > 0) 
+                callback(undefined, true);
+            else
+                callback(undefined, false);
+        }
+    });
+}
 
 function runQuery(query, callback) {
     useConnection(callback, function(con) {
