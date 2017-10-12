@@ -40,28 +40,33 @@ router.get('/classes', authenticate, function(req, res, next) {
     }
 });
 
-router.get('/class/:classId', authenticate, function(req, res, next, id) {
+router.get('/class/:classId', authenticate, function(req, res, next) {
     if (routeHelper.paramRegex(res, req.params.classId, routeHelper.regex.classId, 'classId must be a valid token')) {
         var netId = req.cookies.netId;
-        db.isEnrolled(netId, classId, function(err, result) {
+        db.isEnrolled(netId, req.params.classId, function(err, result) {
             if (err) 
                 routeHelper.sendError(res, err, `Error checking enrollment`);
             else {
-                // TODO: Check class and lecture state, notify app of activity state
-                var results;
-                if (Math.random() < 0.2) {
-                    results = { 
-                        isActive: true, 
-                        lecture: {
-                            lecNum: helper.randomInt(0, 10),
-                            eTime: Date.now(),
-                            location: 'here'
+                db.getActiveLecture(req.params.classId, function(err, lecture, fields) {
+                    if (err)
+                        routeHelper.sendError(res, err, `Error getting active lecture for student ${studentId}`);
+                    else {
+                        var json;
+                        if (lecture) {
+                            json = { 
+                                isActive: true, 
+                                lecture: {
+                                    number: lecture.lecNum,
+                                    endTime: lecture.eTime,
+                                    location: lecture.location
+                                } 
+                            };
+                        } else {
+                            json = { isActive: false };
                         }
-                     }
-                } else {                
-                    results = { isActive: false };
-                }
-                res.json(results);
+                        res.json(json);
+                    }
+                });
             }
         });
     } else return;

@@ -14,7 +14,7 @@ exports.addClass = function(code, name, defLocation, callback) {
     var query = 
         `INSERT INTO course (cID, cCode, cName, regNum, defLocation)
         VALUES ('${id}', '${code}', '${name}', '${id.substring(0, 5)}', '${defLocation}')`;
-    runQuery(query, callback);
+    runQuery({ query: query, callback: callback });
 };
 
 exports.enroll = function(classId, students, callback) {
@@ -69,8 +69,28 @@ exports.getLectures = function(classId, callback) {
         `SELECT *
          FROM lecture
          WHERE lecture.cID = '${classId}'`;
-    runQuery(query, callback);
+    runQuery({ query: query, callback: callback });
 };
+
+exports.getActiveLecture = function(classId, callback) {
+    var now = Date.now();
+    var query = 
+        `SELECT *
+        FROM lecture
+        WHERE cID = '${classId}'
+            AND `; //TODO: finish query
+    runQuery({ query: query, callback: function (err, results, fields) {
+        if (err)
+            callback(err);
+        else if (results.length < 1) {
+            callback();
+        } else { 
+            if (results.length > 1) 
+                console.log(`Warning: db.getActiveLecture query returned more than one result: ${results}`);
+            callback(undefined, results[0], fields);
+        }
+    } });
+}
 
 exports.profExists = function(netId, callback) {
     var query = 
@@ -105,29 +125,40 @@ exports.isEnrolled(netId, classId, callback) {
 };
 
 exports.getEnrolledClasses = function(studentId, callback) {
+    // TODO: test removal of direct studentId insertion with ? and use of values to prevent SQL injection
     var query = 
         `SELECT course.cID, course.cName, course.cCode
         FROM student
             INNER JOIN enrolled ON student.sNetID = enrolled.sNetID AND student.sNetID = '${studentId}'
             INNER JOIN course ON enrolled.cID = course.cID`;
-    runQuery(query, callback);
+    runQuery({ query: query, callback: callback });
 };
 
 function runExistenceQuery(query, callback) {
-    runQuery(query, function(err, results, fields) {
-        if (err) callback(err);
-        else {
-            if (results.length > 0) 
-                callback(undefined, true);
-            else
-                callback(undefined, false);
-        }
-    });
+    runQuery({ query: query, callback: function(err, results, fields) {
+        if (err) 
+            callback(err);
+        else if (results.length > 0) 
+            callback(undefined, true);
+        else
+            callback(undefined, false);
+    } });
 }
 
-function runQuery(query, callback) {
-    useConnection(callback, function(con) {
-        con.query(query, callback);
+/**
+ * Run a query
+ * @param {Object} params 
+ * @param {string} params.query
+ * @param {function} params.callback - Will call callback(err) if err or callback(undefined, results, fields)
+ * @param {Array=} params.values - Values for automatic insertion - Must be either falsey or a populated array
+ */
+function runQuery(params) {
+    useConnection(params.callback, function(con) {
+        if (params.values) { 
+            con.query(params.query, [params.values], params.callback)
+        } else {
+            con.query(params.query, params.callback);
+        }
     });
 }
 
