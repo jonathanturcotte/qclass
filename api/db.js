@@ -116,7 +116,7 @@ exports.ownsClass = function(classId, netId, callback) {
     runExistenceQuery(query, callback);
 };
 
-exports.isEnrolled(netId, classId, callback) {
+exports.isEnrolled = function(netId, classId, callback) {
     var query =
         `SELECT 1
         FROM  enrolled

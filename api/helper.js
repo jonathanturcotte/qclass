@@ -1,5 +1,6 @@
 /**
- * Prints an array to a single string, with elements delimited by the delimiter string
+ * Prints an array to a single string, with elements delimited by the delimiter 
+ * @param {Array} array
  */
 exports.printArray = function(array, delimiter = ', ') {
     var print = '';
@@ -9,6 +10,10 @@ exports.printArray = function(array, delimiter = ', ') {
     return print.substring(0, print.length - delimiter.length); 
 };
 
+/**
+ * @param {number} min 
+ * @param {number} max 
+ */
 exports.randomInt = function(min, max)
 {
     return Math.floor(Math.random() * (max - min + 1) + min);

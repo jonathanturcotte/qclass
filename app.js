@@ -15,16 +15,8 @@ var server = require('http').Server(app);
 var db = require('./api/db'); // Call solely to initialize db pool as app starts 
 
 // Socket.IO 
-var io = require('socket.io')();
-io.on('connection', function(socket) {
-    //TODO: Authentication
-    console.log('A user connected');
-    socket.on('test', function(message) {
-        console.log('Received test message');
-        socket.emit('test', `Hi, it's the server! You said: \'${message}\'`);
-    });
-});
-app.io = io;
+var io = require('./api/socket'); 
+app.io = io.initialize();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

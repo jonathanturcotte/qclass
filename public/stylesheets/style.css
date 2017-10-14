@@ -7,6 +7,10 @@ body * {
     display: block;
 }
 
+style, script {
+    display: none;
+}
+
 a {
     color: #00B7FF;
 }
