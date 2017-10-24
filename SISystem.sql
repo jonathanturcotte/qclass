@@ -54,7 +54,6 @@ create table teaches (
 );
 
 /*
-
 create table lecture (
 	lecNum		int not null,
 	cID			char(36) not null,
@@ -93,7 +92,6 @@ create table response (
 	correct		tinyint(1),
 	primary key (qNum, lecNum, cID, sNetID)
 );
-
 */
 	
 insert into course values 
@@ -103,12 +101,10 @@ insert into course values
 	( 'ree49eb2-0630-4382-98b5-reefd40627b8', 'ECON 255', 'Math Econ', 'MacDonald Hall', '10boo3'),
 	( 'boo49eb2-0630-4382-98b5-moofd40627b8', 'CMPE 333', 'Data Mining', 'Kingston Hall', '12hdm');	
 
-
 insert into student values
 	( '12cjd2', 'Curtis', 'Demerah', '10090510'),
 	( '12ozs', 'Omar', 'Sandarusi', '10030050'),
 	( '11jlt10', 'Jonathan', 'Turcotte', '10060060');
-
 
 insert into  professor values
 	('1pvb69', 'Patrick', 'Van Blunt'),
@@ -131,13 +127,6 @@ insert into teaches values
 	('you49eb2-0630-4382-98b5-wutfd40627b8', '15jc3'),
 	('ree49eb2-0630-4382-98b5-reefd40627b8', '10boo3'),
 	('boo49eb2-0630-4382-98b5-moofd40627b8',  '12hdm');
-
-
-
-
-
-
-
 
 /*
 insert into lecture values

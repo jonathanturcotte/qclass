@@ -21,51 +21,14 @@ var authenticate = function(req, res, next) {
     }
 };
 
-router.get('/', authenticate, function(req, res, next) { 
-    res.render('professor/index');
-});
-
-router.get('/class/add', authenticate, function(req, res, next) {
-    res.render('professor/class/add', { netId: req.cookies.netId });
-});
-
 router.post('/class/add', authenticate, function(req, res, next) { 
     // TODO: Add validation
     db.addClass(req.body.code, req.body.name, req.body.defLocation, function(err, results, fields) {
         if (err) 
             routeHelper.sendError(res, err, 'Error adding class');
         else
-            res.status(201).render('professor/class/add', { status: 201 }); 
+            res.status(201).send(); 
     });
-});
-
-// GET lectures for a prof
-router.get('/class/:classId/lectures', authenticate, function(req, res, next) {
-    var classId = req.params.classId;
-    if (routeHelper.paramRegex(res, classId, routeHelper.regex.classId, 'classId must be a valid token')) {
-        var netId = req.cookies.netId; 
-        db.ownsClass(classId, netId, function(err, result) {
-            if (err) 
-                routeHelper.sendError(res, err, 'Permission not granted', 403);
-            else {
-                if (!result)
-                    res.status(403).send();
-                else {
-                    db.getLectures(classId, function(err, results, fields) {
-                        if (err) 
-                            routeHelper.sendError(res, err, 'Error fetching lectures');
-                        else {
-                            for(var i = 0; i < results.length; i++) {
-                                results[i].cID = undefined;
-                            }
-                            console.log(`Found ${results.length} lectures`);
-                            res.json(results);
-                        }
-                    });
-                }
-            }
-        });
-    }  else return;
 });
 
 router.post('/class/:classId/enroll', authenticate, function(req, res, next) {
