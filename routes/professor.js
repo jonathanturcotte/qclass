@@ -1,9 +1,9 @@
-var express = require('express');
-var router = express.Router();
-var routeHelper = require('./helper');
-var helper = require('../api/helper');
-var db = require('../api/db');
-var prefix = 'professor';
+var express = require('express'),
+    router = express.Router(),
+    routeHelper = require('./helper'),
+    helper = require('../api/helper'),
+    db = require('../api/db'),
+    attendanceSessions = require('../api/data/attendanceSessions');
 
 var authenticate = function(req, res, next) {
     var netId = req.cookies.netId;
@@ -59,6 +59,26 @@ router.post('/class/:classId/enroll', authenticate, function(req, res, next) {
             }
         });
     } else return;
+});
+
+router.post('/class/start/:classId', authenticate, function(req, res, next) {
+    var classId = req.params.classId;
+    if (!classId) 
+        routeHelper.sendError(res, null, 'Invalid ClassID', 422);
+    else {
+        db.ownsClass(classId, req.params.netId, function(err, result) {
+            if (err)
+                routeHelper.sendError(res, err);
+            else {
+                var start = attendanceSessions.start(classId);
+                if (start.error) {
+                    routeHelper.sendError(res, null, start.message, start.error);
+                } else {
+                    res.send('Success');
+                }
+            }
+        })
+    }
 });
 
 module.exports = router;

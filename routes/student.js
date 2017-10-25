@@ -1,8 +1,9 @@
-var express = require('express');
-var router = express.Router();
-var routeHelper = require('./helper');
-var helper = require('../api/helper');
-var db = require('../api/db');
+var express = require('express'),
+    router = express.Router(),
+    routeHelper = require('./helper'),
+    helper = require('../api/helper'),
+    db = require('../api/db'),
+    attendanceSessions = require('../api/data/attendanceSessions');
 
 var authenticate = function(req, res, next) {
     var netId = req.cookies.netId;
@@ -19,6 +20,17 @@ var authenticate = function(req, res, next) {
         });
     }
 };
+
+// Studnet sign in 
+router.post('/sign-in/:code', authenticate, function(req, res, next) {
+    var code = req.params.code;
+    if (!code || code.length != 5) 
+        routeHelper.sendError(res, null, 'Invalid code', 422);
+    var signInResult = attendanceSessions.signIn(code);
+    if (signInResult.error) 
+        routeHelper.sendError(res, null, signInResult.message, signInResult.error);
+    res.send('Success');
+});
 
 // GET all classes associated with a specific student 
 router.get('/classes', authenticate, function(req, res, next) {
