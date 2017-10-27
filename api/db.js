@@ -106,6 +106,16 @@ exports.getEnrolledClasses = function(studentId, callback) {
     runQuery({ query: query, callback: callback });
 };
 
+exports.startAttendance = function(classId, duration, callback) {
+    var query = `INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?`;
+    runQuery({ query: query, callback: callback, values: [classId, Date.now(), duration] });
+}
+
+/**
+ * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
+ * @param {string} query 
+ * @param {Function} callback (err, result)
+ */
 function runExistenceQuery(query, callback) {
     runQuery({ query: query, callback: function(err, results, fields) {
         if (err) 
