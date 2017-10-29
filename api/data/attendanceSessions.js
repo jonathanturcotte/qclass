@@ -1,7 +1,7 @@
 var db = require('../db'),
     randToken = require('rand-token');
 
-var sessions = [], // array of running attendanceSessions, contains objects of the form { classId, code }
+var sessions = [], // array of running attendanceSessions, contains objects of the form { classId, code, time }
     ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
     DEFAULT_DURATION = 60000;
 
@@ -41,13 +41,14 @@ exports.start = function(params) {
             code = randToken.generate(5, ALPHABET);
             exists = sessions.find(function(e) { e.code == code });
         } while (exists);
-        db.startAttendance(params.classId, params.duration, function(err, results, fields) {
+        var time = Date.now();
+        db.startAttendance(params.classId, params.duration, time, function(err, results, fields) {
             if (err)
                 params.callback(err);
             else {
-                sessions.push({ classId: params.classId, code: code });
+                sessions.push({ classId: params.classId, code: code, time: time });
                 setTimeout(stop, params.duration, params.classId);
-                callback(null, code);
+                params.callback(null, code);
             }
         });
     }
@@ -72,15 +73,15 @@ exports.stop = stop;
 
 /**
  * Get the classId associated with a running session code.
- * Returns the classId as a string, or undefined if the code does not exist
+ * Returns the attendance session entry object, or undefined if the code does not exist
  * @param {string} code
- * @returns {string | undefined}
+ * @returns {Object | undefined}
  */
-exports.getClassFromCode = function(code) {
+exports.getEntryByCode = function(code) {
     var found = sessions.find(function(e) { e.code === code });
     if (!found) 
         return;
     else {
-        return found.classId;
+        return found;
     }
 };

@@ -5,38 +5,48 @@ var express = require('express'),
     db = require('../api/db'),
     attendanceSessions = require('../api/data/attendanceSessions');
 
-var authenticate = function(req, res, next) {
+// Authenticate every request to the student API against the DB
+router.use(function(req, res, next) {
     var netId = req.cookies.netId;
     if (!netId) {
         routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
     } else {
         db.studentExists(netId, function(err, result) {
             if (err)
-                routeHelper.sendError(res, err, 'Error checking netID');
-            else if (!result)
-                routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
-            else 
-                next();
+                return routeHelper.sendError(res, err, 'Error checking netID');
+            if (!result)
+                return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
+            next();
         });
     }
-};
+});
 
-// Studnet sign in 
-router.post('/sign-in/:code', authenticate, function(req, res, next) {
+// Student sign in 
+router.post('/sign-in/:code', function(req, res, next) {
     var code = req.params.code;
-    if (!code || code.length != 5) 
-        routeHelper.sendError(res, null, 'Invalid code', 422);
-    var signInResult = attendanceSessions.signIn(code);
-    if (signInResult.error) 
-        routeHelper.sendError(res, null, signInResult.message, signInResult.error);
-    res.send('Success');
+    if (!code || code.length != 5)
+        return routeHelper.sendError(res, null, 'Invalid code', 422);
+    var session = attendanceSessions.getEntryByCode(code);
+    if (!session)
+        return routeHelper.sendError(res, null, 'Class not found for provided code', 404);
+    db.isEnrolled(req.params.netId, session.classId, function(err, result) {
+        if (err)
+            return routeHelper.sendError(res, err, '');
+        if (!result) 
+            return routeHelper.sendError(res, null, 'Not a member of the requested class', 403);
+        db.recordAttendance(req.params.netId, session.classId, session.time, function(err, results, fields) {
+            if (err)
+                return routeHelper.sendError(res, err, 'Error recording attendance');
+            res.status(201).send('Success');
+        });
+    });
 });
 
 // GET all classes associated with a specific student 
-router.get('/classes', authenticate, function(req, res, next) {
+router.get('/classes', function(req, res, next) {
     db.getEnrolledClasses(req.params.netId, function(err, results, fields) {
         if (err) 
-            routeHelper.sendError(res, err, `Error getting classes for student ${studentId}`);
+            return routeHelper.sendError(res, err, `Error getting classes for student ${studentId}`);
         else {
             for (var result in results) {
                 result.defLocation = undefined;

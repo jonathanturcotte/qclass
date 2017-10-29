@@ -54,7 +54,6 @@ exports.enroll = function(classId, students, callback) {
         }, function (err) { 
                 if (err) {
                     err.errorStudents = errorStudents;
-                    console.log(err.message);
                     callback(err);
                 } else {
                     var enrollQuery = `INSERT INTO enrolled (sNetID, cID) VALUES ?`;
@@ -106,9 +105,14 @@ exports.getEnrolledClasses = function(studentId, callback) {
     runQuery({ query: query, callback: callback });
 };
 
-exports.startAttendance = function(classId, duration, callback) {
-    var query = `INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?`;
-    runQuery({ query: query, callback: callback, values: [classId, Date.now(), duration] });
+exports.startAttendance = function(classId, duration, time, callback) {
+    var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
+    runQuery({ query: query, callback: callback, values: [classId, time, duration] });
+}
+
+exports.recordAttendance = function(netId, classId, time, callback) {
+    var query = `INSERT INTO attendance (cID, attTime, sNetID) VALUES ?`;
+    runQuery({ query: query, values: [classId, time, netId], callback: callback });
 }
 
 /**
@@ -132,7 +136,7 @@ function runExistenceQuery(query, callback) {
  * @param {Object} params 
  * @param {string} params.query
  * @param {function} params.callback - Will call callback(err) if err or callback(undefined, results, fields)
- * @param {Array=} params.values - Values for automatic insertion - Must be either falsey or a populated array
+ * @param {Array=} params.values - Optional values for automatic insertion - Must be either falsey or a populated array
  */
 function runQuery(params) {
     useConnection(params.callback, function(con) {

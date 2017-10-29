@@ -4,30 +4,23 @@ exports.getRenderName = function(prefix, suffix) {
 
 /**
  * Send an error from a route back to the client. 
+ * Note that execution is not stopped, but the HTTP response gets sent
+ * @param {Response} res
+ * @param {Error=} err
+ * @param {string} errMsg
+ * @param {number=} status
  */
-exports.sendError = function(res, err, errMsg = 'Error - Unspecified', status = 500) {
-    console.error(`Error: ${errMsg} ;; ${err || 'No error thrown' }`);
+exports.sendError = function(res, err, errMsg, status = 500) {
     if (isNaN(status)) {
         status = 500;
-        console.log('routes/helper.sendError status not a number, changed to 500');
+        console.warn('routes/helper.sendError() status not a number, changed to 500');
     } else if (status >= 200 && status <= 299) {
         status = 500;
-        console.log('routes/helper.sendError status cannot be a 2xx code, changed to 500');
-    }
+        console.warn('routes/helper.sendError() status cannot be a 2xx code, changed to 500');
+    } 
+    console.error(`Error: ${errMsg} ;; ${err || 'No exception thrown' }`);
     res.status(status).send(errMsg);
 }
-
-/**
- * Run regex test on value, sends HTTP 422 and optional errMsg to client on failure.
- * Returns success of regular expression test.
- */
-exports.paramRegex = function(res, value, regex, errMsg = 'Invalid parameter') {
-    if (!regex.test(value)) {
-        res.status(422).send(errMsg);
-        return false;
-    }
-    return true;
-};
 
 /**
  * Common regular expressions
