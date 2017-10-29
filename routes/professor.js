@@ -74,7 +74,7 @@ router.post('/class/start/:classId', function(req, res, next) {
 });
 
 // GET all classes associated with a specific student 
-router.get('/classes', authenticate, function(req, res, next) {
+router.get('/classes', function(req, res, next) {
     db.getTeachesClasses(req.cookies.netId, function(err, results, fields) {
         if (err) 
             routeHelper.sendError(res, err, `Error getting classes for professor ${profId}`);
