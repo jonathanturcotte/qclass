@@ -163,9 +163,15 @@ function useConnection(callback, queryFunc) {
     pool.getConnection(function(err, con) {
         if (err) {
             console.log('Error getting connection from pool');
+            if (con) { // try to release connection if it exists for some reason
+                try {
+                    con.release();
+                } finally { }
+            }
             callback(err);
         } else {
             queryFunc(con);
+            con.release();
         }
     });
 }; 
