@@ -1,16 +1,12 @@
-exports.getRenderName = function(prefix, suffix) {
-    return `${prefix}/${suffix}`;  
-} 
-
 /**
  * Send an error from a route back to the client. 
  * Note that execution is not stopped, but the HTTP response gets sent
  * @param {Response} res
  * @param {Error=} err
- * @param {string} errMsg
+ * @param {string|object} body Either an error string or a json package
  * @param {number=} status
  */
-exports.sendError = function(res, err, errMsg, status = 500) {
+exports.sendError = function(res, err, body, status = 500) {
     if (isNaN(status)) {
         status = 500;
         console.warn('routes/helper.sendError() status not a number, changed to 500');
@@ -18,8 +14,12 @@ exports.sendError = function(res, err, errMsg, status = 500) {
         status = 500;
         console.warn('routes/helper.sendError() status cannot be a 2xx code, changed to 500');
     } 
-    console.error(`Error: ${errMsg} ;; ${err || 'No exception thrown' }`);
-    res.status(status).send(errMsg);
+    var isBodyString = typeof(body) === 'string'; 
+    console.error(`Error: ${isBodyString ? `${body} ;; ` : ''}${err || 'No exception thrown'}`);
+    if (isBodyString)
+        res.status(status).send(body);
+    else
+        res.status(status).json(body);
 }
 
 /**

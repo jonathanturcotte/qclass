@@ -3,14 +3,14 @@ var db = require('../db'),
 
 var sessions = [], // array of running attendanceSessions, contains objects of the form { classId, code, time }
     ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
-    DEFAULT_DURATION = 60000;
+    DEFAULT_DURATION = 15000;
 
 /**
  * Checks if a class is running an attendance session.
  * @param {string} classId Should be a uuid
  */
 var isClassRunning = function(classId) {
-    if (sessions.find(function(e) { e.classId === classId })) {
+    if (sessions.find(function(e) { return e.classId === classId })) {
         return true;
     }
     return false;
@@ -22,7 +22,7 @@ exports.isClassRunning = isClassRunning;
  * @param {Object} params
  * @param {string} params.classId uuid
  * @param {number} [params.duration=60000] Session duration in ms
- * @param {Function} params.callback (err, code)
+ * @param {Function} params.callback (err, code) err may contain customStatus, eg. 409 Conflict if class already exists
  */
 exports.start = function(params) {
     if (!params.duration)
@@ -32,14 +32,14 @@ exports.start = function(params) {
         console.warn(`attendanceSessions.start(): Duration < 1, changed to default (${DEFAULT_DURATION})`);
     }
     if (!params.classId) 
-        params.callback({ error: 1, message: 'Empty classId' });
+        params.callback({ customStatus: 500, message: 'Internal Server Error' });
     else if (isClassRunning(params.classId)) 
-        callback({ error: 409, message: 'Class is already running' });
+        params.callback({ customStatus: 409, message: 'Class is already running' });
     else {
         var code, exists = false;
         do {
             code = randToken.generate(5, ALPHABET);
-            exists = sessions.find(function(e) { e.code == code });
+            exists = sessions.find(function(e) { return e.code == code });
         } while (exists);
         var time = Date.now();
         db.startAttendance(params.classId, params.duration, time, function(err, results, fields) {
@@ -60,14 +60,13 @@ exports.start = function(params) {
  * @param {string} classId 
  */
 var stop = function(classId) {
-    var index = sessions.findIndex(function(e) { e.classId === classId });
+    var index = sessions.findIndex(function(e) { return e.classId === classId });
     if (index === -1) {
         console.warn(`attendanceSessions.stop(): no entry found for classId '${classId}'`);
         return false;
-    } else {
-        sessions.splice(index, 1);
-        return true;
     }
+    sessions.splice(index, 1); console.log(`stopped ${classId}`);
+    return true;
 }
 exports.stop = stop;
 
@@ -78,7 +77,7 @@ exports.stop = stop;
  * @returns {Object | undefined}
  */
 exports.getEntryByCode = function(code) {
-    var found = sessions.find(function(e) { e.code === code });
+    var found = sessions.find(function(e) { return e.code === code });
     if (!found) 
         return;
     else {

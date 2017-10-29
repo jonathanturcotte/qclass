@@ -6,7 +6,7 @@ use SISystem;
 create table course (
 	cID			char(36) not null,
 	cCode 		varchar(10) not null,
-	cName		varchar(20),
+	cName		varchar(70),
 	defLocation	varchar(30),
 	pNetID		varchar(10) not null,
 	primary key (cID)
@@ -35,15 +35,15 @@ create table enrolled (
 
 create table attendanceSession (
 	cID			char(36) not null,
-	attTime 	int not null,
+	attTime 	bigint not null,
 	attDuration	int not null,
 	primary key (cID, attTime)
 );
 
 create table attendance (
-	attTime 	int not null,
-	cID		char(36) not null,
-	sNetID 	varchar(10) not null,
+	attTime 	bigint not null,
+	cID			char(36) not null,
+	sNetID 		varchar(10) not null,
 	primary key (cID, attTime, sNetID)
 );
 
@@ -122,11 +122,11 @@ insert into enrolled values
 	('11jlt10', 'boo49eb2-0630-4382-98b5-moofd40627b8');
 
 insert into teaches values 
-	('abc49eb2-0630-4382-98b5-abcfd40627b8', '1pvb69'),
-	('ddd49eb2-0630-4382-98b5-lolfd40627b8', '10yfl1'),
-	('you49eb2-0630-4382-98b5-wutfd40627b8', '15jc3'),
-	('ree49eb2-0630-4382-98b5-reefd40627b8', '10boo3'),
-	('boo49eb2-0630-4382-98b5-moofd40627b8',  '12hdm');
+	('1pvb69', 'abc49eb2-0630-4382-98b5-abcfd40627b8'),
+	('10yfl1', 'ddd49eb2-0630-4382-98b5-lolfd40627b8'),
+	('15jc3', 'you49eb2-0630-4382-98b5-wutfd40627b8'),
+	('10boo3', 'ree49eb2-0630-4382-98b5-reefd40627b8'),
+	('12hdm', 'boo49eb2-0630-4382-98b5-moofd40627b8');
 
 /*
 insert into lecture values

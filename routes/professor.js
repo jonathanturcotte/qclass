@@ -19,7 +19,7 @@ router.use(function(req, res, next) {
     });
 });
 
-router.post('/class/add', authenticate, function(req, res, next) { 
+router.post('/class/add', function(req, res, next) { 
     // TODO: Add validation of body
     db.addClass(req.body.code, req.body.name, req.body.defLocation, function(err, results, fields) {
         if (err) 
@@ -28,20 +28,20 @@ router.post('/class/add', authenticate, function(req, res, next) {
     });
 });
 
-router.post('/class/:classId/enroll', authenticate, function(req, res, next) {
+router.post('/class/:classId/enroll', function(req, res, next) {
     var classId = req.params.classId;
     if (!routeHelper.regex.classId.test(classId))
         return routeHelper.sendError(res, null, 'Invalid classId', 404);
     var reqStudents = req.body.students;
     var students = [];
     if (!reqStudents || !Array.isArray(reqStudents) || reqStudents.length < 1)
-        return res.status(422).send('Student list missing or invalid');
+        return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 422);
     // Validate each entry in the students array
     for (let i = 0; i < reqStudents.length; i++) {
         if (typeof(reqStudents[i]) === 'string' && reqStudents[i].length >= 3 && reqStudents[i].length < 20 /*routeHelper.regex.studentNetId.test(reqStudents[i])*/)
             students.push(reqStudents[i]);
         else 
-            return res.status(422).send(`Invalid student netID in list: ${reqStudents[i]}`);
+            return routeHelper.sendError(res, null, `Invalid student netID in list at position ${i}: ${reqStudents[i]}`, 422);
     }
     db.enroll(classId, students, function(err, results, fields) {
         if (err)  
@@ -51,20 +51,26 @@ router.post('/class/:classId/enroll', authenticate, function(req, res, next) {
     });
 });
 
-router.post('/class/start/:classId', authenticate, function(req, res, next) {
+router.post('/class/start/:classId', function(req, res, next) {
     var classId = req.params.classId;
-    if (!classId || classId.length < 36) 
-        routeHelper.sendError(res, null, 'Invalid ClassID', 404);
-    else {
-        db.ownsClass(classId, req.params.netId, function(err, result) {
-            if (err)
-                return routeHelper.sendError(res, err);
-            var start = attendanceSessions.start(classId);
-            if (start.error) 
-                return routeHelper.sendError(res, null, start.message, start.error);
-            res.send('Success');
-        })
-    }
+    if (!classId || !routeHelper.regex.classId.test(classId)) 
+        return routeHelper.sendError(res, null, 'Invalid ClassID', 404);
+    db.ownsClass(classId, req.cookies.netId, function(err, result) {
+        if (err)
+            return routeHelper.sendError(res, err, 'Error processing request - Attendance session NOT started');
+        var duration = req.body.duration;
+        if (!duration || !(typeof(duration) === 'number'))
+            duration = null;
+        attendanceSessions.start({ classId: classId, duration: duration, callback: function(err, code) {
+            if (err) {
+                if (err.customStatus) 
+                    return routeHelper.sendError(res, null, err.message, err.customStatus);
+                else 
+                    return routeHelper.sendError(res, err, 'Error starting session');
+            }
+            res.send(code);
+        } });
+    });
 });
 
 module.exports = router;

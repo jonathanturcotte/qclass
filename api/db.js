@@ -107,7 +107,7 @@ exports.getEnrolledClasses = function(studentId, callback) {
 
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-    runQuery({ query: query, callback: callback, values: [classId, time, duration] });
+    runQuery({ query: query, callback: callback, values: [[classId, time, duration]] });
 }
 
 exports.recordAttendance = function(netId, classId, time, callback) {
