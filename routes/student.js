@@ -56,4 +56,12 @@ router.get('/classes', function(req, res, next) {
     }); 
 });
 
+router.get('/hello', function(req, res, next) {
+    res.status(200).send('hello');
+});
+
+router.get('/error', function(req, res, next) {
+    routeHelper.sendError(res, null, 'Error lol');
+});
+
 module.exports = router;
