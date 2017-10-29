@@ -105,6 +105,7 @@ exports.getEnrolledClasses = function(studentId, callback) {
     runQuery({ query: query, callback: callback });
 };
 
+<<<<<<< Updated upstream
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
     runQuery({ query: query, callback: callback, values: [[classId, time, duration]] });
@@ -120,6 +121,17 @@ exports.recordAttendance = function(netId, classId, time, callback) {
  * @param {string} query 
  * @param {Function} callback (err, result)
  */
+=======
+exports.getTeachesClasses = function(profId, callback) {
+    // TODO: test removal of direct studentId insertion with ? and use of values to prevent SQL injection
+    var query = 
+        `SELECT course.cID, course.cName, course.cCode
+         FROM teaches NATURAL JOIN course
+         WHERE pNetID = '${profId}'`;
+    runQuery({ query: query, callback: callback });
+};
+
+>>>>>>> Stashed changes
 function runExistenceQuery(query, callback) {
     runQuery({ query: query, callback: function(err, results, fields) {
         if (err) 
