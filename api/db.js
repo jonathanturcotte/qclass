@@ -74,8 +74,8 @@ exports.profExists = function(netId, callback) {
 exports.studentExists = function(netId, callback) {
     var query = 
         `SELECT 1
-        FROM professor
-        WHERE pNetID = '${netId}'`;
+        FROM student
+        WHERE sNetID = '${netId}'`;
     runExistenceQuery(query, callback);
 };
 

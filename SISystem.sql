@@ -6,11 +6,7 @@ use SISystem;
 create table course (
 	cID			char(36) not null,
 	cCode 		varchar(10) not null,
-<<<<<<< Updated upstream
 	cName		varchar(70),
-=======
-	cName		varchar(50),
->>>>>>> Stashed changes
 	defLocation	varchar(30),
 	pNetID		varchar(10) not null,
 	primary key (cID)
