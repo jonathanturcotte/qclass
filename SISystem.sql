@@ -7,7 +7,6 @@ create table course (
 	cID			char(36) not null,
 	cCode 		varchar(10) not null,
 	cName		varchar(70),
-	defLocation	varchar(30),
 	pNetID		varchar(10) not null,
 	primary key (cID)
 );

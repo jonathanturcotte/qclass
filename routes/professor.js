@@ -17,8 +17,9 @@ router.use(function(req, res, next) {
 });
 
 router.post('/class/add', function(req, res, next) { 
-    // TODO: Add validation of body
-    db.addClass(req.body.code, req.body.name, req.body.defLocation, function(err, results, fields) {
+    var code = req.body.code,
+        name = req.body.name;
+    db.addClass(code, name, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error adding class');
         res.status(201).send(); 
     });
@@ -44,7 +45,9 @@ router.post('/class/enroll/:classId', function(req, res, next) {
         db.enroll(classId, students, function(err, results, fields) {
             if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${helper.printArray(err.errorStudents)}` : ''}`);
             console.log(`Inserted ${results.affectedRows} students`);
-            res.status(201).json({ added: results });
+            res.status(201).json({ 
+                affectedRows: results.affectedRows 
+            });
         });
     });
 });

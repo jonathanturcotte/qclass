@@ -9,10 +9,10 @@ var pool = mysql.createPool({
     database: "SISystem"
 });
 
-exports.addClass = function(code, name, defLocation, callback) {
+exports.addClass = function(code, name, callback) {
     var id = uuid();
-    var query = `INSERT INTO course (cID, cCode, cName, defLocation) VALUES (?, ?, ?, ?)`;
-    runQuery(query, [id, code, name, defLocation], callback);
+    var query = `INSERT INTO course (cID, cCode, cName) VALUES (?, ?, ?)`;
+    runQuery(query, [id, code, name], callback);
 };
 
 exports.enroll = function(classId, students, callback) {

@@ -8,14 +8,12 @@ var express = require('express'),
 // Authenticate every request to the student API against the DB
 router.use(function(req, res, next) {
     var netId = req.cookies.netId;
-    if (!netId) routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
-    else {
-        db.studentExists(netId, function(err, result) {
-            if (err) return routeHelper.sendError(res, err, 'Error checking netID');
-            if (!result) return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
-            next();
-        });
-    }
+    if (!netId) return routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
+    db.studentExists(netId, function(err, result) {
+        if (err) return routeHelper.sendError(res, err, 'Error checking netID');
+        if (!result) return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
+        next();
+    });
 });
 
 // Student sign in 
@@ -37,11 +35,8 @@ router.post('/sign-in/:code', function(req, res, next) {
 
 // GET all classes associated with a specific student 
 router.get('/classes', function(req, res, next) {
-    db.getEnrolledClasses(req.params.netId, function(err, results, fields) {
-        if (err) return routeHelper.sendError(res, err, `Error getting classes for student ${studentId}`);
-        for (var result in results) {
-            result.defLocation = undefined;
-        }
+    db.getEnrolledClasses(req.cookies.netId, function(err, results, fields) {
+        if (err) return routeHelper.sendError(res, err, `Error getting classes for student ${netId}`);
         res.json(results);
     }); 
 });
