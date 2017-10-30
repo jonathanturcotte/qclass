@@ -1,20 +1,22 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
+var express      = require('express'),
+    path         = require('path'),
+    favicon      = require('serve-favicon'),
+    logger       = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser   = require('body-parser'),
+    helmet       = require('helmet'),
 
-var professor = require('./routes/professor');
-var student = require('./routes/student');
+    // Require our routes and APIs
+    professor    = require('./routes/professor'),
+    student      = require('./routes/student'),
+    db           = require('./api/db'),
+    io           = require('./api/socket'),
 
-var app = express();
-var server = require('http').Server(app);
+    // Create the app and server
+    app          = express();
+    server       = require('http').Server(app);
 
-var db = require('./api/db'); // Call solely to initialize db pool as app starts 
-
-// Socket.IO 
-var io = require('./api/socket'); 
+// Initialize the socketIO
 app.io = io.initialize();
 
 // uncomment after placing your favicon in /public
@@ -27,6 +29,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/professor', professor);
 app.use('/student', student);
+
+// Use Helmet to help cover any common security vulnerabilities
+app.use(helmet());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
