@@ -127,6 +127,17 @@ insert into teaches values
 	('10boo3', 'ree49eb2-0630-4382-98b5-reefd40627b8'),
 	('12hdm', 'boo49eb2-0630-4382-98b5-moofd40627b8');
 
+insert into attendanceSession values 
+	('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398271000', '60000'),
+    ('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398272000', '60000');
+    
+
+insert into attendance values 
+	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12ozs'),
+	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2'),
+    ('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2');
+
+
 /*
 insert into lecture values
 	('1', 'abc49eb2-0630-4382-98b5-abcfd40627b8','2017-10-16 08:30:00', '2017-10-16 09:30:00'),

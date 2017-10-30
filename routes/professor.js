@@ -77,4 +77,14 @@ router.get('/classes', function(req, res, next) {
     }); 
 });
 
+// GET all attendance session for a certain class
+router.get('/:classId/attendanceSessions', function(req, res, next) {
+    var classId = req.params.classId;
+    db.getAttendanceSessions(classId, function(err, results, fields) {
+        if (err) return routeHelper.senderror(res, err, `Error retrieving attendance sessions for ${req.cookies.netId}`);
+        if (results.length == 0) res.send(`No Attendance Sessions for Course`);
+        else res.json(results)
+    });
+});
+
 module.exports = router;

@@ -114,7 +114,16 @@ exports.getTeachesClasses = function(profId, callback) {
          FROM teaches NATURAL JOIN course
          WHERE pNetID = ?`;
     runQuery(query, [profId], callback);
-};
+}
+
+exports.getAttendanceSessions = function(classId, callback) {
+    var query =
+        `SELECT cID, attTime, attDuration, COUNT(sNetID) AS numInAttendance
+         FROM attendanceSession NATURAL JOIN attendance
+         WHERE cID = ? 
+         GROUP BY attTime`;
+    runQuery(query, [classId], callback);
+}
 
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
