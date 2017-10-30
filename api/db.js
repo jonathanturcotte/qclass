@@ -11,10 +11,8 @@ var pool = mysql.createPool({
 
 exports.addClass = function(code, name, defLocation, callback) {
     var id = uuid();
-    var query = 
-        `INSERT INTO course (cID, cCode, cName, defLocation)
-        VALUES ('${id}', '${code}', '${name}', '${defLocation}')`;
-    runQuery({ query: query, callback: callback });
+    var query = `INSERT INTO course (cID, cCode, cName, defLocation) VALUES (?, ?, ?, ?)`;
+    runQuery(query, [id, code, name, defLocation], callback);
 };
 
 exports.enroll = function(classId, students, callback) {
@@ -23,139 +21,126 @@ exports.enroll = function(classId, students, callback) {
         var newStudents = [];
         var errorStudents = [];
         async.forEachOf(students, function(student, i, innerCallback) {
-            var studentQuery = `SELECT 1 FROM student WHERE sNetID = ${student}`;
-            con.query(studentQuery, function(err, result, fields) {
+            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student], function(err, results, fields) {
                 if (err) {
                     errorStudents.push(student);
                     innerCallback(err);
                 } else {
-                    if (!Array.isArray(result)) { 
+                    if (!Array.isArray(results)) { 
                         errorStudents.push(student);
                         innerCallback(new Error('Select query did not return an array'));
-                    } else if (result.length > 1) {
+                    } else if (results.length > 1) {
                         errorStudents.push(student);
                         innerCallback(new Error('Selct query returned more than 1 row'));
-                    } else if (result.length == 1) { // student does not exist, insert student
-                            con.query(`INSERT INTO student (sNetID) VALUES (${student})`, function(err, results, fields) {
-                                if (err) {
-                                    errorStudents.push(student);
-                                    innerCallback(err);
-                                } else {
-                                    values.push([ student, classId ]);
+                    } else {
+                        if (results.length == 0) { // student does not exist, insert student
+                            newStudents.push([student]);
+                            values.push([student, classId]);
+                            innerCallback();
+                        } else { // student exists, need to check current enrollment to avoid attempting duplicates
+                            alreadyEnrolledQuery = 'SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?';
+                            runExistenceQuery(alreadyEnrolledQuery, [student, classId], function(err, result) {
+                                if (err) innerCallback(err);
+                                else {
+                                    if (!result) values.push([student, classId]);
                                     innerCallback();
                                 }
                             });
-                    } else { // student already exists
-                        values.push([ student, classId ]);
-                        innerCallback();
+                        }
                     }
                 }
             });
         }, function (err) { 
-                if (err) {
-                    err.errorStudents = errorStudents;
-                    callback(err);
-                } else {
-                    var enrollQuery = `INSERT INTO enrolled (sNetID, cID) VALUES ?`;
-                    con.query(enrollQuery, [values], callback);
-                }
+            if (err) {
+                err.errorStudents = errorStudents;
+                if (con) con.release();
+                callback(err);
+            } else {
+                if (newStudents.length > 0) {
+                    con.query('INSERT INTO student (sNetID) VALUES ?', [newStudents], function(err, results, fields) {
+                        if (err) callback(err);
+                        else _runEnrollQuery(con, values, callback);
+                    });
+                } else _runEnrollQuery(con, values, callback);
+            }
         })
     });
 };
 
+function _runEnrollQuery(con, values, callback) {
+    if (values.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
+    else con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [values], callback);
+}
+
 exports.profExists = function(netId, callback) {
-    var query = 
-        `SELECT 1
-        FROM professor
-        WHERE pNetID = '${netId}'`;
-    runExistenceQuery(query, callback);
+    runExistenceQuery(`SELECT 1 FROM professor WHERE pNetID = ?`, [netId], callback);
 };
 
 exports.studentExists = function(netId, callback) {
-    var query = 
-        `SELECT 1
-        FROM student
-        WHERE sNetID = '${netId}'`;
-    runExistenceQuery(query, callback);
+    runExistenceQuery(`SELECT 1 FROM student WHERE sNetID = ?`, [netId], callback);
 };
 
 exports.ownsClass = function(classId, netId, callback) {
-    var query =
-        `SELECT 1
-         FROM  teaches
-         WHERE pNetID = '${netId}' AND cID = '${classId}'`;
-    runExistenceQuery(query, callback);
+    runExistenceQuery(`SELECT 1 FROM  teaches WHERE pNetID = ? AND cID = ?`, [netId, classId], callback);
 };
 
 exports.isEnrolled = function(netId, classId, callback) {
-    var query =
-        `SELECT 1
-        FROM  enrolled
-        WHERE sNetID = '${netId}' AND cID = '${classId}'`;
-    runExistenceQuery(query, callback);
+    runExistenceQuery(`SELECT 1 FROM  enrolled WHERE sNetID = ? AND cID = ?`, [netId, classId], callback);
 };
 
 exports.getEnrolledClasses = function(studentId, callback) {
-    // TODO: test removal of direct studentId insertion with ? and use of values to prevent SQL injection
     var query = 
         `SELECT course.cID, course.cName, course.cCode
         FROM student
-            INNER JOIN enrolled ON student.sNetID = enrolled.sNetID AND student.sNetID = '${studentId}'
+            INNER JOIN enrolled ON student.sNetID = enrolled.sNetID AND student.sNetID = ?
             INNER JOIN course ON enrolled.cID = course.cID`;
-    runQuery({ query: query, callback: callback });
+    runQuery(query, [studentId], callback);
 };
 
 
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-    runQuery({ query: query, callback: callback, values: [[classId, time, duration]] });
+    runQuery(query, [classId, time, duration], callback);
 }
 
 exports.recordAttendance = function(netId, classId, time, callback) {
     var query = `INSERT INTO attendance (cID, attTime, sNetID) VALUES ?`;
-    runQuery({ query: query, values: [classId, time, netId], callback: callback });
+    runQuery(query, [classId, time, netId], callback);
 }
 
 exports.getTeachesClasses = function(profId, callback) {
-    // TODO: test removal of direct studentId insertion with ? and use of values to prevent SQL injection
     var query = 
         `SELECT course.cID, course.cName, course.cCode
          FROM teaches NATURAL JOIN course
-         WHERE pNetID = '${profId}'`;
-    runQuery({ query: query, callback: callback });
+         WHERE pNetID = ?`;
+    runQuery(query, [profId], callback);
 };
 
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 
+ * @param {Array} values
  * @param {Function} callback (err, result)
  */
-
-function runExistenceQuery(query, callback) {
-    runQuery({ query: query, callback: function(err, results, fields) {
-        if (err) 
-            callback(err);
+function runExistenceQuery(query, values, callback) {
+    runQuery(query, values, function(err, results, fields) {
+        if (err) callback(err);
         else if (results.length > 0) 
             callback(undefined, true);
-        else
-            callback(undefined, false);
-    } });
+        else callback(undefined, false);
+    });
 }
 
 /**
  * Run a query
- * @param {Object} params 
- * @param {string} params.query
- * @param {function} params.callback - Will call callback(err) if err or callback(undefined, results, fields)
- * @param {Array=} params.values - Optional values for automatic insertion - Must be either falsey or a populated array
+ * @param {string} query
+ * @param {function} callback Will call callback(err) if err or callback(undefined, results, fields)
+ * @param {Array} values Values for automatic insertion
  */
-function runQuery(params) {
-    useConnection(params.callback, function(con) {
-        if (params.values) { 
-            con.query(params.query, [params.values], params.callback)
-        } else {
-            con.query(params.query, params.callback);
-        }
+function runQuery(query, values, callback) {
+    useConnection(callback, function(con) {
+        if (values) con.query(query, values, callback)
+        else con.query(query, callback);
     });
 }
 
@@ -175,6 +160,8 @@ function useConnection(callback, queryFunc) {
         }
     });
 }; 
+
+// Below are legacy Q&A queries
 
 // exports.getLectures = function(classId, callback) {
 //     var query = 

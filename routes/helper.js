@@ -6,7 +6,7 @@
  * @param {string|object} body Either an error string or a json package
  * @param {number=} status
  */
-exports.sendError = function(res, err, body, status = 500) {
+exports.sendError = function(res, err, body = 'Internal Server Error', status = 500) {
     if (isNaN(status)) {
         status = 500;
         console.warn('routes/helper.sendError() status not a number, changed to 500');
@@ -14,6 +14,11 @@ exports.sendError = function(res, err, body, status = 500) {
         status = 500;
         console.warn('routes/helper.sendError() status cannot be a 2xx code, changed to 500');
     } 
+    if (err && err.customStatus) { // handle custom error object from one of our internal API calls
+        body = err.message;
+        status = err.customStatus;
+        err = null;
+    }
     var isBodyString = typeof(body) === 'string'; 
     console.error(`Error: ${isBodyString ? `${body} ;; ` : ''}${err || 'No exception thrown'}`);
     if (isBodyString)

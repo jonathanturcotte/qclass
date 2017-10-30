@@ -1,9 +1,10 @@
 var db = require('../db'),
     randToken = require('rand-token');
 
-var sessions = [], // array of running attendanceSessions, contains objects of the form { classId, code, time }
-    ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
-    DEFAULT_DURATION = 15000;
+const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
+    DEFAULT_DURATION = 60000;
+
+var sessions = []; // array of running attendanceSessions, contains objects of the form { classId, code, time }
 
 /**
  * Checks if a class is running an attendance session.
@@ -65,7 +66,8 @@ var stop = function(classId) {
         console.warn(`attendanceSessions.stop(): no entry found for classId '${classId}'`);
         return false;
     }
-    sessions.splice(index, 1); console.log(`stopped ${classId}`);
+    sessions.splice(index, 1); 
+    console.log(`Stopped attendance session for ${classId}`);
     return true;
 }
 exports.stop = stop;
@@ -77,6 +79,7 @@ exports.stop = stop;
  * @returns {Object | undefined}
  */
 exports.getEntryByCode = function(code) {
+    code = code.toLowerCase();
     var found = sessions.find(function(e) { return e.code === code });
     if (!found) 
         return;
