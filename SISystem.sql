@@ -94,11 +94,11 @@ create table response (
 */
 	
 insert into course values 
-	( 'abc49eb2-0630-4382-98b5-abcfd40627b8', 'ELEC 498', 'Design Course', 'Dupuis Auditorium', '1pvb69'),
-	( 'ddd49eb2-0630-4382-98b5-lolfd40627b8', 'ECON 222', 'Macroeconomic Theory I', 'Boterall Hall', '10yfl1'),
-	( 'you49eb2-0630-4382-98b5-wutfd40627b8', 'ECON 360', 'Labour Economics', 'John Watson Hall', '15jc3'),
-	( 'ree49eb2-0630-4382-98b5-reefd40627b8', 'ECON 255', 'Math Econ', 'MacDonald Hall', '10boo3'),
-	( 'boo49eb2-0630-4382-98b5-moofd40627b8', 'CMPE 333', 'Data Mining', 'Kingston Hall', '12hdm');	
+	( 'abc49eb2-0630-4382-98b5-abcfd40627b8', 'ELEC 498', 'Design Course', '1pvb69'),
+	( 'ddd49eb2-0630-4382-98b5-lolfd40627b8', 'ECON 222', 'Macroeconomic Theory I', '10yfl1'),
+	( 'you49eb2-0630-4382-98b5-wutfd40627b8', 'ECON 360', 'Labour Economics', '15jc3'),
+	( 'ree49eb2-0630-4382-98b5-reefd40627b8', 'ECON 255', 'Math Econ', '10boo3'),
+	( 'boo49eb2-0630-4382-98b5-moofd40627b8', 'CMPE 333', 'Data Mining', '12hdm');	
 
 insert into student values
 	( '12cjd2', 'Curtis', 'Demerah', '10090510'),
