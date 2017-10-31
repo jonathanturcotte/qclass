@@ -19,9 +19,20 @@ router.use(function(req, res, next) {
 router.post('/class/add', function(req, res, next) { 
     var code = req.body.code,
         name = req.body.name;
-    db.addClass(code, name, function(err, results, fields) {
-        if (err) return routeHelper.sendError(res, err, 'Error adding class');
-        res.status(201).send(); 
+    if (!routeHelper.regex.class.code.test(code)) 
+        return routeHelper.sendError(res, null, 'Invalid code format', 400);
+    if (name.length < 3 || name.length > 100 || !routeHelper.regex.class.name.test(name)) 
+        return routeHelper.sendError(res, null, 'Invalid class name', 400);
+    db.getTeachesClasses(req.cookies.netId, function(err, results, fields) {
+        if (err) return routeHelper.sendError(res, err);
+        for (course in results) {
+            if (course.cCode === code)
+                return routeHelper.sendError(res, null, `User already teaches a course with the course code ${code}`, 400);
+        }
+        db.addClass(req.cookies.netId, code, name, function(err, id, results, fields) {
+            if (err) return routeHelper.sendError(res, err, 'Error adding class');
+            res.status(201).json({ classId: id }); 
+        });
     });
 });
 
@@ -72,7 +83,7 @@ router.post('/class/start/:classId', function(req, res, next) {
 // GET all classes associated with a specific student 
 router.get('/classes', function(req, res, next) {
     db.getTeachesClasses(req.cookies.netId, function(err, results, fields) {
-        if (err) return routeHelper.sendError(res, err, `Error getting classes for professor ${profId}`);
+        if (err) return routeHelper.sendError(res, err, `Error getting classes for professor ${req.cookies.netId}`);
         res.json(results);
     }); 
 });

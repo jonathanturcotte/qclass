@@ -6,7 +6,7 @@ use SISystem;
 create table course (
 	cID			char(36) not null,
 	cCode 		varchar(10) not null,
-	cName		varchar(70),
+	cName		varchar(100),
 	pNetID		varchar(10) not null,
 	primary key (cID)
 );
@@ -44,12 +44,6 @@ create table attendance (
 	cID			char(36) not null,
 	sNetID 		varchar(10) not null,
 	primary key (cID, attTime, sNetID)
-);
-
-create table teaches (
-	pNetID		varchar(10) not null,
-	cID			char(36) not null,
-	primary key (pNetID, cID)
 );
 
 /*

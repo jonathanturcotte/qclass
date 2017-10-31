@@ -9,10 +9,13 @@ var pool = mysql.createPool({
     database: "SISystem"
 });
 
-exports.addClass = function(code, name, callback) {
+exports.addClass = function(netId, code, name, callback) {
     var id = uuid();
-    var query = `INSERT INTO course (cID, cCode, cName) VALUES (?, ?, ?)`;
-    runQuery(query, [id, code, name], callback);
+    var query = `INSERT INTO course (pNetId, cID, cCode, cName) VALUES (?, ?, ?, ?)`;
+    runQuery(query, [netId, id, code, name], function(err, results, fields) {
+        if (err) callback(err);
+        else callback(err, err ? null : id, results, fields);
+    });
 };
 
 exports.enroll = function(classId, students, callback) {
@@ -97,7 +100,6 @@ exports.getEnrolledClasses = function(studentId, callback) {
     runQuery(query, [studentId], callback);
 };
 
-
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
     runQuery(query, [classId, time, duration], callback);
@@ -111,7 +113,7 @@ exports.recordAttendance = function(netId, classId, time, callback) {
 exports.getTeachesClasses = function(profId, callback) {
     var query = 
         `SELECT course.cID, course.cName, course.cCode
-         FROM teaches NATURAL JOIN course
+         FROM course
          WHERE pNetID = ?`;
     runQuery(query, [profId], callback);
 }

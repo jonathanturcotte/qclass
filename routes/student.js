@@ -36,7 +36,7 @@ router.post('/sign-in/:code', function(req, res, next) {
 // GET all classes associated with a specific student 
 router.get('/classes', function(req, res, next) {
     db.getEnrolledClasses(req.cookies.netId, function(err, results, fields) {
-        if (err) return routeHelper.sendError(res, err, `Error getting classes for student ${netId}`);
+        if (err) return routeHelper.sendError(res, err, `Error getting classes for student ${req.cookies.netId}`);
         res.json(results);
     }); 
 });
