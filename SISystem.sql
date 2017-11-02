@@ -114,13 +114,6 @@ insert into enrolled values
 	('12ozs', 'ree49eb2-0630-4382-98b5-reefd40627b8'),
 	('11jlt10', 'boo49eb2-0630-4382-98b5-moofd40627b8');
 
-insert into teaches values 
-	('1pvb69', 'abc49eb2-0630-4382-98b5-abcfd40627b8'),
-	('10yfl1', 'ddd49eb2-0630-4382-98b5-lolfd40627b8'),
-	('15jc3', 'you49eb2-0630-4382-98b5-wutfd40627b8'),
-	('10boo3', 'ree49eb2-0630-4382-98b5-reefd40627b8'),
-	('12hdm', 'boo49eb2-0630-4382-98b5-moofd40627b8');
-
 insert into attendanceSession values 
 	('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398271000', '60000'),
     ('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398272000', '60000');

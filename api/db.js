@@ -84,7 +84,7 @@ exports.studentExists = function(netId, callback) {
 };
 
 exports.ownsClass = function(classId, netId, callback) {
-    runExistenceQuery(`SELECT 1 FROM  teaches WHERE pNetID = ? AND cID = ?`, [netId, classId], callback);
+    runExistenceQuery(`SELECT 1 FROM course WHERE pNetID = ? AND cID = ?`, [netId, classId], callback);
 };
 
 exports.isEnrolled = function(netId, classId, callback) {
@@ -102,12 +102,12 @@ exports.getEnrolledClasses = function(studentId, callback) {
 
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-    runQuery(query, [classId, time, duration], callback);
+    runQuery(query, [[[classId, time, duration]]], callback);
 }
 
 exports.recordAttendance = function(netId, classId, time, callback) {
     var query = `INSERT INTO attendance (cID, attTime, sNetID) VALUES ?`;
-    runQuery(query, [classId, time, netId], callback);
+    runQuery(query, [[[classId, time, netId]]], callback);
 }
 
 exports.getTeachesClasses = function(profId, callback) {
