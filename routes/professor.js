@@ -28,7 +28,7 @@ router.param('classId', function(req, res, next, classId) {
     if (!classId) return routeHelper.sendError(res, null, 'Empty classId', 400);
     if (!routeHelper.regex.class.id.test(classId))
         return routeHelper.sendError(res, null, 'Invalid classId', 400);
-    db.ownsClass(classId, req.info.netId, function(err, result) {
+    db.ownsClass(classId, req.user.netId, function(err, result) {
         if (err) return routeHelper.sendError(res, err, 'Error processing request');
         if (!result) return routeHelper.sendError(res, null, 'User does not own the requested class', 403);
         next();
@@ -68,6 +68,7 @@ router.post('/class/add', function(req, res, next) {
     });
 });
 
+// Enroll students in a class
 router.post('/class/enroll/:classId', function(req, res, next) {
     var reqStudents = req.body.students,
         students = [];
