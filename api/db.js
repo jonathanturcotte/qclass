@@ -76,19 +76,19 @@ function _runEnrollQuery(con, values, callback) {
 }
 
 exports.profExists = function(netId, callback) {
-    runExistenceQuery(`SELECT 1 FROM professor WHERE pNetID = ?`, [netId], callback);
+    runQuery(`SELECT * FROM professor WHERE pNetID = ? LIMIT 1`, [netId], callback);
 };
 
 exports.studentExists = function(netId, callback) {
-    runExistenceQuery(`SELECT 1 FROM student WHERE sNetID = ?`, [netId], callback);
+    runQuery(`SELECT * FROM student WHERE sNetID = ? LIMIT 1`, [netId], callback);
 };
 
 exports.ownsClass = function(classId, netId, callback) {
-    runExistenceQuery(`SELECT 1 FROM course WHERE pNetID = ? AND cID = ?`, [netId, classId], callback);
+    runExistenceQuery(`SELECT * FROM course WHERE pNetID = ? AND cID = ? LIMIT 1`, [netId, classId], callback);
 };
 
 exports.isEnrolled = function(netId, classId, callback) {
-    runExistenceQuery(`SELECT 1 FROM  enrolled WHERE sNetID = ? AND cID = ?`, [netId, classId], callback);
+    runExistenceQuery(`SELECT * FROM  enrolled WHERE sNetID = ? AND cID = ? LIMIT 1`, [netId, classId], callback);
 };
 
 exports.getEnrolledClasses = function(studentId, callback) {
