@@ -132,7 +132,7 @@ exports.aggregateInfo = function(classId, callback) {
         `SELECT T1.sNetID, COUNT(T2.attTime) AS attCount 
          FROM ((SELECT *
                 FROM enrolled
-                WHERE enrolled.cID = 'abc49eb2-0630-4382-98b5-abcfd40627b8') AS T1
+                WHERE enrolled.cID = ?) AS T1
                     LEFT JOIN (SELECT *
                                FROM attendance NATURAL JOIN attendancesession) AS T2
                                ON (T1.sNetID = T2.sNetID))
