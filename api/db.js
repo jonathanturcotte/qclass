@@ -127,6 +127,27 @@ exports.getAttendanceSessions = function(classId, callback) {
     runQuery(query, [classId], callback);
 }
 
+exports.aggregateInfo = function(classId, callback) {
+    var query = 
+        `SELECT T1.sNetID, COUNT(T2.attTime) AS attCount 
+         FROM ((SELECT *
+                FROM enrolled
+                WHERE enrolled.cID = 'abc49eb2-0630-4382-98b5-abcfd40627b8') AS T1
+                    LEFT JOIN (SELECT *
+                               FROM attendance NATURAL JOIN attendancesession) AS T2
+                               ON (T1.sNetID = T2.sNetID))
+         GROUP BY sNetID`;
+    runQuery(query, [classId], callback);
+}
+
+exports.getNumSession = function(classId, callback) {
+    var query = 
+        `SELECT *
+         FROM attendanceSession
+         WHERE cID = ?`
+    runQuery(query, [classId], callback);
+}
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 

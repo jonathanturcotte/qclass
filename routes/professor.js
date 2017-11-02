@@ -106,5 +106,28 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
         else res.json(results);
     });
 });
+ 
+// Aggregate Info: student | attendance (%)
+// Session Info: Total Number of students + Percent Attendance
+//               List of students in attendance: name, netId, std#   
+router.get('/:classId/exportAttendance', function(req, res, next) {
+    var classId = req.params.classId;
+    db.aggregateInfo(classId, function(err, attInfo, fields) {
+        if (err) return routeHelper.senderror(res, err, `Error retrieving attendance information for ${req.cookies.netId}`);
+        if (attInfo.length == 0) res.send(`No Attendance Information for Course`);
+        else{
+            db.getNumSession(classId, function(err, numSessions, fields) {
+                if(err) return routeHelper.senderror(res, err, `Error retrieving number of sessions `);
+                if(numSessions.length == 0) res.send(`No Attendance sessions for couse`);
+                else {
+                    for(let i = 0; i < attInfo.length; i++)
+                        attInfo[i].attPercent = (attInfo[i].attCount/numSessions.length)*100; 
+                    res.json(attInfo);
+                }
+            });
+        }
+    });
+    
+});
 
 module.exports = router;
