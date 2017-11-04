@@ -123,7 +123,15 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                 else {
                     for(let i = 0; i < attInfo.length; i++)
                         attInfo[i].attPercent = (attInfo[i].attCount/numSessions.length)*100; 
-                    res.json(attInfo);
+                    db.getSessionAttInfo(classId, function(err, sessInfo, fields, callback) {
+                        if (err) return routeHelper.sendError(res, err, `Error retrieving session information`);
+                        if (sessInfo.length == 0) res.send(`No Session Information for course`);
+                        result = [];
+                        result[0] = attInfo;
+                        result[1] = sessInfo;
+                        res.send(result);
+
+                    });
                 }
             });
         }

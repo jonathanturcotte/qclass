@@ -148,6 +148,14 @@ exports.getNumSession = function(classId, callback) {
     runQuery(query, [classId], callback);
 }
 
+exports.getSessionAttInfo = function(classId, callback) {
+    var query =
+        `SELECT *
+         FROM (attendanceSession NATURAL JOIN attendance) NATURAL JOIN student
+         WHERE cID = ?`
+    runQuery(query, [classId],callback);
+}
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 
