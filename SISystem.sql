@@ -6,23 +6,23 @@ use SISystem;
 create table course (
 	cID			char(36) not null,
 	cCode 		varchar(10) not null,
-	cName		varchar(70),
+	cName		varchar(100),
 	pNetID		varchar(10) not null,
 	primary key (cID)
 );
 
 create table student (
 	sNetID		varchar(10) not null,
-	fname 		varchar(20),
-	lName		varchar(20),
+	fName 		varchar(100),
+	lName		varchar(100),
 	stdNum		char(8),
 	primary key (sNetID)
 );
 
 create table professor (
 	pNetID		varchar(10) not null,
-	fname 		varchar(20) not null,
-	lName		varchar(20) not null,
+	fName 		varchar(100) not null,
+	lName		varchar(100) not null,
 	primary key (pNetID)
 );
 
@@ -44,12 +44,6 @@ create table attendance (
 	cID			char(36) not null,
 	sNetID 		varchar(10) not null,
 	primary key (cID, attTime, sNetID)
-);
-
-create table teaches (
-	pNetID		varchar(10) not null,
-	cID			char(36) not null,
-	primary key (pNetID, cID)
 );
 
 /*
@@ -102,7 +96,7 @@ insert into course values
 
 insert into student values
 	( '12cjd2', 'Curtis', 'Demerah', '10090510'),
-	( '12ozs', 'Omar', 'Sandarusi', '10030050'),
+	( '12ozs', 'Omar', 'Sandarusi', '10097124'),
 	( '11jlt10', 'Jonathan', 'Turcotte', '10060060');
 
 insert into  professor values
@@ -120,12 +114,16 @@ insert into enrolled values
 	('12ozs', 'ree49eb2-0630-4382-98b5-reefd40627b8'),
 	('11jlt10', 'boo49eb2-0630-4382-98b5-moofd40627b8');
 
-insert into teaches values 
-	('1pvb69', 'abc49eb2-0630-4382-98b5-abcfd40627b8'),
-	('10yfl1', 'ddd49eb2-0630-4382-98b5-lolfd40627b8'),
-	('15jc3', 'you49eb2-0630-4382-98b5-wutfd40627b8'),
-	('10boo3', 'ree49eb2-0630-4382-98b5-reefd40627b8'),
-	('12hdm', 'boo49eb2-0630-4382-98b5-moofd40627b8');
+insert into attendanceSession values 
+	('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398271000', '60000'),
+    ('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398272000', '60000');
+    
+
+insert into attendance values 
+	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12ozs'),
+	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2'),
+    ('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2');
+
 
 /*
 insert into lecture values

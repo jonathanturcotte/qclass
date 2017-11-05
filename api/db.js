@@ -1,6 +1,7 @@
-var mysql = require('mysql');
-var uuid = require('uuid/v4');
-var async = require('async');
+var mysql = require('mysql'),
+    uuid = require('uuid/v4'),
+    async = require('async'),
+    EnrollStudent = require('../models/EnrollStudent');
 
 var pool = mysql.createPool({
     host: "localhost",
@@ -9,19 +10,28 @@ var pool = mysql.createPool({
     database: "SISystem"
 });
 
-exports.addClass = function(code, name, callback) {
+exports.addClass = function(netId, code, name, callback) {
     var id = uuid();
-    var query = `INSERT INTO course (cID, cCode, cName) VALUES (?, ?, ?)`;
-    runQuery(query, [id, code, name], callback);
+    var query = `INSERT INTO course (pNetId, cID, cCode, cName) VALUES (?, ?, ?, ?)`;
+    runQuery(query, [netId, id, code, name], function(err, results, fields) {
+        if (err) callback(err);
+        else callback(err, err ? null : id, results, fields);
+    });
 };
 
+/**
+ * Enroll students in a class
+ * @param {string} classId
+ * @param {EnrollStudent[]} students
+ * @param {Function} callback
+ */
 exports.enroll = function(classId, students, callback) {
     useConnection(callback, function(con) {
-        var values = [];
+        var toEnroll = [];
         var newStudents = [];
         var errorStudents = [];
         async.forEachOf(students, function(student, i, innerCallback) {
-            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student], function(err, results, fields) {
+            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netId], function(err, results, fields) {
                 if (err) {
                     errorStudents.push(student);
                     innerCallback(err);
@@ -34,15 +44,15 @@ exports.enroll = function(classId, students, callback) {
                         innerCallback(new Error('Selct query returned more than 1 row'));
                     } else {
                         if (results.length == 0) { // student does not exist, insert student
-                            newStudents.push([student]);
-                            values.push([student, classId]);
+                            newStudents.push(student);
+                            toEnroll.push(student);
                             innerCallback();
                         } else { // student exists, need to check current enrollment to avoid attempting duplicates
                             alreadyEnrolledQuery = 'SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?';
-                            runExistenceQuery(alreadyEnrolledQuery, [student, classId], function(err, result) {
+                            runExistenceQuery(alreadyEnrolledQuery, [student.netId, classId], function(err, result) {
                                 if (err) innerCallback(err);
                                 else {
-                                    if (!result) values.push([student, classId]);
+                                    if (!result) toEnroll.push(student);
                                     innerCallback();
                                 }
                             });
@@ -57,35 +67,41 @@ exports.enroll = function(classId, students, callback) {
                 callback(err);
             } else {
                 if (newStudents.length > 0) {
-                    con.query('INSERT INTO student (sNetID) VALUES ?', [newStudents], function(err, results, fields) {
+                    for (var i = 0; i < newStudents.length; i++) 
+                        newStudents[i] = [ newStudents[i].netId, newStudents[i].stdNum, newStudents[i].firstName, newStudents[i].lastName ];
+                    con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [[newStudents]], function(err, results, fields) {
                         if (err) callback(err);
-                        else _runEnrollQuery(con, values, callback);
+                        else _runEnrollQuery(con, toEnroll, callback);
                     });
-                } else _runEnrollQuery(con, values, callback);
+                } else _runEnrollQuery(con, toEnroll, callback);
             }
         })
     });
 };
 
-function _runEnrollQuery(con, values, callback) {
-    if (values.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
-    else con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [values], callback);
+function _runEnrollQuery(con, toEnroll, callback) {
+    if (toEnroll.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
+    else {
+        for (var i = 0; i < toEnroll.length; i++)
+            toEnroll[i] = [ toEnroll[i].netId, classId ];
+        con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [[toEnroll]], callback);
+    }
 }
 
 exports.profExists = function(netId, callback) {
-    runExistenceQuery(`SELECT 1 FROM professor WHERE pNetID = ?`, [netId], callback);
+    runQuery(`SELECT * FROM professor WHERE pNetID = ? LIMIT 1`, [netId], callback);
 };
 
 exports.studentExists = function(netId, callback) {
-    runExistenceQuery(`SELECT 1 FROM student WHERE sNetID = ?`, [netId], callback);
+    runQuery(`SELECT * FROM student WHERE sNetID = ? LIMIT 1`, [netId], callback);
 };
 
 exports.ownsClass = function(classId, netId, callback) {
-    runExistenceQuery(`SELECT 1 FROM  teaches WHERE pNetID = ? AND cID = ?`, [netId, classId], callback);
+    runExistenceQuery(`SELECT * FROM course WHERE pNetID = ? AND cID = ? LIMIT 1`, [netId, classId], callback);
 };
 
 exports.isEnrolled = function(netId, classId, callback) {
-    runExistenceQuery(`SELECT 1 FROM  enrolled WHERE sNetID = ? AND cID = ?`, [netId, classId], callback);
+    runExistenceQuery(`SELECT * FROM  enrolled WHERE sNetID = ? AND cID = ? LIMIT 1`, [netId, classId], callback);
 };
 
 exports.getEnrolledClasses = function(studentId, callback) {
@@ -97,24 +113,62 @@ exports.getEnrolledClasses = function(studentId, callback) {
     runQuery(query, [studentId], callback);
 };
 
-
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-    runQuery(query, [classId, time, duration], callback);
+    runQuery(query, [[[classId, time, duration]]], callback);
 }
 
 exports.recordAttendance = function(netId, classId, time, callback) {
     var query = `INSERT INTO attendance (cID, attTime, sNetID) VALUES ?`;
-    runQuery(query, [classId, time, netId], callback);
+    runQuery(query, [[[classId, time, netId]]], callback);
 }
 
 exports.getTeachesClasses = function(profId, callback) {
     var query = 
         `SELECT course.cID, course.cName, course.cCode
-         FROM teaches NATURAL JOIN course
+         FROM course
          WHERE pNetID = ?`;
     runQuery(query, [profId], callback);
-};
+}
+
+exports.getAttendanceSessions = function(classId, callback) {
+    var query =
+        `SELECT cID, attTime, attDuration, COUNT(sNetID) AS numInAttendance
+         FROM attendanceSession NATURAL JOIN attendance
+         WHERE cID = ? 
+         GROUP BY attTime`;
+    runQuery(query, [classId], callback);
+}
+
+exports.aggregateInfo = function(classId, callback) {
+    var query = 
+        `SELECT T1.sNetID, COUNT(T2.attTime) AS attCount 
+         FROM ((SELECT *
+                FROM enrolled
+                WHERE enrolled.cID = ?) AS T1
+                    LEFT JOIN (SELECT *
+                               FROM attendance NATURAL JOIN attendancesession) AS T2
+                               ON (T1.sNetID = T2.sNetID))
+         GROUP BY sNetID`;
+    runQuery(query, [classId], callback);
+}
+
+exports.getNumSession = function(classId, callback) {
+    var query = 
+        `SELECT *
+         FROM attendanceSession
+         WHERE cID = ?`
+    runQuery(query, [classId], callback);
+}
+
+exports.getSessionAttInfo = function(classId, callback) {
+    var query =
+        `SELECT attTime, attDuration, sNetID, fName, lName, stdNum
+         FROM (attendanceSession NATURAL JOIN attendance) NATURAL JOIN student
+         WHERE cID = ?
+         ORDER BY attTime`
+    runQuery(query, [classId],callback);
+}
 
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
