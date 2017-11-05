@@ -3,7 +3,8 @@ var express = require('express'),
     routeHelper = require('./helper'),
     helper = require('../api/helper'),
     db = require('../api/db'),
-    attendanceSessions = require('../api/data/attendanceSessions');
+    attendanceSessions = require('../api/data/attendanceSessions'),
+    EnrollStudent = require('../models/EnrollStudent');
 
 /**
  * Authenticate every request to the professor API against the DB
@@ -77,9 +78,14 @@ router.post('/class/enroll/:classId', function(req, res, next) {
         return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
     // Validate each entry in the students array
     for (let i = 0; i < reqStudents.length; i++) {
-        if (typeof(reqStudents[i]) === 'string' && reqStudents[i].length >= 3 && reqStudents[i].length <= 20)
-            students.push(reqStudents[i]);
-        else return routeHelper.sendError(res, null, `Invalid student netID in list at position ${i}: ${reqStudents[i]}`, 400);
+        if (!reqStudents[i]) return routeHelper.sendError(res, null, `Empty student entry at position ${i}`, 400);
+        try {
+            var student = new EnrollStudent(reqStudents[i]);
+        }
+        catch (e) {
+            return routeHelper.sendError(res, e, `Invalid student in list at position ${i}`, 400);
+        }
+        students.push(student);
     }
     db.enroll(req.params.classId, students, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${helper.printArray(err.errorStudents)}` : ''}`);

@@ -1,6 +1,7 @@
-var mysql = require('mysql');
-var uuid = require('uuid/v4');
-var async = require('async');
+var mysql = require('mysql'),
+    uuid = require('uuid/v4'),
+    async = require('async'),
+    EnrollStudent = require('../models/EnrollStudent');
 
 var pool = mysql.createPool({
     host: "localhost",
@@ -18,13 +19,19 @@ exports.addClass = function(netId, code, name, callback) {
     });
 };
 
+/**
+ * Enroll students in a class
+ * @param {string} classId
+ * @param {EnrollStudent[]} students
+ * @param {Function} callback
+ */
 exports.enroll = function(classId, students, callback) {
     useConnection(callback, function(con) {
-        var values = [];
+        var toEnroll = [];
         var newStudents = [];
         var errorStudents = [];
         async.forEachOf(students, function(student, i, innerCallback) {
-            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student], function(err, results, fields) {
+            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netId], function(err, results, fields) {
                 if (err) {
                     errorStudents.push(student);
                     innerCallback(err);
@@ -37,15 +44,15 @@ exports.enroll = function(classId, students, callback) {
                         innerCallback(new Error('Selct query returned more than 1 row'));
                     } else {
                         if (results.length == 0) { // student does not exist, insert student
-                            newStudents.push([student]);
-                            values.push([student, classId]);
+                            newStudents.push(student);
+                            toEnroll.push(student);
                             innerCallback();
                         } else { // student exists, need to check current enrollment to avoid attempting duplicates
                             alreadyEnrolledQuery = 'SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?';
-                            runExistenceQuery(alreadyEnrolledQuery, [student, classId], function(err, result) {
+                            runExistenceQuery(alreadyEnrolledQuery, [student.netId, classId], function(err, result) {
                                 if (err) innerCallback(err);
                                 else {
-                                    if (!result) values.push([student, classId]);
+                                    if (!result) toEnroll.push(student);
                                     innerCallback();
                                 }
                             });
@@ -60,19 +67,25 @@ exports.enroll = function(classId, students, callback) {
                 callback(err);
             } else {
                 if (newStudents.length > 0) {
-                    con.query('INSERT INTO student (sNetID) VALUES ?', [newStudents], function(err, results, fields) {
+                    for (var i = 0; i < newStudents.length; i++) 
+                        newStudents[i] = [ newStudents[i].netId, newStudents[i].stdNum, newStudents[i].firstName, newStudents[i].lastName ];
+                    con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [[newStudents]], function(err, results, fields) {
                         if (err) callback(err);
-                        else _runEnrollQuery(con, values, callback);
+                        else _runEnrollQuery(con, toEnroll, callback);
                     });
-                } else _runEnrollQuery(con, values, callback);
+                } else _runEnrollQuery(con, toEnroll, callback);
             }
         })
     });
 };
 
-function _runEnrollQuery(con, values, callback) {
-    if (values.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
-    else con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [values], callback);
+function _runEnrollQuery(con, toEnroll, callback) {
+    if (toEnroll.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
+    else {
+        for (var i = 0; i < toEnroll.length; i++)
+            toEnroll[i] = [ toEnroll[i].netId, classId ];
+        con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [[toEnroll]], callback);
+    }
 }
 
 exports.profExists = function(netId, callback) {
