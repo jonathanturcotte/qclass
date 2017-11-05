@@ -114,23 +114,42 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 router.get('/:classId/exportAttendance', function(req, res, next) {
     var classId = req.params.classId;
     db.aggregateInfo(classId, function(err, attInfo, fields) {
-        if (err) return routeHelper.senderror(res, err, `Error retrieving attendance information for ${req.cookies.netId}`);
+        if (err) return routeHelper.sendError(res, err, `Error retrieving attendance information for ${req.cookies.netId}`);
         if (attInfo.length == 0) res.send(`No Attendance Information for Course`);
         else{
             db.getNumSession(classId, function(err, numSessions, fields) {
-                if(err) return routeHelper.senderror(res, err, `Error retrieving number of sessions `);
+                if(err) return routeHelper.sendError(res, err, `Error retrieving number of sessions `);
                 if(numSessions.length == 0) res.send(`No Attendance sessions for couse`);
                 else {
                     for(let i = 0; i < attInfo.length; i++)
                         attInfo[i].attPercent = (attInfo[i].attCount/numSessions.length)*100; 
-                    db.getSessionAttInfo(classId, function(err, sessInfo, fields, callback) {
+                    db.getSessionAttInfo(classId, function(err, sessInfo, fields) {
                         if (err) return routeHelper.sendError(res, err, `Error retrieving session information`);
                         if (sessInfo.length == 0) res.send(`No Session Information for course`);
+                        
                         result = [];
-                        result[0] = attInfo;
-                        result[1] = sessInfo;
-                        res.send(result);
+                        result[0] = {header: "Overall Attendance Info"};
+                        result[1] = {col1: "NetID" , col2: "Attended (Total)", col3: "Attended (%)"}
+                        for(let i = 0; i < attInfo.length;i++)
+                            result[i + 2] = attInfo[i];
+                        var index = attInfo.length + 2
+                        result[index] = {header: "Session Info"};
+                        var j = 0;
+                        var date = 0;
+                        while (j < sessInfo.length) {
+                            if(date == sessInfo[j].attTime){
+                                index++;
+                                result[index] = {NetID: sessInfo[j].sNetID, fName: sessInfo[j].fName, lName: sessInfo[j].lName, stdNum: sessInfo[j].stdNum};
+                                j++;
+                            }
+                            else{
+                                index++;
+                                date = sessInfo[j].attTime;
+                                result[index] = {SessDate: new Date(date)};
+                            }
+                        }
 
+                        res.csv(result);
                     });
                 }
             });

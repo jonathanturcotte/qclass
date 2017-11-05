@@ -150,9 +150,10 @@ exports.getNumSession = function(classId, callback) {
 
 exports.getSessionAttInfo = function(classId, callback) {
     var query =
-        `SELECT *
+        `SELECT attTime, attDuration, sNetID, fName, lName, stdNum
          FROM (attendanceSession NATURAL JOIN attendance) NATURAL JOIN student
-         WHERE cID = ?`
+         WHERE cID = ?
+         ORDER BY attTime`
     runQuery(query, [classId],callback);
 }
 
