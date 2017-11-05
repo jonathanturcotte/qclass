@@ -1,11 +1,20 @@
 var express      = require('express'),
     path         = require('path'),
+    http         = require('http'),
+    https        = require('https'),
+    fs           = require('fs'),
     favicon      = require('serve-favicon'),
     logger       = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser   = require('body-parser'),
     helmet       = require('helmet'),
     csv          = require('express-csv'),
+
+    // Setup SSL options
+    sslOptions = {
+        key: fs.readFileSync('app.key'),
+        cert: fs.readFileSync('app.cert')
+    },
 
     // Require our routes and APIs
     professor    = require('./routes/professor'),
@@ -15,7 +24,7 @@ var express      = require('express'),
 
     // Create the app and server
     app          = express();
-    server       = require('http').Server(app);
+    server       = https.createServer(sslOptions, app).listen(8443);
 
 // Initialize the socketIO
 app.io = io.initialize();
