@@ -3,11 +3,6 @@ This is the web-application portion of the Q-Clicker project. The web-applicatio
 
 Created as a Queen's University ELEC 498 project.
 
-## Authors
-Jonathan Turcotte,
-Omar Sandarusi,
-Curtis Demerah.
-
 ## Development and Testing
 The project is webpacked. Open two shells and navigate to the root of the repo, then run
  `npm start` in one to start the server, and `npm run watch` in the other to
@@ -16,3 +11,8 @@ The project is webpacked. Open two shells and navigate to the root of the repo, 
 Other commands that are available to change the behaviour of webpack are `npm run build`,
  which builds the bundle once without watching for changes, and `npm run release`,
  which runs uglifyjs on the source, and then bundles it once.
+
+## Authors
+Jonathan Turcotte,
+Omar Sandarusi,
+Curtis Demerah.
