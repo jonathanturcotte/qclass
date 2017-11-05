@@ -25,7 +25,8 @@ router.use(function(req, res, next) {
     });
 });
 
-router.get('/user', function(req, res, next) {
+// GET user info
+router.get('/info', function(req, res, next) {
     res.json(req.user);
 });
 

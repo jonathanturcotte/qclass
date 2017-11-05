@@ -96,7 +96,7 @@ insert into course values
 
 insert into student values
 	( '12cjd2', 'Curtis', 'Demerah', '10090510'),
-	( '12ozs', 'Omar', 'Sandarusi', '10030050'),
+	( '12ozs', 'Omar', 'Sandarusi', '10097124'),
 	( '11jlt10', 'Jonathan', 'Turcotte', '10060060');
 
 insert into  professor values
