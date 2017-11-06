@@ -1,4 +1,5 @@
-var NavBar = require('./navbar');
+var NavBar      = require('./navbar'),
+    ClassList   = require('./professor/classlist');
 
 SITE_NAME = "Q-Class";
 
