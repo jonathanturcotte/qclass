@@ -69,22 +69,22 @@ exports.enroll = function(classId, students, callback) {
                 if (newStudents.length > 0) {
                     for (var i = 0; i < newStudents.length; i++) 
                         newStudents[i] = [ newStudents[i].netId, newStudents[i].stdNum, newStudents[i].firstName, newStudents[i].lastName ];
-                    con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [[newStudents]], function(err, results, fields) {
+                    con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [newStudents], function(err, results, fields) {
                         if (err) callback(err);
-                        else _runEnrollQuery(con, toEnroll, callback);
+                        else _runEnrollQuery(con, classId, toEnroll, callback);
                     });
-                } else _runEnrollQuery(con, toEnroll, callback);
+                } else _runEnrollQuery(con, classId, toEnroll, callback);
             }
         })
     });
 };
 
-function _runEnrollQuery(con, toEnroll, callback) {
+function _runEnrollQuery(con, classId, toEnroll, callback) {
     if (toEnroll.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
     else {
         for (var i = 0; i < toEnroll.length; i++)
-            toEnroll[i] = [ toEnroll[i].netId, classId ];
-        con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [[toEnroll]], callback);
+            toEnroll[i] = [toEnroll[i].netId, classId];
+        con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [toEnroll], callback);
     }
 }
 

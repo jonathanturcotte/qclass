@@ -147,7 +147,6 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                         var j = 0;
                         var date = 0;
                         while (j < sessInfo.length) {
-                            result[index++]
                             if (date === sessInfo[j].attTime) {
                                 result[index++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
                                 j++;
@@ -157,7 +156,7 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                                 result[index++] = { sessDate: new Date(date) };
                             }
                         }
-                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"')
+                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"');
                         res.csv(result);
                     });
                 }
