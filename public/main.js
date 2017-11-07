@@ -56,8 +56,6 @@ SignInApp.prototype.buildClassList = function () {
 $(function () {
     window.app = new SignInApp();
     window.app.init();
-    var modalWindow = new ModalWindow({ title: 'Modal Window Test' });
-    modalWindow.show();
 });
 
 module.exports = SignInApp;
