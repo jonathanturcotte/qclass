@@ -11,6 +11,7 @@ var SignInApp = function () {};
  */
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
+
     this.navbar = new NavBar();
 
     // Check if we're logged in as a professor or not
@@ -34,6 +35,11 @@ SignInApp.prototype.isProfessor = function (id) {
  */
 SignInApp.prototype.buildProfDOM = function () {
     this.navbar.buildProfNavbar();
+    this.classlist = new ClassList();
+    this.classlist.updateClasses();
+
+    this.classpage = undefined;
+
 };
 
 /**

@@ -1,3 +1,15 @@
+/* Navbar takes up space, so the entire body
+needs to be shifted down */
 body {
     padding-top: 70px;
+}
+
+/* Give the classlist/sidebar some percent of the view width,
+and the rest to the main page. */
+.classlist {
+    width: 20vw;
+}
+
+.classpage {
+    width: 80vw
 }
