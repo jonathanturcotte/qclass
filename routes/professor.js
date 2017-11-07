@@ -108,10 +108,16 @@ router.post('/class/start/:classId', function(req, res, next) {
 });
 
 // GET all attendance sessions for a certain class
+// use to fill table on professor page
+// Each entry has the session time and a list of students 
 router.get('/:classId/attendanceSessions', function(req, res, next) {
-    db.getAttendanceSessions(req.params.classId, function(err, results, fields) {
+    db.getSessionAttInfo(req.params.classId, function(err, results, fields) {
         if (err) return routeHelper.senderror(res, err, `Error retrieving attendance sessions for ${req.user.netId}`);
-        else res.json(results);
+        if (results.length == 0) res.send('No attendance sessions for this class');
+        else {
+             var attSessions = organizeAttendanceSession(results);
+            res.json(attSessions);
+        };
     });
 });
 
@@ -134,7 +140,6 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                     db.getSessionAttInfo(classId, function(err, sessInfo, fields) {
                         if (err) return routeHelper.sendError(res, err, `Error retrieving session information`);
                         if (sessInfo.length == 0) return res.send(`No Session Information for course`);
-                        
                         result = [];
                         result[0] = { header: "Overall Attendance Info" };
                         result[1] = { col1: "NetID" , col2: "Attended (Total)", col3: "Attended (%)" }
@@ -143,7 +148,7 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                         var index = attInfo.length + 2;
                         result[index++] = {};
                         result[index++] = { header: "Session Info" };
-                        result[index++] = { col1: 'NetID', col2: 'Student #', col3: 'First Name', col4: 'Last Name' };
+                        result[index++] = { col1: 'NetID', col2: 'Student #', col3: 'First Name', col4: 'Last Name' };                                           
                         var j = 0;
                         var date = 0;
                         while (j < sessInfo.length) {
@@ -155,9 +160,15 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                                 result[index++] = {};
                                 result[index++] = { sessDate: new Date(date) };
                             }
+<<<<<<< Updated upstream
                         }
                         res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"');
                         res.csv(result);
+=======
+                        }                   
+                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"')
+                        res.csv(result);                        
+>>>>>>> Stashed changes
                     });
                 }
             });
@@ -165,5 +176,30 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
     });
     
 });
+
+// pass in ordered session results from db
+// returns json with each entry containing session date + list of students in attendance
+function organizeAttendanceSession(sessInfo) {
+    var j = 0;
+    var i = 0;
+    var k = 0;
+    var date = sessInfo[0].attTime;
+    var session = [];
+    var toReturn = [];
+    while (j < sessInfo.length) {
+        if (date === sessInfo[j].attTime) {
+            session[i++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
+            j++;
+        } else {
+            toReturn[k++] = { sessDate: new Date(date), studentList: session };
+            session = [];
+            date = sessInfo[j].attTime;
+            i = 0;
+        }
+    }
+    //Add last session
+    toReturn[k] = { sessDate: new Date(date), studentList: session };
+    return toReturn;
+}
 
 module.exports = router;
