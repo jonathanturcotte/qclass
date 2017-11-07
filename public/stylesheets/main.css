@@ -13,3 +13,11 @@ and the rest to the main page. */
 .classpage {
     width: 80vw
 }
+
+.hidden {
+    display: none;
+}
+
+.centered {
+    text-align: center;
+}

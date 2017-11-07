@@ -1,5 +1,6 @@
 var NavBar      = require('./navbar'),
-    ClassList   = require('./professor/classlist');
+    ClassList   = require('./professor/classlist'),
+    ModalWindow = require('./modalwindow');
 
 SITE_NAME = "Q-Class";
 
@@ -58,7 +59,7 @@ SignInApp.prototype.buildClassList = function () {
 };
 
 // When the page is loaded, create our main ui object
-$(document).ready(function () {
+$(function () {
     window.app = new SignInApp();
     window.app.init();
 });
