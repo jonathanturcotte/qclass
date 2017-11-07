@@ -14,7 +14,13 @@ Other commands that are available to change the behaviour of webpack are `npm ru
 
 Authentication stub - server parses the netId cookie
 To set from the client side, just run Cookies.set('netId', '12ozs'); with whatever netId you actually want in place of netId. 
-Cookies is a global, so either manual setting through the developer console or calling it in client code works 
+Cookies is a global, so either manual setting through the developer console or calling it in client code works
+
+## Database Test Information
+Run SISystem.sql to refresh database 
+
+10yfl1 owns zero classes
+1pvb69 owns 12 classes
 
 ## Authors
 Jonathan Turcotte,
