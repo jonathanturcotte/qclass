@@ -12,6 +12,10 @@ Other commands that are available to change the behaviour of webpack are `npm ru
  which builds the bundle once without watching for changes, and `npm run release`,
  which runs uglifyjs on the source, and then bundles it once.
 
+Authentication stub - server parses the netId cookie
+To set from the client side, just run Cookies.set('netId', '12ozs'); with whatever netId you actually want in place of netId. 
+Cookies is a global, so either manual setting through the developer console or calling it in client code works 
+
 ## Authors
 Jonathan Turcotte,
 Omar Sandarusi,
