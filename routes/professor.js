@@ -160,15 +160,9 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                                 result[index++] = {};
                                 result[index++] = { sessDate: new Date(date) };
                             }
-<<<<<<< Updated upstream
-                        }
-                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"');
-                        res.csv(result);
-=======
                         }                   
                         res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"')
                         res.csv(result);                        
->>>>>>> Stashed changes
                     });
                 }
             });
