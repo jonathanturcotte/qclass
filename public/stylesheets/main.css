@@ -10,6 +10,23 @@ and the rest to the main page. */
     width: 20vw;
 }
 
+/* Sidebar/Classlist */
+.sidebar {
+    height: 100vh
+}
+
+/* TODO fix the margin hack */
+.add-class-btn {
+    position: absolute;
+    bottom: 20px;
+    margin-left: 10vw;
+}
+
+/* Show newlines properly in inner text */
+.classlist-link {
+    white-space: pre;
+}
+
 .classpage {
     width: 80vw
 }

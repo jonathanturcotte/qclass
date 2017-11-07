@@ -20,7 +20,7 @@ function buildList () {
     this._$element.empty();
 
     // Create the basic sidebar
-    var $sidebar = $('<nav class="col-sm-3 col-md-2 d-none d-sm-block bg-list sidebar">');
+    var $sidebar = $('<nav class="d-block bg-list sidebar">');
 
     // If there are no classes, show an informational message
     if (this.classes.length === 0) {
@@ -34,10 +34,10 @@ function buildList () {
         // Create a list tag for each class
         this.classes.forEach(function (course) {
             var $listItem = $('<li class="nav-item">'),
-                $listLink = $('<a class="nav-link">');
+                $listLink = $('<a class="nav-link classlist-link" href="#">');
 
             // Fill add the course information to it
-            $listLink.text(course.cCode + ": " + course.cName)
+            $listLink.text(course.cCode + ":\n" + course.cName)
                 .attr('id', course.cID).appendTo($listItem);
 
             // Append it to the list
@@ -49,7 +49,7 @@ function buildList () {
     }
 
     // Append the add class button
-    var $button = $('<button type="button" class="btn btn-primary">')
+    var $button = $('<button type="button" class="add-class-btn btn btn-primary justify-content-end">')
         .text("Add Class");
 
     // TODO Button on click
