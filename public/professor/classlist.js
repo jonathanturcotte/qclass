@@ -1,3 +1,5 @@
+var ClassPage = require('./classpage');
+
 var ClassList = function () {
     this._$element = $('.classlist');
     this.classes = [];
@@ -33,17 +35,15 @@ function buildList () {
 
         // Create a list tag for each class
         this.classes.forEach(function (course) {
-            var $listItem = $('<li class="nav-item">'),
-                $listLink = $('<a class="nav-link classlist-link" href="#">');
-
-            // Fill add the course information to it
-            $listLink.text(course.cCode + ":\n" + course.cName)
-                .attr('id', course.cID).appendTo($listItem);
-
-            // Append it to the list
-            $listItem.appendTo($list);
+            $('<li>', { class: 'nav-item' })
+                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link', href: '#', text: course.cCode + ":\n" + course.cName })
+                    .click(function() {
+                        var classPage = new ClassPage(course);
+                        classPage.build();
+                    }))
+            .appendTo($list);
         });
-
+        
         // Append everything to the sidebar
         $list.appendTo($sidebar);
     }
