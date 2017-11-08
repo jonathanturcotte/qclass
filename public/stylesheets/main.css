@@ -8,7 +8,7 @@ body {
 
 /* Sidebar/Classlist */
 .sidebar {
-    height: 100vh;
+    height: calc(100vh - 50px);
     min-width: 300px;
     max-width: 300px;
     background: #c8ccd1;
