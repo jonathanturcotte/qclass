@@ -12,13 +12,9 @@ var SignInApp = function () {};
  */
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
-
     this.navbar = new NavBar();
 
-    // Check if we're logged in as a professor or not
-    isProf = this.isProfessor();
-
-    isProf ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
+    this.isProfessor() ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
 };
 
 /**
@@ -39,8 +35,8 @@ SignInApp.prototype.buildProfDOM = function () {
     this.classlist = new ClassList();
     this.classlist.updateClasses();
 
-    this.classpage = undefined;
-
+    // TODO
+    // Select the first class by default
 };
 
 /**
@@ -48,14 +44,6 @@ SignInApp.prototype.buildProfDOM = function () {
  */
 SignInApp.prototype.buildStudentDOM = function () {
     
-};
-
-
-/**
- * Build the professors class list
- */
-SignInApp.prototype.buildClassList = function () {
-
 };
 
 // When the page is loaded, create our main ui object

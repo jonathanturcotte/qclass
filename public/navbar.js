@@ -7,6 +7,9 @@ NAVBAR_ITEMS = [
     { label: "Sign-out",      id: "signout",   text: false, profOnly: false }
 ];
 
+/**
+ * Creates the navbar object
+ */
 var NavBar = function () {
     this._$element = $('.navbar');
 };
@@ -30,7 +33,8 @@ NavBar.prototype.buildStudentNavbar = function () {
 ///////////////////////
 
 /**
- * Build the simple navbar
+ * Build the simple navbar, and append it to the DOM
+ * @param {Boolean} showProf
  */
 function buildNavbar (showProf) {
     // Make sure to clear any old navbar
