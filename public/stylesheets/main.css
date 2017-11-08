@@ -1,29 +1,41 @@
-/* Navbar takes up space, so the entire body
-needs to be shifted down */
 body {
+    /* Padding for the navbar */
     padding-top: 70px;
 }
 
-/* Give the classlist/sidebar some percent of the view width,
-and the rest to the main page. */
 .classlist {
 }
 
 /* Sidebar/Classlist */
 .sidebar {
     height: 100vh;
-    width: 20vw;
+    min-width: 300px;
+    max-width: 300px;
+    background: #c8ccd1;
+    margin-left: -20px;
+    margin-top: -20px;
     float: left;
 }
 
-/* TODO fix the margin hack */
+.sidebar-empty-message {
+    margin-top: 40px;
+    margin-left: 20px;
+    margin-right: 20px;
+    text-align: center;
+}
+
 .add-class-btn {
     position: absolute;
     bottom: 20px;
-    margin-left: 10vw;
+    margin-left: 180px;
 }
 
-/* Show newlines properly in inner text */
+.classlist-item {
+    margin-top: 20px;
+    margin-left: 10px;
+    /* border-bottom: 1px black; */
+}
+
 .classlist-link {
     white-space: pre;
 }

@@ -37,14 +37,14 @@ function buildNavbar (showProf) {
     this._$element.empty();
 
     // Create the basic structure
-    var $siteName = $('<a class="navbar-brand" href="#">').text(document.title),
-        $linkDiv  = $('<div id="navbar" class="collapse navbar-collapse justify-content-end">'),
-        $linkList = $('<ul class="nav navbar-nav navbar-right">');
+    var $siteName = $('<a>', { class: "navbar-brand", href: "#", text: document.title }),
+        $linkDiv  = $('<div>', { id: "navbar", class: "collapse navbar-collapse justify-content-end" }),
+        $linkList = $('<ul>', { class: "nav navbar-nav navbar-right" });
 
     // Create a list tag for each navbar item
     NAVBAR_ITEMS.forEach(function (item) {
         if (!item.profOnly || showProf){
-            var $li = $('<li class="nav-item">'),
+            var $li = $('<li>', { class: "nav-item" }),
                 $el;
 
             // TODO - Decide if we even want the greeting
@@ -52,11 +52,11 @@ function buildNavbar (showProf) {
             // if (item.id === 'greeting') {
             //     $el = $('<p class="navbar-text">');
             // } else {
-            $el = $('<a class="nav-link">');
+            $el = $('<a>', { class: "nav-link", id: item.id, text: item.label });
             // }
 
-            // Add item specific information, then append them
-            $el.text(item.label).attr('id', item.id).appendTo($li);
+            // Append the elements
+            $el.appendTo($li);
             $li.appendTo($linkList);
         }
     });

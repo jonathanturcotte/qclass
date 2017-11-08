@@ -22,20 +22,20 @@ function buildList () {
     this._$element.empty();
 
     // Create the basic sidebar
-    var $sidebar = $('<nav class="d-block bg-list sidebar">');
+    var $sidebar = $('<nav>', { class: "d-block bg-list sidebar" });
 
     // If there are no classes, show an informational message
     if (this.classes.length === 0) {
-        var $message = $('<p class="sidebar-empty-message">');
-        $message.append($('<i>Add classes to have them show up here.</i>'));
+        var $message = $('<p>', { class: "sidebar-empty-message" });
+        $message.append($('<i>', { text: "Add classes to have them show up here."} ));
         $message.appendTo($sidebar);
     } else {
         // Create the container for the list items
-        var $list = $('<ul class="nav nav-pills flex-column">');
+        var $list = $('<ul>', { class: "nav nav-pills flex-column" });
 
         // Create a list tag for each class
         this.classes.forEach(function (course) {
-            $('<li>', { class: 'nav-item' })
+            $('<li>', { class: 'nav-item classlist-item' })
                 .append($('<a>', { id: course.cID, class: 'nav-link classlist-link', href: '#', text: course.cCode + ":\n" + course.cName })
                     .click(function() {
                         var classPage = new ClassPage(course);
@@ -49,8 +49,7 @@ function buildList () {
     }
 
     // Append the add class button
-    var $button = $('<button type="button" class="add-class-btn btn btn-primary justify-content-end">')
-        .text("Add Class");
+    var $button = $('<button>', { type: "button", text: "Add Class", class: "add-class-btn btn btn-primary justify-content-end" });
 
     // TODO Button on click
     // $button.onClick(function () {})
@@ -75,51 +74,3 @@ function updateFail (jqXHR, textStatus, errorThrown) {
 
 
 module.exports = ClassList;
-
-// How the html looked in the bootstrap example:
-//
-// <!-- <div class="row">
-//     <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
-//         <ul class="nav nav-pills flex-column">
-//             <li class="nav-item">
-//             <a class="nav-link active" href="#">Overview <span class="sr-only">(current)</span></a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Reports</a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Analytics</a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Export</a>
-//             </li>
-//         </ul>
-
-//         <ul class="nav nav-pills flex-column">
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Nav item</a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Nav item again</a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">One more nav</a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Another nav item</a>
-//             </li>
-//         </ul>
-
-//         <ul class="nav nav-pills flex-column">
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Nav item again</a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">One more nav</a>
-//             </li>
-//             <li class="nav-item">
-//             <a class="nav-link" href="#">Another nav item</a>
-//             </li>
-//         </ul>
-//     </nav>
-// </div> -->
