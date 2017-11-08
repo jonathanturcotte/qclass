@@ -23,36 +23,42 @@ var ClassPage = function(course) {
      */
     this.build = function() {
         replacePage(
-            $('<div>', { id: 'classpage', class: 'classpage' })
+            $('<div>', { class: 'classpage' })
                 .append($('<h2>', { class: 'class-page-title-code', text: course.cCode }))
                 .append($('<h3>', { class: 'class-page-title-name', text: course.cName }))
                 .append($('<a>', { class: 'class-page-start-link', href: '#' })
                     .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
                     .click(function() {
-                        var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
+                        var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: true });
                         modal.show();
-                        $(`#${modal.id} .modal-body`)
+                        $body = $(`#${modal.id} .modal-body`)
                             .spin()
                             .addClass('spin-min-height');
+                        $.post({
+                            url: `/professor/class/start/${course.cID}`,
+                            dataType: 'json'
+                        }).done(function(data, status, xhr) {
+                            modal.getSelf().find($('.modal-body'))
+                                .empty()
+                                .append($('<p>', { text: 'Success!' })
+                                .append($('<h4>', { text: data.code })));
+                        }).fail(function(xhr, status, errorThrown) {
+                            modal.error('Error starting attendance session', 'Error');
+                        }).always(function(a, status, b) {
+                            $body.spin(false);
+                        });
                     }))
         );
         window.app.classPage = this;
     }
-
-    /**
-     * Replaces #classpage with an empty classpage div
-     */
-    this.clear = function() {
-        replacePage($('<div>', { id: 'classpage', class: 'classpage' }));        
-    };
 };
 
 function replacePage($newPage) {
-    var $classPage = $('#classpage');
+    var $classPage = $('.classpage');
     if ($classPage.length > 0) 
         $classPage.replaceWith($newPage);
     else 
-        $newPage.appendTo($('#container'));
+        $newPage.appendTo($('.main-container'));
 }
 
 module.exports = ClassPage;

@@ -103,7 +103,7 @@ router.post('/class/start/:classId', function(req, res, next) {
         duration = null;
     attendanceSessions.start({ classId: req.params.classId, duration: duration, callback: function(err, code) {
         if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
-        res.send(code);
+        res.json({ code: code });
     } });
 });
 
