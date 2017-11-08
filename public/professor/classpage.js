@@ -31,6 +31,9 @@ var ClassPage = function(course) {
                     .click(function() {
                         var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
                         modal.show();
+                        $(`#${modal.id} .modal-body`)
+                            .spin()
+                            .addClass('spin-min-height');
                     }))
         );
         window.app.classPage = this;

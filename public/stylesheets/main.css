@@ -59,3 +59,7 @@ and the rest to the main page. */
     line-height: 1.33;
     border-radius: 50px;
 }
+
+.spin-min-height {
+    min-height: 70px;
+}
