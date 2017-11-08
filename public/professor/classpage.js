@@ -5,6 +5,8 @@
  * attendance timer duration selection 
  */
 
+var ModalWindow = require('../modalwindow');
+
 /**
  * Creates a class page, responsible for the central window of the professor site
  * @param {Object} course The selected course the page should use to construct itself 
@@ -24,6 +26,12 @@ var ClassPage = function(course) {
             $('<div>', { id: 'classpage', class: 'classpage' })
                 .append($('<h2>', { class: 'class-page-title-code', text: course.cCode }))
                 .append($('<h3>', { class: 'class-page-title-name', text: course.cName }))
+                .append($('<a>', { class: 'class-page-start-link', href: '#' })
+                    .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
+                    .click(function() {
+                        var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
+                        modal.show();
+                    }))
         );
         window.app.classPage = this;
     }
