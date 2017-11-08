@@ -75,3 +75,8 @@ body {
 .spin-min-height {
     min-height: 70px;
 }
+
+.modal-header-danger {
+    background-color: #d9534f;
+    color: white;
+}
