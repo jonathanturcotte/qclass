@@ -13,6 +13,11 @@ ClassList.prototype.updateClasses = function () {
         .fail(updateFail.bind(this));
 };
 
+ClassList.prototype.selectFirstClass = function () {
+    if (this.classes.length !== 0)
+        selectClass(this.classes[0]);
+};
+
 ///////////////////////
 // Private Functions //
 ///////////////////////
@@ -36,14 +41,9 @@ function buildList () {
         // Create a list tag for each class
         this.classes.forEach(function (course) {
             $('<li>', { class: 'nav-item classlist-item' })
-                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link text-truncate', href: '#', text: course.cCode + ":\n" + course.cName })
-                    .click(function() {
-                        $('.classlist-item').removeClass('border border-secondary border-left-0 rounded-right');
-                        $('#' + course.cID).parent().addClass('border border-secondary border-left-0 rounded-right');
-                        var classPage = new ClassPage(course);
-                        classPage.build();
-                    }))
-            .appendTo($list);
+                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link text-truncate text-white', href: '#', text: course.cCode + ":\n" + course.cName }))
+                .click(selectClass.bind(this, course))
+                .appendTo($list);
         });
         
         // Append everything to the sidebar
@@ -62,9 +62,17 @@ function buildList () {
     $sidebar.appendTo(this._$element);
 }
 
+function selectClass (course) {
+    $('.classlist-item').removeClass('classlist-item-selected');
+    $('#' + course.cID).parent().addClass('classlist-item-selected');
+    var classPage = new ClassPage(course);
+    classPage.build();
+}
+
 function updateSuccess (data, textStatus, jqXHR) {
     this.classes = _.sortBy(data, 'cCode');
     buildList.call(this);
+    this.selectFirstClass();
 }
 
 function updateFail (jqXHR, textStatus, errorThrown) {

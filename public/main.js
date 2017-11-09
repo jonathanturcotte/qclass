@@ -34,9 +34,6 @@ SignInApp.prototype.buildProfDOM = function () {
     this.navbar.buildProfNavbar();
     this.classlist = new ClassList();
     this.classlist.updateClasses();
-
-    // TODO
-    // Select the first class by default
 };
 
 /**

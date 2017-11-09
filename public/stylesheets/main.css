@@ -10,9 +10,9 @@ body {
 .sidebar {
     min-height: calc(100vh - 50px);
     max-height: calc(100vh - 50px);
+    background: #5677fc;
     min-width: 300px;
     max-width: 300px;
-    background: #c8ccd1;
     margin-left: -20px;
     margin-top: -20px;
     float: left;
@@ -35,6 +35,14 @@ body {
     padding-top: 10px;
     padding-left: 10px;
     padding-bottom: 10px;
+}
+
+.classlist-item:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+.classlist-item-selected {
+    background: rgba(255,255,255,0.25);
 }
 
 .classlist-link {
