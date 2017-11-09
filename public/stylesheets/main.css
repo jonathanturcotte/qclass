@@ -31,17 +31,17 @@ body {
 }
 
 .classlist-item {
-    margin-top: 20px;
-    margin-left: 10px;
-    /* border-bottom: 1px black; */
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 10px;
 }
 
 .classlist-link {
     white-space: pre;
+    outline: 0px;
 }
 
 .classpage {
-    /* width: 80vw; */
     float: left;
 }
 

@@ -38,6 +38,8 @@ function buildList () {
             $('<li>', { class: 'nav-item classlist-item' })
                 .append($('<a>', { id: course.cID, class: 'nav-link classlist-link', href: '#', text: course.cCode + ":\n" + course.cName })
                     .click(function() {
+                        $('.classlist-item').removeClass('border border-secondary border-left-0 rounded-right');
+                        $('#' + course.cID).parent().addClass('border border-secondary border-left-0 rounded-right');
                         var classPage = new ClassPage(course);
                         classPage.build();
                     }))
