@@ -117,7 +117,7 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
         if (err) return routeHelper.senderror(res, err, `Error retrieving attendance sessions for ${req.user.netId}`);
         if (results.length == 0) res.send('No attendance sessions for this class');
         else {
-             var attSessions = organizeAttendanceSession(results);
+            var attSessions = organizeAttendanceSession(results);
             res.json(attSessions);
         };
     });
@@ -187,14 +187,14 @@ function organizeAttendanceSession(sessInfo) {
             session[i++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
             j++;
         } else {
-            toReturn[k++] = { sessDate: new Date(date), studentList: session };
+            toReturn[k++] = { sessDate: date, studentList: session };
             session = [];
             date = sessInfo[j].attTime;
             i = 0;
         }
     }
     //Add last session
-    toReturn[k] = { sessDate: new Date(date), studentList: session };
+    toReturn[k] = { sessDate: date, studentList: session };
     return toReturn;
 }
 
