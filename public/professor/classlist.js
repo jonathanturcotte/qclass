@@ -22,7 +22,7 @@ function buildList () {
     this._$element.empty();
 
     // Create the basic sidebar
-    var $sidebar = $('<nav>', { class: "d-block bg-list sidebar" });
+    var $sidebar = $('<nav>', { class: "d-block bg-list sidebar pre-scrollable" });
 
     // If there are no classes, show an informational message
     if (this.classes.length === 0) {
@@ -36,7 +36,7 @@ function buildList () {
         // Create a list tag for each class
         this.classes.forEach(function (course) {
             $('<li>', { class: 'nav-item classlist-item' })
-                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link', href: '#', text: course.cCode + ":\n" + course.cName })
+                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link text-truncate', href: '#', text: course.cCode + ":\n" + course.cName })
                     .click(function() {
                         $('.classlist-item').removeClass('border border-secondary border-left-0 rounded-right');
                         $('#' + course.cID).parent().addClass('border border-secondary border-left-0 rounded-right');

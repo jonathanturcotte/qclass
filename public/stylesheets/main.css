@@ -8,7 +8,8 @@ body {
 
 /* Sidebar/Classlist */
 .sidebar {
-    height: calc(100vh - 50px);
+    min-height: calc(100vh - 50px);
+    max-height: calc(100vh - 50px);
     min-width: 300px;
     max-width: 300px;
     background: #c8ccd1;
@@ -38,6 +39,7 @@ body {
 
 .classlist-link {
     white-space: pre;
+    max-width: 270px;
     outline: 0px;
 }
 
