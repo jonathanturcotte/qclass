@@ -2,7 +2,8 @@ var db = require('../db'),
     randToken = require('rand-token');
 
 const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
-    DEFAULT_DURATION = 60000;
+    DEFAULT_DURATION = 60000,
+    MIN_DURATION = 30000;
 
 var sessions = []; // array of running attendanceSessions, contains objects of the form { classId, code, time }
 
@@ -28,9 +29,9 @@ exports.isClassRunning = isClassRunning;
 exports.start = function(params) {
     if (!params.duration)
         params.duration = DEFAULT_DURATION;
-    else if (params.duration < 30000) {
+    else if (params.duration < MIN_DURATION) {
         params.duration = DEFAULT_DURATION;
-        console.warn(`attendanceSessions.start(): Duration < 30000, changed to default (${DEFAULT_DURATION})`);
+        console.warn(`attendanceSessions.start(): Duration < ${MIN_DURATION}, changed to default (${DEFAULT_DURATION})`);
     }
     if (!params.classId) 
         params.callback({ customStatus: 500, message: 'Internal Server Error' });

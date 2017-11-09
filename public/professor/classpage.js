@@ -60,7 +60,7 @@ function replacePage($newPage) {
 }
 
 function startAttendance(data, modal) {
-    modal.getSelf().find($('.modal-title')).text('Running Attendance Session');
+    modal.$window.find($('.modal-title')).text('Running Attendance Session');
     modal.appendToBody([
         $('<p>', { class: '.start-modal-top-info', text: 'Success!' }),
         $('<div>', { class: 'flex flex-start' })
@@ -70,12 +70,12 @@ function startAttendance(data, modal) {
                 .append($('<h2>', { class: 'start-modal-timer' }))
     ], true);
     // Countdown Timer
-    modal.getSelf().find($('.start-modal-timer'))
+    modal.$window.find($('.start-modal-timer'))
         .countdown(data.endTime, function(e) {
             $(this).text(e.strftime('%-H:%M:%S'));
         }).on('finish.countdown', function(e) {
             modal.success('Complete');
-            modal.getSelf().find('.start-modal-top-info')
+            modal.$window.find('.start-modal-top-info')
                 .text('Session complete!')
                 .addClass('.start-modal-top-info-finished')
         }).countdown('start');
