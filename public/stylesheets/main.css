@@ -40,10 +40,21 @@ body {
 
 .classlist-item:hover {
     background: rgba(255,255,255,0.25);
+    cursor: pointer;
 }
 
 .classlist-item-selected {
     background: rgba(255,255,255,0.25);
+}
+
+.classlist-spacer {
+    min-height: 80px;
+    max-height: 80px;
+}
+
+.classlist-spacer:hover {
+    background: #5677fc;
+    cursor: default;
 }
 
 .classlist-link {

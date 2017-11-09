@@ -45,13 +45,18 @@ function buildList () {
                 .click(selectClass.bind(this, course))
                 .appendTo($list);
         });
+
+        // Add an empty, non-interactive empty element so that
+        // we can scroll items above the add class button
+        $('<li>', { class: 'nav-item classlist-item classlist-spacer'})
+            .appendTo($list);
         
         // Append everything to the sidebar
         $list.appendTo($sidebar);
     }
 
     // Append the add class button
-    var $button = $('<button>', { type: "button", text: "Add Class", class: "add-class-btn btn btn-primary justify-content-end" });
+    var $button = $('<button>', { type: "button", text: "Add Class", class: "add-class-btn btn btn-danger justify-content-end" });
 
     // TODO Button on click
     // $button.onClick(function () {})
