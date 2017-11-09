@@ -33,7 +33,8 @@ var ModalWindow = function(options) {
             backdrop: 'static',
             keyboard: false
         });
-    } 
+    }
+    $(`#${this.id}`).remove(); 
     $window
         .append($('<div>', { class: 'modal-dialog', role: 'document' })
             .append($('<div>', { class: 'modal-content' })
