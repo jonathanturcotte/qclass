@@ -3,9 +3,6 @@ body {
     padding-top: 70px;
 }
 
-.classlist {
-}
-
 /* Sidebar/Classlist */
 .sidebar {
     min-height: calc(100vh - 50px);
