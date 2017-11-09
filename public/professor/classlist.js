@@ -63,7 +63,7 @@ function buildList () {
 }
 
 function updateSuccess (data, textStatus, jqXHR) {
-    this.classes = data;
+    this.classes = _.sortBy(data, 'cCode');
     buildList.call(this);
 }
 
