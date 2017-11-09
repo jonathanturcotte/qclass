@@ -16,6 +16,7 @@ body {
     margin-left: -20px;
     margin-top: -20px;
     float: left;
+    overflow-y: auto;
 }
 
 .sidebar-empty-message {

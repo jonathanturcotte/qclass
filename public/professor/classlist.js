@@ -27,11 +27,11 @@ function buildList () {
     this._$element.empty();
 
     // Create the basic sidebar
-    var $sidebar = $('<nav>', { class: "d-block bg-list sidebar pre-scrollable" });
+    var $sidebar = $('<nav>', { class: "d-block bg-list sidebar" });
 
     // If there are no classes, show an informational message
     if (this.classes.length === 0) {
-        var $message = $('<p>', { class: "sidebar-empty-message" });
+        var $message = $('<p>', { class: "sidebar-empty-message text-light" });
         $message.append($('<i>', { text: "Add classes to have them show up here."} ));
         $message.appendTo($sidebar);
     } else {
