@@ -22,6 +22,7 @@ var ModalWindow = function(options) {
     $(`#${this.id}`).remove();
     var $window = $('<div>', { id: this.id, class: 'modal fade', role: 'dialog', tabindex: -1, }),
         $footer = $('<div>', { class: 'modal-footer' }),
+        $body = $('<div>', { class: 'modal-body' }),
         $header = $('<div>', { class: 'modal-header' })
             .append($('<h4>', { class: 'modal-title', text: this.title }));
     if (this.closeable) { // append close button to footer
@@ -37,11 +38,14 @@ var ModalWindow = function(options) {
         .append($('<div>', { class: 'modal-dialog', role: 'document' })
             .append($('<div>', { class: 'modal-content' })
                 .append($header)
-                .append($('<div>', { class: 'modal-body' }))
+                .append($body)
                 .append($footer)))
         .appendTo('body');
     
-    this.$window = $(`#${this.id}`);
+    this.$window = $window;
+    this.$header = $header;
+    this.$body = $body;
+    this.$footer = $footer;
     
     this.show = function() {
         this.$window.modal('show');
@@ -52,15 +56,15 @@ var ModalWindow = function(options) {
     };
 
     this.appendToHeader = function($toAppend, shouldEmpty = false) {
-        appendToSection.call(this, shouldEmpty, 'header', $toAppend);
+        appendToSection.call(this, shouldEmpty, this.$header, $toAppend);
     };
 
     this.appendToBody = function($toAppend, shouldEmpty = false) {
-        appendToSection.call(this, shouldEmpty, 'body', $toAppend);
+        appendToSection.call(this, shouldEmpty, this.$body, $toAppend);
     };
 
     this.appendToFooter = function($toAppend, shouldEmpty = false) {
-        appendToSection.call(this, shouldEmpty, 'footer', $toAppend);
+        appendToSection.call(this, shouldEmpty, this.$footer, $toAppend);
     };
 
     /**
@@ -88,8 +92,8 @@ var ModalWindow = function(options) {
     }
 
     this.makeCloseable = function() {
-        this.$window.find('.modal-header').append(closeElements.headerEx);
-        this.$window.find('.modal-footer').append(closeElements.footerButton);
+        this.$header.append(closeElements.headerEx);
+        this.$footer.append(closeElements.footerButton);
         var data = this.$window.data('bs.modal');
         this.$window.removeData('bs.modal').modal({ 
                 backdrop: true,
@@ -100,21 +104,20 @@ var ModalWindow = function(options) {
     };
 };
 
-function appendToSection(shouldEmpty, section, $toAppend) {
-    $section = this.$window.find($(`.modal-${section}`));
+function appendToSection(shouldEmpty, $section, $toAppend) {
     if (shouldEmpty) $section.empty();
     $section.append($toAppend);
 };
 
 function updateStatus(title, message, headerClass) {
     if (message) {
-        this.$window.find('.modal-body')
+        this.$body
             .empty()
             .append($('<p>', { text: message }));
     }
-    var $header = this.$window.find('.modal-header').addClass(headerClass);
+    this.$header.addClass(headerClass);
     if (title && title instanceof String) 
-        $header.empty().append($('<h2', { class: 'modal-title', text: title }));
+        this.$header.empty().append($('<h2', { class: 'modal-title', text: title }));
 }
 
 var closeElements = {
