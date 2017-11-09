@@ -1,4 +1,5 @@
 var NavBar      = require('./navbar'),
+    CheckIn     = require('./student/checkin'),
     ClassList   = require('./professor/classlist'),
     ModalWindow = require('./modalwindow');
 
@@ -13,7 +14,6 @@ var SignInApp = function () {};
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
     this.navbar = new NavBar();
-
     this.isProfessor() ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
 };
 
@@ -24,23 +24,35 @@ SignInApp.prototype.init = function () {
  */
 SignInApp.prototype.isProfessor = function (id) {
     //TODO - unstub
-    return true;
+    return false;
 };
 
 /**
  * Build the professor DOM
  */
 SignInApp.prototype.buildProfDOM = function () {
+    var $container = $('.main-container');
+    $container.empty();
+
+    // Build the required div structure
+    $('<div>', { class: "classlist" }).appendTo($container);
+    $('<div>', { class: "classpage" }).appendTo($container);
+
     this.navbar.buildProfNavbar();
-    this.classlist = new ClassList();
-    this.classlist.updateClasses();
+    this.classList = new ClassList();
+    this.classList.updateClasses();
 };
 
 /**
  * Build the student DOM
  */
 SignInApp.prototype.buildStudentDOM = function () {
-    
+    var $container = $('.main-container');
+    $container.empty();
+
+    $('<div>', { class: "student-checkin" }).appendTo($container);
+    this.navbar.buildStudentNavbar();
+    this.studentCheckin = new CheckIn();
 };
 
 // When the page is loaded, create our main ui object
