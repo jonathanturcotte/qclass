@@ -29,21 +29,19 @@ var ClassPage = function(course) {
                 .append($('<a>', { class: 'class-page-start-link', href: '#' })
                     .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
                     .click(function() {
-                        var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: true });
+                        var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
                         modal.show();
                         $body = $(`#${modal.id} .modal-body`)
                             .spin()
                             .addClass('spin-min-height');
                         $.post({
                             url: `/professor/class/start/${course.cID}`,
+                            data: { duration: 30000 },
                             dataType: 'json'
                         }).done(function(data, status, xhr) {
-                            modal.getSelf().find($('.modal-body'))
-                                .empty()
-                                .append($('<p>', { text: 'Success!' })
-                                .append($('<h4>', { text: data.code })));
+                            startAttendance(data, modal);
                         }).fail(function(xhr, status, errorThrown) {
-                            modal.error('Error starting attendance session', 'Error');
+                            modal.error('Error', 'Error starting attendance session');
                         }).always(function(a, status, b) {
                             $body.spin(false);
                         });
@@ -59,6 +57,28 @@ function replacePage($newPage) {
         $classPage.replaceWith($newPage);
     else 
         $newPage.appendTo($('.main-container'));
+}
+
+function startAttendance(data, modal) {
+    modal.getSelf().find($('.modal-title')).text('Running Attendance Session');
+    modal.appendToBody([
+        $('<p>', { class: '.start-modal-top-info', text: 'Success!' }),
+        $('<div>', { class: 'flex flex-start' })
+            .append($('<div>', { class: 'start-modal-running-info' })
+                .append($('<h3>', { class: 'start-modal-code', text: data.code })))
+            .append($('<div>', { class: 'start-modal-timer-container' }))
+                .append($('<h2>', { class: 'start-modal-timer' }))
+    ], true);
+    // Countdown Timer
+    modal.getSelf().find($('.start-modal-timer'))
+        .countdown(data.endTime, function(e) {
+            $(this).text(e.strftime('%-H:%M:%S'));
+        }).on('finish.countdown', function(e) {
+            modal.success('Complete');
+            modal.getSelf().find('.start-modal-top-info')
+                .text('Session complete!')
+                .addClass('.start-modal-top-info-finished')
+        }).countdown('start');
 }
 
 module.exports = ClassPage;

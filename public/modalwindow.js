@@ -56,39 +56,73 @@ var ModalWindow = function(options) {
         return $(`#${this.id}`);
     };
 
+    this.appendToHeader = function($toAppend, shouldEmpty = false) {
+        appendToSection.bind(this)(shouldEmpty, 'header', $toAppend);
+    };
+
+    this.appendToBody = function($toAppend, shouldEmpty = false) {
+        appendToSection.bind(this)(shouldEmpty, 'body', $toAppend);
+    };
+
+    this.appendToFooter = function($toAppend, shouldEmpty = false) {
+        appendToSection.bind(this)(shouldEmpty, 'footer', $toAppend);
+    };
+
     /**
-     * Clears the modal window and transitions it to an error state.
-     * The body is replaced with the message, and if a title is given the title is changed.
-     * Non-closeable modals will become closeable.
-     * @param {string} message
+     * Transitions modal style to an error state.
+     * The body is replaced with the message if given, and if a title is given the title is changed.
+     * Non-closeable modals will become closeable
+     * @param {string=} message
      * @param {string=} title
      */
-    this.error = function(message, title) {
-        var $window = this.getSelf();
-        $window.find('.modal-body')
-            .empty()
-            .append($('<p>', { text: message }));
-        var $header = $window.find('.modal-header').addClass('modal-header-danger');
-        if (title && title instanceof String) {
-            $header.empty().append($('<h2', { class: 'modal-title', text: title }));
-        }
+    this.error = function(title, message) {
+        updateStatus.bind(this)(title, message, 'modal-header-danger');
+        if (!this.closeable) this.makeCloseable();
+    }
+
+    /**
+     * Transitions modal style to a success state.
+     * The body is replaced with the message if given, and if a title is given the title is changed.
+     * Non-closeable modals will become closeable
+     * @param {string=} message
+     * @param {string=} title
+     */
+    this.success = function(title, message) {
+        updateStatus.bind(this)(title, message, 'modal-header-success');
         if (!this.closeable) this.makeCloseable();
     }
 
     this.makeCloseable = function() {
-        $window = this.getSelf();
+        var $window = this.getSelf();
         $window.find('.modal-header').append(closeElements.headerEx);
         $window.find('.modal-footer').append(closeElements.footerButton);
+        var data = $window.data('bs.modal');
+        $window.removeData('bs.modal').modal({ 
+                backdrop: true,
+                keyboard: true
+            });
+        $window.prev($('.modal-backdrop')).remove(); // remove second backdrop created by .modal()
         this.closeable = true;
-    }
-
-    this.makeNotCloseable = function() {
-        $window = this.getSelf();
-        $window.find('.modal-header .closeable').remove();
-        $window.find('.modal-footer .closeable').remove();
-        this.closeable = false;
-    }
+    };
 };
+
+function appendToSection(shouldEmpty, section, $toAppend) {
+    $section = this.getSelf().find($(`.modal-${section}`));
+    if (shouldEmpty) $section.empty();
+    $section.append($toAppend);
+};
+
+function updateStatus(title, message, headerClass) {
+    var $window = this.getSelf();
+    if (message) {
+        $window.find('.modal-body')
+            .empty()
+            .append($('<p>', { text: message }));
+    }
+    var $header = $window.find('.modal-header').addClass(headerClass);
+    if (title && title instanceof String) 
+        $header.empty().append($('<h2', { class: 'modal-title', text: title }));
+}
 
 var closeElements = {
     headerEx: $('<button>', { class: 'close closeable', type: 'button' })

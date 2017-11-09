@@ -5,7 +5,7 @@
  * @param {Error=} err
  * @param {string|object} body Either an error string or a json package
  * @param {number=} status
- */
+ */ //TODO: CHANGE FUNCTION SO THAT A GENERIC ERROR OBJECT IS ALWAYS SENT
 exports.sendError = function(res, err, body = 'Internal Server Error', status = 500) {
     if (isNaN(status)) {
         status = 500;

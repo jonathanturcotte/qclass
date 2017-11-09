@@ -80,3 +80,38 @@ body {
     background-color: #d9534f;
     color: white;
 }
+
+.modal-header-success {
+    background-color: #5cb85c;
+    color: white;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-start {
+    justify-content: flex-start;
+}
+
+.flex-center {
+    justify-content: center;
+}
+
+.start-modal-top-info-finished {
+    text-align: center;
+}
+
+.start-modal-finished-info {
+    font-size: 18px;
+}
+
+.start-modal-timer-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.start-modal-code {
+
+}

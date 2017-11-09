@@ -99,11 +99,13 @@ router.post('/class/enroll/:classId', function(req, res, next) {
 // Start an attendance session for a class, return the code to the professor
 router.post('/class/start/:classId', function(req, res, next) {
     var duration = req.body.duration;
-    if (!duration || !(typeof(duration) === 'number'))
+    if (!duration || !/^\d+$/.test(duration))
         duration = null;
-    attendanceSessions.start({ classId: req.params.classId, duration: duration, callback: function(err, code) {
+    else
+        duration = duration - 0;
+    attendanceSessions.start({ classId: req.params.classId, duration: duration, callback: function(err, code, endTime) {
         if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
-        res.json({ code: code });
+        res.json({ code: code, endTime: endTime });
     } });
 });
 

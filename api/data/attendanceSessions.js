@@ -22,15 +22,15 @@ exports.isClassRunning = isClassRunning;
  * Starts a new attendance session and creates a new session entry in the DB
  * @param {Object} params
  * @param {string} params.classId uuid
- * @param {number} [params.duration=60000] Session duration in ms
- * @param {Function} params.callback (err, code) err may contain customStatus, eg. 409 Conflict if class already exists
+ * @param {number} [params.duration=60000] Session duration in ms, must be >= 30000
+ * @param {Function} params.callback (err, code, endTime) err may contain customStatus, eg. 409 Conflict if class already exists
  */
 exports.start = function(params) {
     if (!params.duration)
         params.duration = DEFAULT_DURATION;
-    else if (params.duration < 1) {
+    else if (params.duration < 30000) {
         params.duration = DEFAULT_DURATION;
-        console.warn(`attendanceSessions.start(): Duration < 1, changed to default (${DEFAULT_DURATION})`);
+        console.warn(`attendanceSessions.start(): Duration < 30000, changed to default (${DEFAULT_DURATION})`);
     }
     if (!params.classId) 
         params.callback({ customStatus: 500, message: 'Internal Server Error' });
@@ -49,7 +49,7 @@ exports.start = function(params) {
             else {
                 sessions.push({ classId: params.classId, code: code, time: time });
                 setTimeout(stop, params.duration, params.classId);
-                params.callback(null, code);
+                params.callback(null, code, time + params.duration);
             }
         });
     }
