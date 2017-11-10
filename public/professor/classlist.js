@@ -1,4 +1,6 @@
 var ClassPage = require('./classpage');
+var ModalWindow = require('../modalwindow');
+
 
 var ClassList = function () {
     this._$element = $('.classlist');
@@ -56,7 +58,25 @@ function buildList () {
     }
 
     // Append the add class button
-    var $button = $('<button>', { type: "button", text: "Add Class", class: "add-class-btn btn btn-danger justify-content-end" });
+
+    var $button = $('<button>', { type: "button", text: "Add Class", class: "add-class-btn btn btn-danger justify-content-end" })
+        .click(function () {
+        var modal = new ModalWindow({id: "addClassModal", title: "Add Class"});
+        var $cCodeInput = $('<input>', {type: 'text', name: 'cCode', id: 'cCode' })
+        $('#addClassModal .modal-body')
+            .append($('<p>', {text: 'Course Code:'}))
+            .append($cCodeInput) 
+            .append($('<p>', {text: 'Course Name:'}))
+            .append($('<input>', {type: 'text', name: 'cName', id: 'cName' }));
+        $('#addClassModal .modal-footer')
+            .prepend($('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' }))
+                .click(function () {
+
+                })
+
+        modal.show();
+        });
+
 
     // TODO Button on click
     // $button.onClick(function () {})
