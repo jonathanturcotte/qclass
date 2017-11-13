@@ -24,7 +24,7 @@ SignInApp.prototype.init = function () {
  */
 SignInApp.prototype.isProfessor = function (id) {
     //TODO - unstub
-    return false;
+    return true;
 };
 
 /**
