@@ -8,11 +8,15 @@ var CheckIn = function () {
 ///////////////////////
 
 function build() {
-    $label = $('<label>', { 
+    var $labelDiv = $('<div>', { class: "student-label-div" }),
+        $inputDiv = $('<div>', { class: "student-input-div" });
+
+    $('<label>', {
         class: "student-label",
         text: "Check-in to a course:"
-    }).appendTo(this._$element);
-    $input = $('<input>', {
+    }).appendTo($labelDiv);
+
+    $('<input>', {
         class: "student-input",
         type: "text",
         title: "Check-in",
@@ -20,8 +24,11 @@ function build() {
         autofocus: true,
         inputmode: "verbatim",
         maxlength: 5,
-        minlength: 5
-    }).appendTo(this._$element);
+        minlength: 5,
+    }).appendTo($inputDiv);
+
+    $labelDiv.appendTo(this._$element);
+    $inputDiv.appendTo(this._$element);
 }
 
 module.exports = CheckIn;

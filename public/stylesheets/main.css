@@ -139,3 +139,23 @@ body {
 .session-table-initial-td {
     min-height: 70px;
 }
+
+.student-checkin {
+    position: absolute;
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    height: 100px;
+}
+
+.student-input {
+    width: 200px;
+    height: 100px;
+    font-size: 60px;
+    font-family: Consolas,Monaco,"Lucida Console","Liberation Mono","DejaVu Sans Mono","Bitstream Vera Sans Mono","Courier New", monospace;
+    text-align: center;
+    text-transform: uppercase;
+}
