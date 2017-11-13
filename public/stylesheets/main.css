@@ -1,6 +1,8 @@
 body {
     /* Padding for the navbar */
     padding-top: 70px;
+    /* Background pattern from Subtle Patterns */
+    background: rgba(0, 0, 0, 0) url("/images/dust_scratches.png") repeat scroll 0% 0%;
 }
 
 /* Sidebar/Classlist */
