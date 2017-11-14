@@ -55,6 +55,13 @@ SignInApp.prototype.buildStudentDOM = function () {
     this.studentCheckin = new CheckIn();
 };
 
+/**
+ * Sign-out
+ */
+SignInApp.prototype.signOut = function () {
+    // TODO - sign out from SSO and redirect to queen's page maybe?
+}
+
 // When the page is loaded, create our main ui object
 $(function () {
     window.app = new SignInApp();

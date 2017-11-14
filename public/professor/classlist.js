@@ -107,19 +107,19 @@ function createAddClassModal () {
             .spin()
             .addClass('spin-min-height');
             $.post({
-                url: `/professor/class/add`,
+                url: '/professor/class/add',
                 data: { code: $cCodeInput.val(), name: $cNameInput.val() },
                 dataType: 'json'
              }).done(function(status, xhr) {
-                modal.success("Success",`${$cCodeInput.val()} Successfully Addded!`);
+                modal.success("Success", $cCodeInput.val() + ' successfully added!');
                 window.app.classList.updateClasses();
              }).fail(function(xhr, status, errorThrown) {
                 modal.error("Error", xhr.responseText);
              }).always(function(a, status, b) {
                 modal.$body.spin(false);
              }); 
-        })
+        });
     modal.show();
-};
+}
 
 module.exports = ClassList;
