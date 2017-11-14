@@ -118,7 +118,7 @@ function updateStatus(title, message, headerClass) {
     }
     this.$header.addClass(headerClass);
     if (title && title instanceof String) 
-        this.$header.empty().append($('<h2', { class: 'modal-title', text: title }));
+        this.$header.empty().append($('<h2>', { class: 'modal-title', text: title }));
 }
 
 var closeElements = {

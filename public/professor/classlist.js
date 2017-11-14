@@ -63,16 +63,35 @@ function buildList () {
         .click(function () {
         var modal = new ModalWindow({id: "addClassModal", title: "Add Class"});
         var $cCodeInput = $('<input>', {type: 'text', name: 'cCode', id: 'cCode' })
-        $('#addClassModal .modal-body')
+        var $cNameInput = $('<input>', {type: 'text', name: 'cName', id: 'cName' })
+        var $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' })
+        modal.$body
             .append($('<p>', {text: 'Course Code:'}))
             .append($cCodeInput) 
             .append($('<p>', {text: 'Course Name:'}))
-            .append($('<input>', {type: 'text', name: 'cName', id: 'cName' }));
-        $('#addClassModal .modal-footer')
-            .prepend($('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' }))
-                .click(function () {
-
-                })
+            .append($cNameInput);
+        modal.$footer
+            .prepend($submitButton);
+        $submitButton
+            .click(function () {
+                $submitButton.remove();
+                modal.$body.empty();
+                modal.$body
+                .spin()
+                .addClass('spin-min-height');
+                $.post({
+                    url: `/professor/class/add`,
+                    data: { code: $cCodeInput.val(), name: $cNameInput.val() },
+                    dataType: 'json'
+                 }).done(function(status, xhr) {
+                    modal.success(new String(`Success`),`${$cCodeInput.val()} Successfully Addded!`);
+                    window.app.classlist.updateClasses();
+                 }).fail(function(xhr, status, errorThrown) {
+                    modal.error(new String(`Error`), xhr.responseText);
+                 }).always(function(a, status, b) {
+                    modal.$body.spin(false);
+                 }); 
+            })
 
         modal.show();
         });
