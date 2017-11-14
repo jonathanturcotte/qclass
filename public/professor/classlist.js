@@ -1,5 +1,5 @@
-var ClassPage = require('./classpage');
-var ModalWindow = require('../modalwindow');
+var ClassPage   = require('./classpage'),
+    ModalWindow = require('../modalwindow');
 
 
 var ClassList = function () {
@@ -58,48 +58,8 @@ function buildList () {
     }
 
     // Append the add class button
-
     var $button = $('<button>', { type: "button", text: "Add Class", class: "add-class-btn btn btn-danger justify-content-end" })
-        .click(function () {
-        var modal = new ModalWindow({id: "addClassModal", title: "Add Class"});
-        var $cCodeInput = $('<input>', {type: 'text', name: 'cCode', id: 'cCode' })
-        var $cNameInput = $('<input>', {type: 'text', name: 'cName', id: 'cName' })
-        var $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' })
-        modal.$body
-            .append($('<p>', {text: 'Course Code:'}))
-            .append($cCodeInput) 
-            .append($('<p>', {text: 'Course Name:'}))
-            .append($cNameInput);
-        modal.$footer
-            .prepend($submitButton);
-        $submitButton
-            .click(function () {
-                $submitButton.remove();
-                modal.$body.empty();
-                modal.$body
-                .spin()
-                .addClass('spin-min-height');
-                $.post({
-                    url: `/professor/class/add`,
-                    data: { code: $cCodeInput.val(), name: $cNameInput.val() },
-                    dataType: 'json'
-                 }).done(function(status, xhr) {
-                    modal.success(new String(`Success`),`${$cCodeInput.val()} Successfully Addded!`);
-                    window.app.classlist.updateClasses();
-                 }).fail(function(xhr, status, errorThrown) {
-                    modal.error(new String(`Error`), xhr.responseText);
-                 }).always(function(a, status, b) {
-                    modal.$body.spin(false);
-                 }); 
-            })
-
-        modal.show();
-        });
-
-
-    // TODO Button on click
-    // $button.onClick(function () {})
-
+        .click(createAddClassModal);
     $button.appendTo($sidebar);
 
     // Append the sidebar to the page
@@ -126,5 +86,40 @@ function updateFail (jqXHR, textStatus, errorThrown) {
     buildList.call(this);
 }
 
+function createAddClassModal () {
+    var modal         = new ModalWindow({id: "addClassModal", title: "Add Class"}),
+        $cCodeInput   = $('<input>', {type: 'text', name: 'cCode', id: 'cCode' }),
+        $cNameInput   = $('<input>', {type: 'text', name: 'cName', id: 'cName' }),
+        $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' });
+
+    modal.$body
+        .append($('<p>', {text: 'Course Code:'}))
+        .append($cCodeInput) 
+        .append($('<p>', {text: 'Course Name:'}))
+        .append($cNameInput);
+    modal.$footer
+        .prepend($submitButton);
+    $submitButton
+        .click(function () {
+            $submitButton.remove();
+            modal.$body.empty();
+            modal.$body
+            .spin()
+            .addClass('spin-min-height');
+            $.post({
+                url: `/professor/class/add`,
+                data: { code: $cCodeInput.val(), name: $cNameInput.val() },
+                dataType: 'json'
+             }).done(function(status, xhr) {
+                modal.success("Success",`${$cCodeInput.val()} Successfully Addded!`);
+                window.app.classList.updateClasses();
+             }).fail(function(xhr, status, errorThrown) {
+                modal.error("Error", xhr.responseText);
+             }).always(function(a, status, b) {
+                modal.$body.spin(false);
+             }); 
+        })
+    modal.show();
+};
 
 module.exports = ClassList;

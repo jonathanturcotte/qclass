@@ -19,7 +19,7 @@ var ModalWindow = function(options) {
             this.closeable = options.closeable;
     }
     // Construction of the elements
-    $(`#${this.id}`).remove();
+    $('#' + this.id).remove();
     var $window = $('<div>', { id: this.id, class: 'modal fade', role: 'dialog', tabindex: -1, }),
         $footer = $('<div>', { class: 'modal-footer' }),
         $body = $('<div>', { class: 'modal-body' }),
@@ -34,7 +34,6 @@ var ModalWindow = function(options) {
             keyboard: false
         });
     }
-    $(`#${this.id}`).remove(); 
     $window
         .append($('<div>', { class: 'modal-dialog', role: 'document' })
             .append($('<div>', { class: 'modal-content' })
@@ -117,7 +116,7 @@ function updateStatus(title, message, headerClass) {
             .append($('<p>', { text: message }));
     }
     this.$header.addClass(headerClass);
-    if (title && title instanceof String) 
+    if (title) 
         this.$header.empty().append($('<h2>', { class: 'modal-title', text: title }));
 }
 
