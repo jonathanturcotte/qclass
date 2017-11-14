@@ -5,7 +5,7 @@
  * attendance timer duration selection 
  */
 
-var ModalWindow = require('../modalwindow'),
+var ModalWindow  = require('../modalwindow'),
     SessionTable = require('./sessionTable');
 
 /**
@@ -46,8 +46,9 @@ var ClassPage = function(course) {
                     });
                 }));
         // TODO: Finish table implementation
-        // this.sessionTable = new SessionTable().build(this.$page);
+        this.sessionTable = new SessionTable(this.course.cID).build(this.$page);
         replacePage(this.$page);
+        this.sessionTable.$spinDiv.spin(); //TODO: options for spinner to make it in the right spot
         window.app.classPage = this;
     }
 };

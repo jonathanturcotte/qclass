@@ -113,6 +113,10 @@ exports.getEnrolledClasses = function(studentId, callback) {
     runQuery(query, [studentId], callback);
 };
 
+exports.getEnrolledStudents = function(classID, callback) {
+    runQuery('SELECT sNetID FROM enrolled WHERE enrolled.cID = ?', [classID], callback);
+};
+
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
     runQuery(query, [[[classId, time, duration]]], callback);
@@ -163,11 +167,15 @@ exports.getNumSession = function(classId, callback) {
 
 exports.getSessionAttInfo = function(classId, callback) {
     var query =
-        `SELECT attTime, attDuration, sNetID, fName, lName, stdNum
-         FROM (attendanceSession NATURAL JOIN attendance) NATURAL JOIN student
-         WHERE cID = ?
-         ORDER BY attTime`
-    runQuery(query, [classId],callback);
+        `SELECT sess.attTime, sess.attDuration, a.sNetID, s.fName, s.lName, s.stdNum
+            FROM (SELECT * FROM attendanceSession WHERE cID = ?) sess 
+                LEFT JOIN attendance a 
+                    ON sess.cID = a.cID 
+                    AND sess.attTime = a.attTime
+                LEFT JOIN student s
+                    ON a.sNetID = s.sNetID
+        ORDER BY sess.attTime`;
+    runQuery(query, [classId], callback);
 }
 
 /**

@@ -109,16 +109,21 @@ router.post('/class/start/:classId', function(req, res, next) {
     } });
 });
 
-// GET all attendance sessions for a certain class
-// use to fill table on professor page
-// Each entry has the session time and a list of students 
+/** GET all attendance sessions for a certain class
+ * used to fill table on professor page
+ * contains number of enrolled studnets for attendance calculations
+ * Each entry in sessions has the session time and a list of students 
+ */
 router.get('/:classId/attendanceSessions', function(req, res, next) {
-    db.getSessionAttInfo(req.params.classId, function(err, results, fields) {
-        if (err) return routeHelper.senderror(res, err, `Error retrieving attendance sessions for ${req.user.netId}`);
-        if (results.length == 0) res.send('No attendance sessions for this class');
+    db.getSessionAttInfo(req.params.classId, function(err, sessions, fields) {
+        if (err) return routeHelper.sendError(res, err, `Error retrieving attendance sessions for ${req.user.netId}`);
+        if (sessions.length == 0) res.json({ numEnrolled: 0, sessions: [] });
         else {
-            var attSessions = organizeAttendanceSession(results);
-            res.json(attSessions);
+            db.getEnrolledStudents(req.params.classId, function(err, enrolled, fields) {
+                if (err) return routeHelper.sendError(res, err);
+                var attSessions = organizeAttendanceSession(sessions);
+                res.json({ numEnrolled: enrolled.length, sessions: attSessions });
+            });
         };
     });
 });
@@ -184,7 +189,10 @@ function organizeAttendanceSession(sessInfo) {
     var toReturn = [];
     while (j < sessInfo.length) {
         if (date === sessInfo[j].attTime) {
-            session[i++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
+            if (sessInfo[j].sNetID)
+                session[i++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
+            else // set session to empty if session entry has no student - this indicates a sesison with no attendances
+                session = [];
             j++;
         } else {
             toReturn[k++] = { sessDate: date, studentList: session };

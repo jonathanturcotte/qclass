@@ -148,10 +148,6 @@ body {
 
 }
 
-.session-table-initial-td {
-    min-height: 70px;
-}
-
 .student-checkin {
     position: absolute;
     margin: auto;
@@ -171,3 +167,12 @@ body {
     text-align: center;
     text-transform: uppercase;
 }
+
+.session-table-container {
+    margin-top: 15px;
+}
+
+.session-table-container tbody {
+    overflow-y: auto;    /* Trigger vertical scroll    */
+    overflow-x: hidden;  /* Hide the horizontal scroll */
+    height: 10px;
