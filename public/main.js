@@ -60,7 +60,8 @@ SignInApp.prototype.buildStudentDOM = function () {
  */
 SignInApp.prototype.signOut = function () {
     // TODO - sign out from SSO and redirect to queen's page maybe?
-}
+    console.log('Signing-out.');
+};
 
 // When the page is loaded, create our main ui object
 $(function () {

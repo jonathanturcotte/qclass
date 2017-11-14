@@ -1,17 +1,16 @@
-// Items to be added to the NavBar. Items are added in order that they
-// appear in the array. Label is the the text that will be displayed
-// profOnly indicates if only professors should see this. Text indicates
-// whether an item should show up as plain text. If false, it shows as a link.
-NAVBAR_ITEMS = [
-    // { label: "Signed in as ", id: "greeting",  text: true,  profOnly: true  },
-    { label: "Sign-out",      id: "signout",   text: false, profOnly: false }
-];
-
 /**
  * Creates the navbar object
  */
 var NavBar = function () {
     this._$element = $('.navbar');
+
+    // Items to be added to the NavBar. Items are added in order that they
+    // appear in the array. Label is the the text that will be displayed
+    // profOnly indicates if only professors should see this. Text indicates
+    // whether an item should show up as plain text. If false, it shows as a link.
+    this._items = [
+        { label: "Sign-out", id: "signout", text: false, profOnly: false, onclick: window.app.signOut }
+    ];
 };
 
 /**
@@ -46,18 +45,13 @@ function buildNavbar (showProf) {
         $linkList = $('<ul>', { class: "nav navbar-nav navbar-right" });
 
     // Create a list tag for each navbar item
-    NAVBAR_ITEMS.forEach(function (item) {
+    this._items.forEach(function (item) {
         if (!item.profOnly || showProf){
             var $li = $('<li>', { class: "nav-item" }),
                 $el;
 
-            // TODO - Decide if we even want the greeting
-            // Special case for the greeting
-            // if (item.id === 'greeting') {
-            //     $el = $('<p class="navbar-text">');
-            // } else {
-            $el = $('<a>', { class: "nav-link", id: item.id, text: item.label });
-            // }
+            $el = $('<a>', { class: "nav-link noselect", id: item.id, text: item.label });
+            $el.click(item.onclick);
 
             // Append the elements
             $el.appendTo($li);
