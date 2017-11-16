@@ -40,7 +40,7 @@ function buildNavbar (showProf) {
     this._$element.empty();
 
     // Create the basic structure
-    var $siteName = $('<a>', { class: "navbar-brand", href: "#", text: document.title }),
+    var $siteName = $('<a>', { class: "navbar-brand noselect", href: "#", text: document.title }),
         $linkDiv  = $('<div>', { id: "navbar", class: "justify-content-end" }),
         $linkList = $('<ul>', { class: "nav navbar-nav navbar-right" });
 
