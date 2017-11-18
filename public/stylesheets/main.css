@@ -144,10 +144,6 @@ body {
     width: 100%;
 }
 
-.start-modal-code {
-
-}
-
 .student-checkin {
     position: absolute;
     margin: auto;
@@ -172,7 +168,11 @@ body {
     margin-top: 15px;
 }
 
-.session-table-container tbody {
-    overflow-y: auto;    /* Trigger vertical scroll    */
-    overflow-x: hidden;  /* Hide the horizontal scroll */
-    height: 10px;
+.session-table {
+    background-color: white;
+}
+
+.session-table-spin-div {
+    height: 55px;
+    position: relative;
+}

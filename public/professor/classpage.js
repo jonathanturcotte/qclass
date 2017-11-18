@@ -48,7 +48,7 @@ var ClassPage = function(course) {
         // TODO: Finish table implementation
         this.sessionTable = new SessionTable(this.course.cID).build(this.$page);
         replacePage(this.$page);
-        this.sessionTable.$spinDiv.spin(); //TODO: options for spinner to make it in the right spot
+        this.sessionTable.startSpinner();
         window.app.classPage = this;
     }
 };
