@@ -33,7 +33,7 @@ function buildList () {
 
     // If there are no classes, show an informational message
     if (this.classes.length === 0) {
-        var $message = $('<p>', { class: "sidebar-empty-message text-light" });
+        var $message = $('<p>', { class: "sidebar-empty-message text-light noselect" });
         $message.append($('<i>', { text: "Add classes to have them show up here."} ));
         $message.appendTo($sidebar);
     } else {
@@ -43,7 +43,7 @@ function buildList () {
         // Create a list tag for each class
         this.classes.forEach(function (course) {
             $('<li>', { class: 'nav-item classlist-item' })
-                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link text-truncate text-white', href: '#', text: course.cCode + ":\n" + course.cName }))
+                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link text-truncate text-white noselect', href: '#', text: course.cCode + ":\n" + course.cName }))
                 .click(selectClass.bind(this, course))
                 .appendTo($list);
         });
