@@ -26,25 +26,24 @@ var ClassPage = function(course) {
         this.$page = $('<div>', { class: 'classpage' })
             .append($('<h2>', { class: 'class-page-title-code', text: course.cCode }))
             .append($('<h3>', { class: 'class-page-title-name', text: course.cName }))
+            .append($('<div>', { class: 'block',  style: 'margin-bottom: 50px'})
+                .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Import Classlist', style: 'margin-right: 15px' })
+                .click(createImportModal.bind(this)))
+                .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
+                .click(function() {
+                    $.get({
+                        url: '/professor/' + course.cID + '/exportAttendance'
+                    }).done(function(data, status, xhr) {
+                        window.location.href = '/professor/' + course.cID + '/exportAttendance';    
+                    }).fail(function(xhr, status, errorThrown) {
+                        alert('Error downloading attendance information');
+                    });
+                }))
+            )
             .append($('<a>', { class: 'class-page-start-link', href: '#' })
                 .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
-                .click(function() {
-                    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
-                    modal.show();
-                    modal.$body.spin()
-                        .addClass('spin-min-height');
-                    $.post({
-                        url: `/professor/class/start/${course.cID}`,
-                        data: { duration: 30000 },
-                        dataType: 'json'
-                    }).done(function(data, status, xhr) {
-                        startAttendance(data, modal);
-                    }).fail(function(xhr, status, errorThrown) {
-                        modal.error('Error', 'Error starting attendance session');
-                    }).always(function(a, status, b) {
-                        modal.$body.spin(false);
-                    });
-                }));
+                .click(createSessionModal.bind(this))
+            );
         // TODO: Finish table implementation
         this.sessionTable = new SessionTable(this.course.cID).build(this.$page);
         replacePage(this.$page);
@@ -80,8 +79,95 @@ function startAttendance(data, modal) {
             modal.success('Complete');
             modal.$body.find('.start-modal-top-info')
                 .text('Session complete!')
-                .addClass('.start-modal-top-info-finished')
+                .addClass('.start-modal-top-info-finished');
         }).countdown('start');
 }
+
+function createSessionModal () {
+    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
+    modal.show();
+    modal.$body.spin()
+        .addClass('spin-min-height');
+    $.post({
+        url: `/professor/class/start/${this.course.cID}`,
+        data: { duration: 30000 },
+        dataType: 'json'
+    }).done(function(data, status, xhr) {
+        startAttendance(data, modal);
+    }).fail(function(xhr, status, errorThrown) {
+        modal.error('Error', 'Error starting attendance session');
+    }).always(function(a, status, b) {
+        modal.$body.spin(false);
+    });
+}
+
+function createImportModal () {
+    var modal = new ModalWindow({ id: 'importModal', title: 'Import Classlist'}),
+        $file = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' }),
+        $importButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Import', id: 'importButton' });
+    modal.$body
+        .append($file);
+    modal.$footer
+        .prepend($importButton);
+    $importButton
+       .click(function () {
+            $importButton.remove();
+            modal.$body.empty();
+            modal.$body
+            .spin()
+            .addClass('spin-min-height');
+            $.post({
+                url: 'professor/class/enroll/' + this.course.cID,
+                data: { file: $file.get(0).files[0] },
+                encType: "multipart/form-data",
+                processData: false
+             }).done(function(status, xhr) {
+                modal.success('Success', 'Classlist successfully added!');
+             }).fail(function(xhr, status, errorThrown) {
+                modal.error("Error", xhr.responseText);
+             }).always(function(a, status, b) {
+                modal.$body.spin(false);
+             }); 
+        }.bind(this));
+    modal.show();
+}
+
+/*
+function createExportModal () {
+    var modal      = new ModalWindow({ id: 'exportModal', title: 'Export Attendance Information'}),
+        $fileName  = $('<input>', {type: 'text', id: 'fileName', name: 'fileName'}),
+        $fileType  = $('<select>', {class: 'btn btn-secondary dropdown-toggle dropdown-toggle-split', id: 'fileType', name: 'fileType'} ),
+        $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
+    modal.$body
+        .append($('<p>', {text: 'Specify output file name and type:'}))
+        .append($fileName)
+        .append($fileType
+            .append($('<option>', { text: 'csv', value: 'csv'}))
+            .append($('<option>', { text: 'xslx', value: 'csv'})));
+    modal.$footer
+        .prepend($exportButton);
+     $exportButton
+        .click(function () {
+            $exportButton.remove();
+            modal.$body.empty();
+            window.location.href = '/professor/' + this.course.cID + '/exportAttendance';
+            modal.$body
+            .spin()
+            .addClass('spin-min-height');
+            $.get({
+                url: '/professor/' + this.course.cID + '/exportAttendance'
+             }).done(function(status, xhr) {
+                modal.success("Success", "File Successfully Downloaded");
+             }).fail(function(xhr, status, errorThrown) {
+                modal.error("Error", "Error Downloading File");
+             }).always(function(a, status, b) {
+                modal.$body.spin(false);
+             });
+             
+        }.bind(this));
+    
+    modal.show();
+}
+*/
 
 module.exports = ClassPage;

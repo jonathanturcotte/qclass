@@ -9,6 +9,7 @@ var express      = require('express'),
     bodyParser   = require('body-parser'),
     helmet       = require('helmet'),
     csv          = require('express-csv'),
+    XLSX         = require('xlsx'),
 
     // Setup SSL options
     sslOptions = {

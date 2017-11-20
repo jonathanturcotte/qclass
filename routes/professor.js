@@ -1,10 +1,11 @@
-var express = require('express'),
-    router = express.Router(),
-    routeHelper = require('./helper'),
-    helper = require('../api/helper'),
-    db = require('../api/db'),
+var express            = require('express'),
+    router             = express.Router(),
+    routeHelper        = require('./helper'),
+    helper             = require('../api/helper'),
+    db                 = require('../api/db'),
     attendanceSessions = require('../api/data/attendanceSessions'),
-    EnrollStudent = require('../models/EnrollStudent');
+    EnrollStudent      = require('../models/EnrollStudent'),
+    XLSX               = require('xlsx');
 
 /**
  * Authenticate every request to the professor API against the DB
@@ -73,7 +74,8 @@ router.post('/class/add', function(req, res, next) {
 // Enroll students in a class
 router.post('/class/enroll/:classId', function(req, res, next) {
     var reqStudents = req.body.students,
-        students = [];
+        students    = [],
+        file        = req.body.file;
     if (!reqStudents || !Array.isArray(reqStudents) || reqStudents.length < 1)
         return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
     // Validate each entry in the students array
@@ -133,10 +135,10 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 // Session Info: Total Number of students + Percent Attendance
 //               List of students in attendance: name, netId, std#   
 router.get('/:classId/exportAttendance', function(req, res, next) {
-    var classId = req.params.classId;
+    var classId  = req.params.classId;
     db.aggregateInfo(classId, function(err, attInfo, fields) {
         if (err) return routeHelper.sendError(res, err, `Error retrieving attendance information for ${classId}`);
-        if (attInfo.length == 0) res.send(`No Attendance Information for Course`);
+        if (attInfo.length == 0) return routeHelper.sendError(res, err, `No Attendance Information for Course`);
         else {
             db.getNumSession(classId, function(err, numSessions, fields) {
                 if (err) return routeHelper.sendError(res, err, `Error retrieving number of sessions `);
@@ -167,9 +169,9 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                                 result[index++] = {};
                                 result[index++] = { sessDate: new Date(date) };
                             }
-                        }                   
-                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"')
-                        res.csv(result);                        
+                        }                 
+                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"');
+                        res.csv(result);                     
                     });
                 }
             });
@@ -181,12 +183,12 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
 // pass in ordered session results from db
 // returns json with each entry containing session date + list of students in attendance
 function organizeAttendanceSession(sessInfo) {
-    var j = 0;
-    var i = 0;
-    var k = 0;
-    var date = sessInfo[0].attTime;
-    var session = [];
-    var toReturn = [];
+    var j = 0,
+        i = 0,
+        k = 0,
+        date = sessInfo[0].attTime,
+        session = [],
+        toReturn = [];
     while (j < sessInfo.length) {
         if (date === sessInfo[j].attTime) {
             if (sessInfo[j].sNetID)
