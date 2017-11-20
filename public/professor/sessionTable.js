@@ -1,3 +1,5 @@
+var ModalWindow = require('../modalwindow');
+
 var SessionTable = function(classID) {
     this.classID = classID;
 
@@ -7,19 +9,17 @@ var SessionTable = function(classID) {
      */
     this.build = function($appendTo) {
         this.$spinDiv = $('<div>', { class: 'session-table-spin-div' });
-        this.$head = $('<thead>')
+        this.$tablehead = $('<thead>')
                 .append($('<th>').html('Date'))
                 .append($('<th>').html('Attendance (%)'));
-        this.$body = $('<tbody>')
+        this.$tablebody = $('<tbody>')
             .append($('<tr>')
                 .append($('<td>', { colspan: 2 })
                     .append($(this.$spinDiv)))); 
         this.$table = $('<table>', { class: 'session-table table-bordered table-sm table-hover' })
-            .append(this.$head)
-            .append(this.$body);
-        this.$container = $('<div>', { class: 'session-table-container' })
-            .append(this.$table);
-        if ($appendTo) this.$container.appendTo($appendTo);
+            .append(this.$tablehead)
+            .append(this.$tablebody);
+        if ($appendTo) this.$table.appendTo($appendTo);
         $.get(`/professor/${this.classID}/attendanceSessions`)
             .done(updateTable.bind(this))
             .fail(failTable.bind(this))
@@ -32,24 +32,35 @@ var SessionTable = function(classID) {
 };
 
 function updateTable(data, status, xhr) {
-    this.$body.empty();
+    this.$tablebody.empty();
     this.data = data;
     for (var i = 0; i < this.data.sessions.length; i++) {
+        // Formatting
         var session = this.data.sessions[i];
         var date = new Date(session.sessDate);
-        var formattedDate = '' + date.getDay() + '/' + (date.getMonth() + 1) + '/' 
-            + date.getFullYear().toString().substr(-2) + ' ' 
-            + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+        var formattedDate = `${date.getDay()}/${date.getMonth() + 1}/${date.getFullYear().toString().substr(-2)} `
+            + `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`; // dd/mm/yy hh:mm:ss - note that day and month can be 1 or 2 digits
         var attendance = session.studentList.length;
-        if (session.studentList.length > 0)
-            attendance = attendance + ' (' + +(attendance / this.data.numEnrolled * 100).toFixed(1) + '%)';
+        var isEmpty = session.studentList.length < 1;
+        if (!isEmpty)
+            attendance = attendance + ' students (' + +(attendance / this.data.numEnrolled * 100).toFixed(1) + '%)';
+        else
+            attendance = attendance + ' students';
         
+        // Create main row 
         session.$td1 = $('<td>', { title: date.toString() }).text(formattedDate); 
         session.$td2 = $('<td>').text(attendance);
-        session.$tr = $('<tr>')
+        session.$tr = $('<tr>', { class: 'accordion-toggle', title: 'Click to view students in attendance' })
             .append(session.$td1)
             .append(session.$td2);
-        this.$body.append(session.$tr);
+        if (!isEmpty) {
+            with ({ oldSession: session }) { // Without this, session gets overridden by subsequent passes of the loop and every .click handler gets the last version of session
+                session.$tr.click(function() {
+                    openAttendanceModal(formattedDate, oldSession.studentList);
+                });
+            }
+        }
+        this.$tablebody.append(session.$tr);
         this.data.sessions[i] = session;
     }
     this.$spinDiv.remove();
@@ -58,7 +69,31 @@ function updateTable(data, status, xhr) {
 function failTable(xhr, status, errorThrown) {
     this.$table.addClass('table-danger');
     this.$spinDiv.remove();
-    this.$body.empty().append($('<p>', { class: 'text-danger', text: 'Error getting attendance sessions: ' + status }));
+    this.$tablebody.empty().append($('<p>', { class: 'text-danger', text: 'Error getting attendance sessions: ' + status }));
+};
+
+function openAttendanceModal(date, studentList) {
+    var id = 'attendance-modal';
+    var modal = new ModalWindow({ id: id, title: 'Attendance Session' });
+    modal.$body.append($('<h5>', { text: date, class: 'attendance-modal-date' }));
+    modal.$body.addClass('attendance-modal-body');
+    var $table = $('<table>', { class: 'attendance-modal-table centered-table table-bordered' })
+        .append($('<thead>')
+        .append($('<tr>')
+            .append($('<th>', { text: 'NetID' }))
+            .append($('<th>', { text: 'Student #' }))
+            .append($('<th>', { text: 'First Name' }))
+            .append($('<th>', { text: 'Last Name' }))));
+    var $tbody = $('<tbody>');
+    for (var i = 0; i < studentList.length; i++) {
+        $tbody.append($('<tr>')
+            .append($('<td>').text(studentList[i].NetID))
+            .append($('<td>').text(studentList[i].stdNum))
+            .append($('<td>').text(studentList[i].fName))
+            .append($('<td>').text(studentList[i].lName)));
+    }
+    modal.$body.append($table.append($tbody));
+    modal.show();
 };
 
 module.exports = SessionTable;

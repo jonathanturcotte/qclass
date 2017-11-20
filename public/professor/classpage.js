@@ -26,7 +26,7 @@ var ClassPage = function(course) {
         this.$page = $('<div>', { class: 'classpage' })
             .append($('<h2>', { class: 'class-page-title-code', text: course.cCode }))
             .append($('<h3>', { class: 'class-page-title-name', text: course.cName }))
-            .append($('<a>', { class: 'class-page-start-link', href: '#' })
+            .append($('<a>', { class: 'class-page-start-link', href: '#' }) // Start button 
                 .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
                 .click(function() {
                     var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
@@ -45,7 +45,7 @@ var ClassPage = function(course) {
                         modal.$body.spin(false);
                     });
                 }));
-        // TODO: Finish table implementation
+        // Session table
         this.sessionTable = new SessionTable(this.course.cID).build(this.$page);
         replacePage(this.$page);
         this.sessionTable.startSpinner();
