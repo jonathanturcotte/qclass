@@ -41,7 +41,12 @@ router.post('/sign-in/:code', function(req, res, next) {
         if (err) return routeHelper.sendError(res, err, '');
         if (!result) return routeHelper.sendError(res, null, 'User not a member of the requested class', 403);
         db.recordAttendance(req.user.netId, session.classId, session.time, function(err, results, fields) {
-            if (err) return routeHelper.sendError(res, err, 'Error recording attendance');
+            if (err) {
+                if (err.errno && err.errno === 1062)
+                    return routeHelper.sendError(res, err, 'Already signed in', 409);
+                else
+                    return routeHelper.sendError(res, err, 'Error recording attendance');
+            } 
             res.send('Success');
         });
     });

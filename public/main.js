@@ -14,17 +14,15 @@ var SignInApp = function () {};
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
     this.navbar = new NavBar();
-    this.isProfessor() ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
+    this.isProfessor() ? this.buildProfDOM() : this.buildStudentDOM();
 };
 
 /**
  * Returns true if a given user id is a professor
  * In reality, currently not sure if we'd do this or SSO could do this
- * @param {*} id 
  */
-SignInApp.prototype.isProfessor = function (id) {
-    //TODO - unstub
-    return true;
+SignInApp.prototype.isProfessor = function () {
+    return Cookies.get('isProf') === 'true';
 };
 
 /**
