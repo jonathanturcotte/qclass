@@ -4,8 +4,7 @@ var express            = require('express'),
     helper             = require('../api/helper'),
     db                 = require('../api/db'),
     attendanceSessions = require('../api/data/attendanceSessions'),
-    EnrollStudent      = require('../models/EnrollStudent'),
-    XLSX               = require('xlsx');
+    EnrollStudent      = require('../models/EnrollStudent');
 
 /**
  * Authenticate every request to the professor API against the DB
@@ -74,8 +73,8 @@ router.post('/class/add', function(req, res, next) {
 // Enroll students in a class
 router.post('/class/enroll/:classId', function(req, res, next) {
     var reqStudents = req.body.students,
-        students    = [],
-        file        = req.body.file;
+        file        = req.files[0],
+        students    = [];
     if (!reqStudents || !Array.isArray(reqStudents) || reqStudents.length < 1)
         return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
     // Validate each entry in the students array

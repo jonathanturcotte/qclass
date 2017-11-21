@@ -6,7 +6,8 @@
  */
 
 var ModalWindow  = require('../modalwindow'),
-    SessionTable = require('./sessionTable');
+    SessionTable = require('./sessionTable'),
+    XLSX         = require('xlsx');
 
 /**
  * Creates a class page, responsible for the central window of the professor site
@@ -116,19 +117,24 @@ function createImportModal () {
             modal.$body
             .spin()
             .addClass('spin-min-height');
+            var file = $file.get(0).files[0];
+            var fd = new FormData();
+            fd.append('excel', file);
             $.post({
                 url: 'professor/class/enroll/' + this.course.cID,
-                data: { file: $file.get(0).files[0] },
-                encType: "multipart/form-data",
-                processData: false
+                file: { file: $file.get(0).files[0] },
+                processData: false,
+                contentType: false,
+                data: fd,
              }).done(function(status, xhr) {
                 modal.success('Success', 'Classlist successfully added!');
              }).fail(function(xhr, status, errorThrown) {
                 modal.error("Error", xhr.responseText);
              }).always(function(a, status, b) {
                 modal.$body.spin(false);
-             }); 
+             });
         }.bind(this));
+            
     modal.show();
 }
 
@@ -169,5 +175,9 @@ function createExportModal () {
     modal.show();
 }
 */
+
+
+
+
 
 module.exports = ClassPage;

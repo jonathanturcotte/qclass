@@ -9,7 +9,7 @@ var express      = require('express'),
     bodyParser   = require('body-parser'),
     helmet       = require('helmet'),
     csv          = require('express-csv'),
-    XLSX         = require('xlsx'),
+    fileUpload   = require('express-fileupload');
 
     // Setup SSL options
     sslOptions = {
@@ -40,6 +40,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/professor', professor);
 app.use('/student', student);
+
+app.use(fileUpload);
 
 // Use Helmet to help cover any common security vulnerabilities
 app.use(helmet());
