@@ -162,6 +162,11 @@ body {
     font-family: Consolas,Monaco,"Lucida Console","Liberation Mono","DejaVu Sans Mono","Bitstream Vera Sans Mono","Courier New", monospace;
     text-align: center;
     text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.student-submit-button {
+    width: 100%
 }
 
 .session-table-container {
