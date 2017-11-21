@@ -115,24 +115,31 @@ function createImportModal () {
             $importButton.remove();
             modal.$body.empty();
             modal.$body
-            .spin()
-            .addClass('spin-min-height');
+                .spin()
+                .addClass('spin-min-height');
             var file = $file.get(0).files[0];
-            var fd = new FormData();
-            fd.append('excel', file);
-            $.post({
-                url: 'professor/class/enroll/' + this.course.cID,
-                file: { file: $file.get(0).files[0] },
-                processData: false,
-                contentType: false,
-                data: fd,
-             }).done(function(status, xhr) {
-                modal.success('Success', 'Classlist successfully added!');
-             }).fail(function(xhr, status, errorThrown) {
-                modal.error("Error", xhr.responseText);
-             }).always(function(a, status, b) {
-                modal.$body.spin(false);
-             });
+            var reader = new FileReader();
+            var cID = this.course.cID;
+            reader.onload = function(e) {
+                var data = new Uint8Array(e.target.result);
+                var workbook = XLSX.read(data, { type: 'array' });
+                var sheet = workbook.Sheets[workbook.SheetNames[0]];
+                var jsonSheet = XLSX.utils.sheet_to_json(sheet, { header: ['stdNum', 'name', 'email', 'dept', 'year'] });
+                $.post({
+                    url: 'professor/class/enroll/' + cID,
+                    data: jsonSheet
+                }).done(function(status, xhr) {
+                    modal.success('Success', 'Classlist successfully added!');
+                }).fail(function(xhr, status, errorThrown) {
+                    modal.error("Error", xhr.responseText);
+                }).always(function(a, status, b) {
+                    modal.$body.spin(false);
+                });
+            };
+            reader.readAsArrayBuffer(file);
+            // var fd = new FormData();
+            // fd.append('excel', file);
+            // 
         }.bind(this));
             
     modal.show();
