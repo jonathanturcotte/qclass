@@ -144,6 +144,10 @@ body {
     width: 100%;
 }
 
+.start-modal-code {
+    white-space: nowrap;
+}
+
 .student-checkin {
     position: absolute;
     margin: auto;

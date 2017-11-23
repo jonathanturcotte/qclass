@@ -64,12 +64,12 @@ function replacePage($newPage) {
 function startAttendance(data, modal) {
     modal.$header.find($('.modal-title')).text('Running Attendance Session');
     modal.appendToBody([
-        $('<p>', { class: '.start-modal-top-info', text: 'Success!' }),
+        $('<p>', { class: 'start-modal-top-info' }),
         $('<div>', { class: 'flex flex-start' })
             .append($('<div>', { class: 'start-modal-running-info' })
-                .append($('<h3>', { class: 'start-modal-code', text: data.code })))
+                .append($('<h3>', { class: 'start-modal-code', text: "Code: " + data.code.toUpperCase() })))
             .append($('<div>', { class: 'start-modal-timer-container' }))
-                .append($('<h2>', { class: 'start-modal-timer' }))
+                .append($('<h3>', { class: 'start-modal-timer' }))
     ], true);
     
     // Countdown Timer
