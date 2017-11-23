@@ -72,9 +72,8 @@ router.post('/class/add', function(req, res, next) {
 
 // For enrolling an entire classlist
 router.post('/class/enrollClass/:classId', function(req, res, next) {
-    var stdList        = req.body,
-        processedStds = processSheet(stdList, res);
-    enroll(processedStds, req.params.classId, res);
+    var stdList        = req.body;
+    enroll(stdList, req.params.classId, res);         // Reminder: note this function can throw error without stopping execution
 });
 
 // For enrolling a single student
@@ -193,34 +192,6 @@ function organizeAttendanceSession(sessInfo) {
     return toReturn;
 }
 
-function processSheet(sheet, res) {
-    var processedStds = [],
-        name          = [],
-        email         = [],
-        netId,
-        stdNum,
-        firstName,
-        lastName;
-    for (var i = 0; i < sheet.length; i++) {
-        // check for valid email
-        email = sheet[i].email.split('@');
-        if (email.length != 2)
-            return routeHelper.sendError(res, null, 'Improper email format at row ' + i , 400);
-        netId = email[0];
-        // get student number
-        stdNum = sheet[i].stdNum;
-        // check for valid name        
-        name = sheet[i].name.split(',');
-        if (name.length != 2)
-            return routeHelper.sendError(res, null, 'Improper name format at row ' + i , 400);
-        firstName = name[1];
-        lastName = name[0];
-        //set entry in valid student list
-        processedStds[i] = {netId: netId, stdNum: stdNum, firstName: firstName, lastName: lastName}; 
-    }
-    return processedStds;
-}
-
 // Runs the general enroll function that adds (if needed) and enrolls each student
 // reqStudents can contain a single student or an entire classList
 function enroll(reqStudents, classId, res) {
@@ -229,7 +200,6 @@ function enroll(reqStudents, classId, res) {
         return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
     // Validate each entry in the students array
     for (var i = 0; i < reqStudents.length; i++) {
-        if (!reqStudents[i]) return routeHelper.sendError(res, null, `Empty student entry at position ${i}`, 400);
         try {
             var student = new EnrollStudent(reqStudents[i]);
         }

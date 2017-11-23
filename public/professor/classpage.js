@@ -30,6 +30,8 @@ var ClassPage = function(course) {
             .append($('<div>', { class: 'block',  style: 'margin-bottom: 50px'})
                 .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Import Classlist', style: 'margin-right: 15px' })
                 .click(createImportModal.bind(this)))
+                .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Add Student', style: 'margin-right: 15px' })
+                .click(createAddStudentModal.bind(this)))
                 .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
                 .click(function() {
                     $.get({
@@ -113,14 +115,16 @@ function createImportModal () {
         .prepend($importButton);
     $importButton
        .click(function () {
+            var file   = $file.get(0).files[0],
+                reader = new FileReader(),
+                cID    = this.course.cID;
+            
             $importButton.remove();
             modal.$body.empty();
             modal.$body
                 .spin()
                 .addClass('spin-min-height');
-            var file   = $file.get(0).files[0],
-                reader = new FileReader(),
-                cID    = this.course.cID;
+          
             if (!file){
                 modal.error('Error', 'No file submitted');
                 return;
@@ -131,21 +135,30 @@ function createImportModal () {
                 reader.onload = function(e) {
                     var sheetData     = new Uint8Array(e.target.result),
                         workbook = null;
+
                     try{
                         workbook = XLSX.read(sheetData, { type: 'array' });
                     }catch(error){
                         modal.error('Error', 'Incorrect file type submitted');
                         return;
                     }
-                    var sheet     = workbook.Sheets[workbook.SheetNames[0]],
-                        jsonSheet = XLSX.utils.sheet_to_json(sheet, { header: ["stdNum", "name", "email", "dept", "year"] });
-                    if(!checkFormat(jsonSheet)){
-                        modal.error('Error', 'File is formatted incorrectly');
+
+                    var sheet          = workbook.Sheets[workbook.SheetNames[0]],
+                        jsonSheet      = XLSX.utils.sheet_to_json(sheet, { header: ["stdNum", "name", "email", "dept", "year"] }),
+                        result         = {},
+                        formattedSheet = [];
+                   
+                    result = checkFormat(jsonSheet);
+                    //check if any errors caught in the file's format
+                    if(result.error) { 
+                        modal.error('Error', result.error);
                         return;
-                    }
+                    }                    
+                    // if no error, send formatted sheet
+                    formattedSheet = result.sheet;
                     $.post({
                         url: 'professor/class/enrollClass/' + cID,
-                        data: JSON.stringify(jsonSheet),
+                        data: JSON.stringify(formattedSheet),
                         contentType: 'application/json'
                     }).done(function(status, xhr) {
                         modal.success('Success', 'Classlist successfully added!');
@@ -159,6 +172,32 @@ function createImportModal () {
             }
         }.bind(this));
             
+    modal.show();
+}
+
+function createAddStudentModal () {
+    var modal   = new ModalWindow({ id: 'addStdModal', title: 'Add Student'}),
+        $netId  = $('<input>', {type: 'text', name: 'netId', id: 'netId', class: 'input-medium' }),
+        $stdNum = $('<input>', {type: 'text', name: 'stdNum', id: 'stdNum', class: 'input-medium' }),
+        $fName  = $('<input>', {type: 'text', name: 'fName', id: 'fName', class: 'input-medium' }),
+        $lName  = $('<input>', {type: 'text', name: 'lName', id: 'lName', class: 'input-medium' }),
+        $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' });
+    modal.$body
+        .append($('<div>', { style: 'margin-bottom: 5px' })
+            .append($('<span>', { text: "NetID:", style: 'display: inline-block; width: 100px' }))
+            .append($netId))
+        .append($('<div>', { style: 'margin-bottom: 5px' })
+            .append($('<span>', { text: "Student #: ", style: 'display: inline-block; width: 100px' }))
+            .append($stdNum))
+        .append($('<div>', { style: 'margin-bottom: 5px' })        
+            .append($('<span>', { text: "First Name:", style: 'display: inline-block; width: 100px' }))
+            .append($fName))
+        .append($('<div>')    
+            .append($('<span>', { text: "Last Name: ", style: 'display: inline-block; width: 100px' }))
+            .append($lName));
+        
+    modal.$footer
+        .prepend($submitButton);
     modal.show();
 }
 
@@ -208,15 +247,46 @@ function checkFileExtension(file) {
 }
 
 function checkFormat(sheet) {
-    var check;
+    var result        = { error: false , sheet: [] },
+        processedStds = [],
+        name          = [],
+        email         = [],
+        netId,
+        stdNum,
+        firstName,
+        lastName,
+        check;
+    // Check correct number of rows/headers    
     for(var i = 0; i < sheet.length; i++) {    
         check = (sheet[i].hasOwnProperty('stdNum') && sheet[i].hasOwnProperty('name') &&
                  sheet[i].hasOwnProperty('email') &&  sheet[i].hasOwnProperty('dept') &&
                  sheet[i].hasOwnProperty('year'));
-        if(!check)
-            return false;
+        if(!check) {
+            result.error = "File is incorrectly formatted at row " + i;
+            return result;
+        }
+        // Parse and check email
+        email = sheet[i].email.split('@');
+        if (email.length != 2 || email[1] !== "queensu.ca" ) {
+            result.error = 'Improper email format at row ' + i;
+            return result;             
+        }
+        netId = email[0];
+        // Get student Number
+        stdNum = sheet[i].stdNum;
+        // Check for valid Name
+        name = sheet[i].name.split(',');
+        if (name.length != 2) {
+            result.error = 'Improper name format at row ' + i;
+            return result;
+        }
+        firstName = name[1];
+        lastName = name[0];
+        // Set entry in valid student list
+        processedStds[i] = {netId: netId, stdNum: stdNum, firstName: firstName, lastName: lastName}; 
     }
-    return true;
+    result.sheet = processedStds;
+    return result;
 }
 
 module.exports = ClassPage;

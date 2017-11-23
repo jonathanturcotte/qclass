@@ -8,7 +8,7 @@ module.exports = class EnrollStudent {
         this.stdNum = student.stdNum;
         this.firstName = student.firstName;
         this.lastName = student.lastName;
-        if (!this.netId || typeof(this.netId) !== 'string' || this.netId.length < 3 || this.netId.length > 20)
+        if (!this.netId || typeof(this.netId) !== 'string' || /^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(this.netId)) // TODO
             throw new Error();
         if (!this.stdNum || typeof(this.stdNum) !== 'string' || this.stdNum.length != 8)
             throw new Error();
