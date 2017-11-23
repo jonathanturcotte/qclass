@@ -148,7 +148,7 @@ function createImportModal () {
                         result         = {},
                         formattedSheet = [];
                    
-                    result = checkFormat(jsonSheet);
+                    result = checkFormat    (jsonSheet);
                     //check if any errors caught in the file's format
                     if(result.error) { 
                         modal.error('Error', result.error);
