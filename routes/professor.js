@@ -70,31 +70,17 @@ router.post('/class/add', function(req, res, next) {
     });
 });
 
-// Enroll students in a class
-router.post('/class/enroll/:classId', function(req, res, next) {
-    var reqStudents = req.body.students,
-        file        = req.files[0],
-        students    = [];
-    if (!reqStudents || !Array.isArray(reqStudents) || reqStudents.length < 1)
-        return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
-    // Validate each entry in the students array
-    for (let i = 0; i < reqStudents.length; i++) {
-        if (!reqStudents[i]) return routeHelper.sendError(res, null, `Empty student entry at position ${i}`, 400);
-        try {
-            var student = new EnrollStudent(reqStudents[i]);
-        }
-        catch (e) {
-            return routeHelper.sendError(res, e, `Invalid student in list at position ${i}`, 400);
-        }
-        students.push(student);
-    }
-    db.enroll(req.params.classId, students, function(err, results, fields) {
-        if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${helper.printArray(err.errorStudents)}` : ''}`);
-        console.log(`Inserted ${results.affectedRows} students`);
-        res.status(201).json({ 
-            affectedRows: results.affectedRows 
-        });
-    });
+// For enrolling an entire classlist
+router.post('/class/enrollClass/:classId', function(req, res, next) {
+    var stdList        = req.body,
+        processedStds = processSheet(stdList, res);
+    enroll(processedStds, req.params.classId, res);
+});
+
+// For enrolling a single student
+router.post('/class/enrollStudent/:classId', function(req, res, next) {
+    var std = req.body.student;
+    enroll(std, req.params.classId, res);
 });
 
 // Start an attendance session for a class, return the code to the professor
@@ -205,6 +191,60 @@ function organizeAttendanceSession(sessInfo) {
     //Add last session
     toReturn[k] = { sessDate: date, studentList: session };
     return toReturn;
+}
+
+function processSheet(sheet, res) {
+    var processedStds = [],
+        name          = [],
+        email         = [],
+        netId,
+        stdNum,
+        firstName,
+        lastName;
+    for (var i = 0; i < sheet.length; i++) {
+        // check for valid email
+        email = sheet[i].email.split('@');
+        if (email.length != 2)
+            return routeHelper.sendError(res, null, 'Improper email format at row ' + i , 400);
+        netId = email[0];
+        // get student number
+        stdNum = sheet[i].stdNum;
+        // check for valid name        
+        name = sheet[i].name.split(',');
+        if (name.length != 2)
+            return routeHelper.sendError(res, null, 'Improper name format at row ' + i , 400);
+        firstName = name[1];
+        lastName = name[0];
+        //set entry in valid student list
+        processedStds[i] = {netId: netId, stdNum: stdNum, firstName: firstName, lastName: lastName}; 
+    }
+    return processedStds;
+}
+
+// Runs the general enroll function that adds (if needed) and enrolls each student
+// reqStudents can contain a single student or an entire classList
+function enroll(reqStudents, classId, res) {
+    var students    = [];
+    if (!reqStudents || !Array.isArray(reqStudents) || reqStudents.length < 1)
+        return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
+    // Validate each entry in the students array
+    for (var i = 0; i < reqStudents.length; i++) {
+        if (!reqStudents[i]) return routeHelper.sendError(res, null, `Empty student entry at position ${i}`, 400);
+        try {
+            var student = new EnrollStudent(reqStudents[i]);
+        }
+        catch (e) {
+            return routeHelper.sendError(res, e, `Invalid student in list at position ${i}`, 400);
+        }
+        students.push(student);
+    }
+    db.enroll(classId, students, function(err, results, fields) {
+        if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${helper.printArray(err.errorStudents)}` : ''}`);
+        console.log(`Inserted ${results.affectedRows} students`);
+        res.status(201).json({ 
+            affectedRows: results.affectedRows 
+        });
+    });
 }
 
 module.exports = router;

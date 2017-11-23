@@ -107,6 +107,7 @@ function createImportModal () {
         $file = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' }),
         $importButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Import', id: 'importButton' });
     modal.$body
+        .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
         .append($file);
     modal.$footer
         .prepend($importButton);
@@ -117,29 +118,45 @@ function createImportModal () {
             modal.$body
                 .spin()
                 .addClass('spin-min-height');
-            var file = $file.get(0).files[0];
-            var reader = new FileReader();
-            var cID = this.course.cID;
-            reader.onload = function(e) {
-                var data = new Uint8Array(e.target.result);
-                var workbook = XLSX.read(data, { type: 'array' });
-                var sheet = workbook.Sheets[workbook.SheetNames[0]];
-                var jsonSheet = XLSX.utils.sheet_to_json(sheet, { header: ['stdNum', 'name', 'email', 'dept', 'year'] });
-                $.post({
-                    url: 'professor/class/enroll/' + cID,
-                    data: jsonSheet
-                }).done(function(status, xhr) {
-                    modal.success('Success', 'Classlist successfully added!');
-                }).fail(function(xhr, status, errorThrown) {
-                    modal.error("Error", xhr.responseText);
-                }).always(function(a, status, b) {
-                    modal.$body.spin(false);
-                });
-            };
-            reader.readAsArrayBuffer(file);
-            // var fd = new FormData();
-            // fd.append('excel', file);
-            // 
+            var file   = $file.get(0).files[0],
+                reader = new FileReader(),
+                cID    = this.course.cID;
+            if (!file){
+                modal.error('Error', 'No file submitted');
+                return;
+            } else if (!checkFileExtension(file)) {
+                modal.error('Error', 'Incorrect file type submitted');
+                return;
+            } else {            
+                reader.onload = function(e) {
+                    var sheetData     = new Uint8Array(e.target.result),
+                        workbook = null;
+                    try{
+                        workbook = XLSX.read(sheetData, { type: 'array' });
+                    }catch(error){
+                        modal.error('Error', 'Incorrect file type submitted');
+                        return;
+                    }
+                    var sheet     = workbook.Sheets[workbook.SheetNames[0]],
+                        jsonSheet = XLSX.utils.sheet_to_json(sheet, { header: ["stdNum", "name", "email", "dept", "year"] });
+                    if(!checkFormat(jsonSheet)){
+                        modal.error('Error', 'File is formatted incorrectly');
+                        return;
+                    }
+                    $.post({
+                        url: 'professor/class/enrollClass/' + cID,
+                        data: JSON.stringify(jsonSheet),
+                        contentType: 'application/json'
+                    }).done(function(status, xhr) {
+                        modal.success('Success', 'Classlist successfully added!');
+                    }).fail(function(xhr, status, errorThrown) {
+                        modal.error("Error", xhr.responseText);
+                    }).always(function(a, status, b) {
+                        modal.$body.spin(false);
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            }
         }.bind(this));
             
     modal.show();
@@ -183,8 +200,23 @@ function createExportModal () {
 }
 */
 
+function checkFileExtension(file) {
+    var splitArr  = file.name.split('.'),
+        length = splitArr.length,
+        extension = splitArr[length-1];
+    return "xlsx" === extension;
+}
 
-
-
+function checkFormat(sheet) {
+    var check;
+    for(var i = 0; i < sheet.length; i++) {    
+        check = (sheet[i].hasOwnProperty('stdNum') && sheet[i].hasOwnProperty('name') &&
+                 sheet[i].hasOwnProperty('email') &&  sheet[i].hasOwnProperty('dept') &&
+                 sheet[i].hasOwnProperty('year'));
+        if(!check)
+            return false;
+    }
+    return true;
+}
 
 module.exports = ClassPage;
