@@ -177,27 +177,119 @@ function createImportModal () {
 
 function createAddStudentModal () {
     var modal   = new ModalWindow({ id: 'addStdModal', title: 'Add Student'}),
-        $netId  = $('<input>', {type: 'text', name: 'netId', id: 'netId', class: 'input-medium' }),
-        $stdNum = $('<input>', {type: 'text', name: 'stdNum', id: 'stdNum', class: 'input-medium' }),
-        $fName  = $('<input>', {type: 'text', name: 'fName', id: 'fName', class: 'input-medium' }),
-        $lName  = $('<input>', {type: 'text', name: 'lName', id: 'lName', class: 'input-medium' }),
-        $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' });
+        $netId  = $('<input>', {type: 'text', name: 'netId', id: 'netId', class: 'form-control' }),
+        $stdNum = $('<input>', {type: 'text', name: 'stdNum', id: 'stdNum', class: 'form-control' }),
+        $fName  = $('<input>', {type: 'text', name: 'fName', id: 'fName', class: 'form-control'  }),
+        $lName  = $('<input>', {type: 'text', name: 'lName', id: 'lName', class: 'form-control'  }),
+        $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' }),
+        //spans man
+        $netIdSpan  = $('<span>', { class: "text-danger", style: 'margin-left: 120px; display: none'}),
+        $stdNumSpan = $('<span>', { class: "text-danger", style: 'margin-left: 120px; display: none'}),
+        $fNameSpan  = $('<span>', { class: "text-danger", style: 'margin-left: 120px; display: none'}),
+        $lNameSpan  = $('<span>', { class: "text-danger", style: 'margin-left: 120px; display: none'})
     modal.$body
-        .append($('<div>', { style: 'margin-bottom: 5px' })
-            .append($('<span>', { text: "NetID:", style: 'display: inline-block; width: 100px' }))
-            .append($netId))
-        .append($('<div>', { style: 'margin-bottom: 5px' })
-            .append($('<span>', { text: "Student #: ", style: 'display: inline-block; width: 100px' }))
-            .append($stdNum))
-        .append($('<div>', { style: 'margin-bottom: 5px' })        
-            .append($('<span>', { text: "First Name:", style: 'display: inline-block; width: 100px' }))
-            .append($fName))
-        .append($('<div>')    
-            .append($('<span>', { text: "Last Name: ", style: 'display: inline-block; width: 100px' }))
-            .append($lName));
-        
+        .append($netIdSpan)
+        .append($('<div>', { class: 'form-group has-danger form-inline', style: 'margin-bottom: 5px' })
+            .append($('<span>', { text: "NetID:", style: 'width: 100px' }))
+            .append($('<div>', { class: 'col-sm-5' })
+                .append($netId)))
+        .append($stdNumSpan)
+        .append($('<div>', { class: 'form-group has-danger form-inline', style: 'margin-bottom: 5px' })
+            .append($('<span>', { text: "Student #:", style: 'width: 100px' }))
+            .append($('<div>', { class: 'col-sm-5' })
+                .append($stdNum)))
+        .append($fNameSpan)
+        .append($('<div>', { class: 'form-group has-danger form-inline', style: 'margin-bottom: 5px' })
+            .append($('<span>', { text: "First Name:", style: 'width: 100px' }))
+            .append($('<div>', { class: 'col-sm-5' })
+                .append($fName)))
+        .append($lNameSpan)
+        .append($('<div>', { class: 'form-group has-danger form-inline', style: 'margin-bottom: 5px' })
+            .append($('<span>', { text: "Last Name:", style: 'width: 100px' }))
+            .append($('<div>', { class: 'col-sm-5' })
+                .append($lName)));
+    //is-invalid    
     modal.$footer
         .prepend($submitButton);
+
+    $submitButton
+        .click(function() {
+            var netId  = $netId.val(),
+                stdNum = $stdNum.val(),
+                fName  = $fName.val(),
+                lName  = $lName.val(),
+                errors = findErrors(netId, stdNum, fName, lName),
+                flag = 0;
+
+            
+            for(var i = 0; i < errors.length; i++) {
+                if(!errors[i]) {
+                    switch(i){                        
+                        case 0: 
+                            $netIdSpan.hide();
+                            $netId.removeClass('is-invalid');
+                            break;
+                        case 1:
+                            $stdNumSpan.hide();
+                            $stdNum.removeClass('is-invalid');
+                            break;
+                        case 2:
+                            $fNameSpan.hide();
+                            $fName.removeClass('is-invalid');
+                            break;
+                        case 3:
+                            $lNameSpan.hide();
+                            $lName.removeClass('is-invalid');
+                            break;
+                    }
+                }
+                else { 
+                    switch(i){                        
+                        case 0: 
+                            $netIdSpan.show();
+                            $netIdSpan.text(errors[i]);
+                            $netId.addClass('is-invalid');
+                            break;
+                        case 1:
+                            $stdNumSpan.show();
+                            $stdNumSpan.text(errors[i]);
+                            $stdNum.addClass('is-invalid');
+                            break;
+                        case 2:
+                            $fNameSpan.show();
+                            $fNameSpan.text(errors[i]);
+                            $fName.addClass('is-invalid');
+                            break;
+                        case 3:
+                            $lNameSpan.show();
+                            $lNameSpan.text(errors[i]);
+                            $lName.addClass('is-invalid');
+                            break;
+                    }
+                    flag = 1;
+                }                
+            }
+            // check if any errors detected
+            if (flag) return;
+
+            $submitButton.remove();
+            modal.$body.empty();
+            modal.$body
+                .spin()
+                .addClass('spin-min-height');
+            $.post({
+                url: '/professor/class/enrollStudent/' + this.course.cID,
+                data: { netId: netId, stdNum: stdNum, firstName: fName, lastName: lName },
+                dataType: 'json'
+            }).done(function(data, status, xhr) {
+                modal.success('Success', 'Student successfully added!');        
+            }).fail(function(xhr, status, errorThrown) {
+                modal.error("Error", 'Error adding student');
+            }).always(function(a, status, b) {
+                modal.$body.spin(false);
+            });
+        }.bind(this));
+
     modal.show();
 }
 
@@ -287,6 +379,39 @@ function checkFormat(sheet) {
     }
     result.sheet = processedStds;
     return result;
+}
+
+function findErrors (netId, stdNum, fName, lName) {
+    var result = [false, false, false, false];
+    // check netID
+    if (!netId || typeof(netId) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(netId))) {
+        if(!netId)
+            result[0] = "No NetID Provided";
+        else
+            result[0] = "Improper NetID Format (Ex. 12xyz3)";            
+    }
+    // check student number
+    if (!stdNum || typeof(stdNum) !== 'string' || stdNum.length != 8) {
+        if(!stdNum)
+            result[1] = "No Student # Provided" ;
+        else
+            result[1] = "Improper Student # Format (Ex. 10050150)";
+    }
+    // check first name    
+    if (!fName || typeof(fName) !== 'string' || fName.length < 1 || fName.length > 100) {
+        if(!fName)
+            result[2] = "No First Name Provided";
+        else
+            result[2] = "First Name Too Long";
+    }
+    // check last Name
+    if (!lName || typeof(lName) !== 'string' || lName.length < 1 || lName.length > 100) {
+        if(!lName)
+            result[3] = "No Last Name Provided" ;
+        else
+            result[3] = "Last Name Too Long";
+    }
+    return result;        
 }
 
 module.exports = ClassPage;
