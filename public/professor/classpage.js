@@ -33,15 +33,7 @@ var ClassPage = function(course) {
                 .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Add Student', style: 'margin-right: 15px' })
                 .click(createAddStudentModal.bind(this)))
                 .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
-                .click(function() {
-                    $.get({
-                        url: '/professor/' + course.cID + '/exportAttendance'
-                    }).done(function(data, status, xhr) {
-                        window.location.href = '/professor/' + course.cID + '/exportAttendance';    
-                    }).fail(function(xhr, status, errorThrown) {
-                        alert('Error downloading attendance information');
-                    });
-                }))
+                .click(createExportModal.bind(this)))
             )
             .append($('<a>', { class: 'class-page-start-link', href: '#' })
                 .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
@@ -208,7 +200,7 @@ function createAddStudentModal () {
             .append($('<span>', { text: "Last Name:", style: 'width: 100px' }))
             .append($('<div>', { class: 'col-sm-5' })
                 .append($lName)));
-    //is-invalid    
+        
     modal.$footer
         .prepend($submitButton);
 
@@ -293,34 +285,77 @@ function createAddStudentModal () {
     modal.show();
 }
 
-/*
 function createExportModal () {
-    var modal      = new ModalWindow({ id: 'exportModal', title: 'Export Attendance Information'}),
-        $fileName  = $('<input>', {type: 'text', id: 'fileName', name: 'fileName'}),
-        $fileType  = $('<select>', {class: 'btn btn-secondary dropdown-toggle dropdown-toggle-split', id: 'fileType', name: 'fileType'} ),
-        $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
+    var modal         = new ModalWindow({ id: 'exportModal', title: 'Export Attendance Information'}),
+        $fileName     = $('<input>', {type: 'text', id: 'fileName', name: 'fileName', style: 'margin-bottom: 20px'}),
+        $fileType     = $('<select>', {class: 'btn btn-secondary dropdown-toggle dropdown-toggle-split', id: 'fileType', name: 'fileType'} ),
+        $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' }),
+        $overallCheck = $('<input>', {type: 'checkbox', id: 'overall', name: 'overall'}),
+        $indivCheck   = $('<input>', {type: 'checkbox', id: 'session', name: 'session'}),
+        $checkDiv     = $('<div>', {style: 'display: none'});
     modal.$body
         .append($('<p>', {text: 'Specify output file name and type:'}))
         .append($fileName)
         .append($fileType
             .append($('<option>', { text: 'csv', value: 'csv'}))
-            .append($('<option>', { text: 'xslx', value: 'csv'})));
+            .append($('<option>', { text: 'xslx', value: 'xlsx'})));
+        /*
+        .append($checkDiv
+            .append($('<h5>', { text: 'Include:' }))
+            .append($('<div>', {class: 'block'})
+                .append($overallCheck)
+                .append($('<label>', {text: 'Overall Attendance Information', style: 'margin-left: 5px;'})))
+            .append($('<div>', {class: 'block'})
+                .append($indivCheck)
+                .append($('<label>', {text: 'Individual Session Information', style: 'margin-left: 6px;'}))));
+        */
+        
     modal.$footer
         .prepend($exportButton);
-     $exportButton
+    
+    /*
+    $fileType.change(function () {
+        if($fileType.val() === 'xlsx') 
+            $checkDiv.show();
+        else
+            $checkDiv.hide();
+    });
+    */
+
+    $exportButton
         .click(function () {
+            var cID = this.course.cID;
             $exportButton.remove();
             modal.$body.empty();
-            window.location.href = '/professor/' + this.course.cID + '/exportAttendance';
             modal.$body
             .spin()
             .addClass('spin-min-height');
             $.get({
-                url: '/professor/' + this.course.cID + '/exportAttendance'
-             }).done(function(status, xhr) {
-                modal.success("Success", "File Successfully Downloaded");
+                url: '/professor/' + cID + '/exportAttendance',
+                data: {fileName: $fileName.val(), fileType: $fileType.val()}
+             }).done(function(data,status, xhr) {
+                if($fileType.val() === 'csv') { 
+                    window.location.href = this.url;  
+                    modal.success("Success", "File Successfully Downloaded");
+                }
+                else {
+                    // Need to write to workbook, only have sheet
+                    var workbook = createSheets(data);
+                    /* bookType can be any supported output type */
+                    var wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
+                    var wbout = XLSX.write(workbook,wopts);
+                    /* the saveAs call downloads a file on the local machine */
+                    var blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+                    var xlName;
+                    if(!$fileName.val())
+                        xlName = "attendance.xlsx";
+                    else 
+                        xlName = $fileName.val() + ".xlsx";
+                    saveData(blob, xlName);
+                    modal.success("Success", "File Successfully Downloaded");
+                }
              }).fail(function(xhr, status, errorThrown) {
-                modal.error("Error", "Error Downloading File");
+                modal.error("Error", xhr.responseText);
              }).always(function(a, status, b) {
                 modal.$body.spin(false);
              });
@@ -329,7 +364,48 @@ function createExportModal () {
     
     modal.show();
 }
-*/
+
+function saveData (data, fileName) {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    //blob = new Blob([json], {type: "octet/stream"}),
+    url = window.URL.createObjectURL(data);
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+function createSheets(json) {
+    var sheet1 = [],
+        sheet2 = [],
+        wb     = { SheetNames:[], Sheets:{} },
+        i      = 1,
+        j      = 0;
+    while (json[i].hasOwnProperty('sNetID')) {
+        sheet1[j++] = json[i];
+        i++;
+    }
+    j = 0;
+    for(i = i + 2; i < json.length; i++)
+        sheet2[j++] = json[i];
+    
+    wb.SheetNames.push('Overall Att');
+    wb.Sheets['Overall Att'] = XLSX.utils.json_to_sheet(sheet1, { header: ["sNetID", "attCount", "attPercent"] });
+    
+    wb.SheetNames.push('Session Info');
+    wb.Sheets['Session Info'] = XLSX.utils.json_to_sheet(sheet2, { header: ["NetID", "Student #", "First Name", "Last Name"], dateNF: 'dd"."mm"."yyyy'});
+
+    return wb;
+}
+
+function s2ab(s) {
+    var buf = new ArrayBuffer(s.length);
+    var view = new Uint8Array(buf);
+    for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+    return buf;
+}
 
 function checkFileExtension(file) {
     var splitArr  = file.name.split('.'),

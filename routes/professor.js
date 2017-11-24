@@ -120,43 +120,54 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 // Session Info: Total Number of students + Percent Attendance
 //               List of students in attendance: name, netId, std#   
 router.get('/:classId/exportAttendance', function(req, res, next) {
-    var classId  = req.params.classId;
+    var classId        = req.params.classId,
+        fileName       = req.query.fileName,
+        fileType       = req.query.fileType;
     db.aggregateInfo(classId, function(err, attInfo, fields) {
         if (err) return routeHelper.sendError(res, err, `Error retrieving attendance information for ${classId}`);
         if (attInfo.length == 0) return routeHelper.sendError(res, err, `No Attendance Information for Course`);
         else {
             db.getNumSession(classId, function(err, numSessions, fields) {
                 if (err) return routeHelper.sendError(res, err, `Error retrieving number of sessions `);
-                if (numSessions.length == 0) res.send(`No Attendance sessions for couse`);
+                if (numSessions.length == 0) routeHelper.sendError(res, err, `No Attendance sessions for couse`);
                 else {
-                    for(let i = 0; i < attInfo.length; i++)
+                    for(var i = 0; i < attInfo.length; i++)
                         attInfo[i].attPercent = (attInfo[i].attCount / numSessions.length)*100; 
                     db.getSessionAttInfo(classId, function(err, sessInfo, fields) {
                         if (err) return routeHelper.sendError(res, err, `Error retrieving session information`);
-                        if (sessInfo.length == 0) return res.send(`No Session Information for course`);
+                        if (sessInfo.length == 0) return routeHelper.sendError(res, err, `No Session Information for course`);
                         result = [];
-                        result[0] = { header: "Overall Attendance Info" };
-                        result[1] = { col1: "NetID" , col2: "Attended (Total)", col3: "Attended (%)" }
-                        for(let i = 0; i < attInfo.length;i++)
-                            result[i + 2] = attInfo[i];
-                        var index = attInfo.length + 2;
+                        //result[0] = { sNetID: "Overall Attendance Info" };
+                        result[0] = { NetID: "NetID" , col2: "Attended (Total)", col3: "Attended (%)" }
+                        for(var i = 0; i < attInfo.length;i++)
+                            result[i + 1] = attInfo[i];
+                        var index = attInfo.length + 1;
                         result[index++] = {};
-                        result[index++] = { header: "Session Info" };
+                        //result[index++] = { col1: "Session Info" };
                         result[index++] = { col1: 'NetID', col2: 'Student #', col3: 'First Name', col4: 'Last Name' };                                           
                         var j = 0;
                         var date = 0;
                         while (j < sessInfo.length) {
                             if (date === sessInfo[j].attTime) {
-                                result[index++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
+                                result[index++] = { "NetID": sessInfo[j].sNetID, "Student #": sessInfo[j].stdNum, "First Name": sessInfo[j].fName, "Last Name": sessInfo[j].lName };
                                 j++;
                             } else {
                                 date = sessInfo[j].attTime;
                                 result[index++] = {};
-                                result[index++] = { sessDate: new Date(date) };
+                                result[index++] = { "NetID": (new Date(date)).toDateString() };
                             }
-                        }                 
-                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"');
-                        res.csv(result);                     
+                        }
+                      
+                        if(fileType === 'csv') {
+                            if(!fileName)
+                                fileName = 'attendance';                 
+                            res.setHeader('Content-disposition', 'attachment; filename=\"' + fileName + '.csv\"');
+                            res.csv(result);
+                        }
+                        else {
+                            res.json(result);
+                        }
+                                          
                     });
                 }
             });
