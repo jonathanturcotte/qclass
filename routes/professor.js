@@ -15,7 +15,7 @@ router.use(function(req, res, next) {
     if (!netId) return routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
     db.profExists(netId, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
-        if (!(results.length > 0)) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
+        if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
         req.user = { 
             netId: results[0].pNetID,
             firstName: results[0].fName,
@@ -81,11 +81,11 @@ router.post('/class/enroll/:classId', function(req, res, next) {
         if (!reqStudents[i]) return routeHelper.sendError(res, null, `Empty student entry at position ${i}`, 400);
         try {
             var student = new EnrollStudent(reqStudents[i]);
+            students.push(student);
         }
         catch (e) {
             return routeHelper.sendError(res, e, `Invalid student in list at position ${i}`, 400);
         }
-        students.push(student);
     }
     db.enroll(req.params.classId, students, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${helper.printArray(err.errorStudents)}` : ''}`);
@@ -117,14 +117,14 @@ router.post('/class/start/:classId', function(req, res, next) {
 router.get('/:classId/attendanceSessions', function(req, res, next) {
     db.getSessionAttInfo(req.params.classId, function(err, sessions, fields) {
         if (err) return routeHelper.sendError(res, err, `Error retrieving attendance sessions for ${req.user.netId}`);
-        if (sessions.length == 0) res.json({ numEnrolled: 0, sessions: [] });
+        if (sessions.length === 0) res.json({ numEnrolled: 0, sessions: [] });
         else {
             db.getEnrolledStudents(req.params.classId, function(err, enrolled, fields) {
                 if (err) return routeHelper.sendError(res, err);
                 var attSessions = organizeAttendanceSession(sessions);
                 res.json({ numEnrolled: enrolled.length, sessions: attSessions });
             });
-        };
+        }
     });
 });
 
@@ -136,20 +136,20 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
     var classId = req.params.classId;
     db.aggregateInfo(classId, function(err, attInfo, fields) {
         if (err) return routeHelper.sendError(res, err, `Error retrieving attendance information for ${classId}`);
-        if (attInfo.length == 0) res.send(`No Attendance Information for Course`);
+        if (attInfo.length === 0) res.send(`No Attendance Information for Course`);
         else {
             db.getNumSession(classId, function(err, numSessions, fields) {
                 if (err) return routeHelper.sendError(res, err, `Error retrieving number of sessions `);
-                if (numSessions.length == 0) res.send(`No Attendance sessions for couse`);
+                if (numSessions.length === 0) res.send(`No Attendance sessions for couse`);
                 else {
                     for(let i = 0; i < attInfo.length; i++)
                         attInfo[i].attPercent = (attInfo[i].attCount / numSessions.length)*100; 
                     db.getSessionAttInfo(classId, function(err, sessInfo, fields) {
                         if (err) return routeHelper.sendError(res, err, `Error retrieving session information`);
-                        if (sessInfo.length == 0) return res.send(`No Session Information for course`);
+                        if (sessInfo.length === 0) return res.send(`No Session Information for course`);
                         result = [];
                         result[0] = { header: "Overall Attendance Info" };
-                        result[1] = { col1: "NetID" , col2: "Attended (Total)", col3: "Attended (%)" }
+                        result[1] = { col1: "NetID" , col2: "Attended (Total)", col3: "Attended (%)" };
                         for(let i = 0; i < attInfo.length;i++)
                             result[i + 2] = attInfo[i];
                         var index = attInfo.length + 2;
@@ -168,7 +168,7 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                                 result[index++] = { sessDate: new Date(date) };
                             }
                         }                   
-                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"')
+                        res.setHeader('Content-disposition', 'attachment; filename=\"attendance.csv\"');
                         res.csv(result);                        
                     });
                 }

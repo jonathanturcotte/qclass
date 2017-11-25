@@ -4,10 +4,13 @@
 module.exports = class EnrollStudent {
     constructor(student) {
         if (!student) throw new Error();
-        this.netId = student.netId;
-        this.stdNum = student.stdNum;
+
+        this.netId     = student.netId;
+        this.stdNum    = student.stdNum;
         this.firstName = student.firstName;
-        this.lastName = student.lastName;
+        this.lastName  = student.lastName;
+
+        // TODO - Be more specific in the errors being thrown
         if (!this.netId || typeof(this.netId) !== 'string' || this.netId.length < 3 || this.netId.length > 20)
             throw new Error();
         if (!this.stdNum || typeof(this.stdNum) !== 'string' || this.stdNum.length < 3 || this.stdNum.length > 20)

@@ -20,9 +20,9 @@ var SessionTable = function(classID) {
             .append(this.$tablehead)
             .append(this.$tablebody);
         if ($appendTo) this.$table.appendTo($appendTo);
-        $.get(`/professor/${this.classID}/attendanceSessions`)
+        $.get('/professor/' + this.classID + '/attendanceSessions')
             .done(updateTable.bind(this))
-            .fail(failTable.bind(this))
+            .fail(failTable.bind(this));
         return this; // allows creation and buolding on same line, eg. var table = new SessionTable(...).build();
     };
 
@@ -34,27 +34,34 @@ var SessionTable = function(classID) {
 function updateTable(data, status, xhr) {
     this.$tablebody.empty();
     this.data = data;
+
     for (var i = 0; i < this.data.sessions.length; i++) {
         // Formatting
-        var session = this.data.sessions[i];
-        var date = new Date(session.sessDate);
-        var formattedDate = `${date.getDay()}/${date.getMonth() + 1}/${date.getFullYear().toString().substr(-2)} `
-            + `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`; // dd/mm/yy hh:mm:ss - note that day and month can be 1 or 2 digits
-        var attendance = session.studentList.length;
-        var isEmpty = session.studentList.length < 1;
+        var session       = this.data.sessions[i],
+            date          = new Date(session.sessDate),
+            attendance    = session.studentList.length,
+            isEmpty       = attendance < 1,
+
+            // Format the date as dd/mm/yy hh:mm:ss - note that day and month can be 1 or 2 digits
+            formattedDate = date.getDay() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear().toString().substr(-2) +
+                ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+
         if (!isEmpty)
-            attendance = attendance + ' students (' + +(attendance / this.data.numEnrolled * 100).toFixed(1) + '%)';
+            attendance = attendance + ' students (' + (attendance / this.data.numEnrolled * 100).toFixed(1) + '%)';
         else
             attendance = attendance + ' students';
         
         // Create main row 
         session.$td1 = $('<td>', { title: date.toString() }).text(formattedDate); 
         session.$td2 = $('<td>').text(attendance);
-        session.$tr = $('<tr>', { class: 'accordion-toggle', title: 'Click to view students in attendance' })
+        session.$tr  = $('<tr>', { class: 'accordion-toggle', title: 'Click to view students in attendance' })
             .append(session.$td1)
             .append(session.$td2);
+
         if (!isEmpty) {
-            with ({ oldSession: session }) { // Without this, session gets overridden by subsequent passes of the loop and every .click handler gets the last version of session
+            // Without this, session gets overridden by subsequent passes
+            // of the loop and every .click handler gets the last version of session
+            with ({ oldSession: session }) {
                 session.$tr.click(function() {
                     openAttendanceModal(formattedDate, oldSession.studentList);
                 });
@@ -64,13 +71,13 @@ function updateTable(data, status, xhr) {
         this.data.sessions[i] = session;
     }
     this.$spinDiv.remove();
-};
+}
 
 function failTable(xhr, status, errorThrown) {
     this.$table.addClass('table-danger');
     this.$spinDiv.remove();
     this.$tablebody.empty().append($('<p>', { class: 'text-danger', text: 'Error getting attendance sessions: ' + status }));
-};
+}
 
 function openAttendanceModal(date, studentList) {
     var id = 'attendance-modal';
@@ -94,6 +101,6 @@ function openAttendanceModal(date, studentList) {
     }
     modal.$body.append($table.append($tbody));
     modal.show();
-};
+}
 
 module.exports = SessionTable;

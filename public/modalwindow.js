@@ -1,4 +1,18 @@
 
+
+// If the window is closeable, these elements can be appended
+var CloseElements = {
+    headerEx: $('<button>', { class: 'close closeable', type: 'button' })
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', 'Close')
+        .append($('<span>')
+            .attr('aria-hidden', 'true')
+            .html('&times;')),
+
+    footerButton: $('<button>', { class: 'btn btn-default closeable',  text: 'Close' })
+            .attr('data-dismiss', 'modal')
+};
+
 /**
  * Creates a modal window and appends it to the body
  * @param {Object} options 
@@ -8,16 +22,10 @@
  */ 
 var ModalWindow = function(options) {
     // Initialization with defaults
-    this.id = 'modal-window';
-    this.title = '';
-    this.closeable = true;
-    // Evaluation of options
-    if (options) { // not empty
-        if (options.id) this.id = options.id;
-        if (options.title) this.title = options.title;
-        if (typeof(options.closeable) !== 'undefined' && options.closeable !== null) 
-            this.closeable = options.closeable;
-    }
+    this.id         = options.id        || 'modal-window';
+    this.title      = options.title     || '';
+    this.closeable  = options.closeable || true;
+
     // Construction of the elements
     $('#' + this.id).remove();
     var $window = $('<div>', { id: this.id, class: 'modal fade', role: 'dialog', tabindex: -1, }),
@@ -25,15 +33,19 @@ var ModalWindow = function(options) {
         $body = $('<div>', { class: 'modal-body' }),
         $header = $('<div>', { class: 'modal-header' })
             .append($('<h4>', { class: 'modal-title', text: this.title }));
-    if (this.closeable) { // append close button to footer
+
+    // Append close button to header and footer
+    if (this.closeable) {
         $footer.append(closeElements.footerButton);
         $header.append(closeElements.headerEx);
-    } else { // stop other closing methods
+    } else {
+        // Otherwise, stop other closing methods
         $window.modal({
             backdrop: 'static',
             keyboard: false
         });
     }
+
     $window
         .append($('<div>', { class: 'modal-dialog', role: 'document' })
             .append($('<div>', { class: 'modal-content' })
@@ -44,9 +56,10 @@ var ModalWindow = function(options) {
     
     this.$window = $window;
     this.$header = $header;
-    this.$body = $body;
+    this.$body   = $body;
     this.$footer = $footer;
-    
+};
+
     this.show = function() {
         this.$window.modal('show');
     };
@@ -55,15 +68,18 @@ var ModalWindow = function(options) {
         this.$window.modal('hide');
     };
 
-    this.appendToHeader = function($toAppend, shouldEmpty = false) {
+    this.appendToHeader = function($toAppend, shouldEmpty) {
+        shouldEmpty = (typeof shouldEmpty !== 'undefined') ?  shouldEmpty : false;
         appendToSection.call(this, shouldEmpty, this.$header, $toAppend);
     };
 
-    this.appendToBody = function($toAppend, shouldEmpty = false) {
+    this.appendToBody = function($toAppend, shouldEmpty) {
+        shouldEmpty = (typeof shouldEmpty !== 'undefined') ?  shouldEmpty : false;
         appendToSection.call(this, shouldEmpty, this.$body, $toAppend);
     };
 
-    this.appendToFooter = function($toAppend, shouldEmpty = false) {
+    this.appendToFooter = function($toAppend, shouldEmpty) {
+        shouldEmpty = (typeof shouldEmpty !== 'undefined') ?  shouldEmpty : false;
         appendToSection.call(this, shouldEmpty, this.$footer, $toAppend);
     };
 
@@ -77,7 +93,7 @@ var ModalWindow = function(options) {
     this.error = function(title, message) {
         updateStatus.call(this, title, message, 'modal-header-danger');
         if (!this.closeable) this.makeCloseable();
-    }
+    };
 
     /**
      * Transitions modal style to a success state.
@@ -89,7 +105,7 @@ var ModalWindow = function(options) {
     this.success = function(title, message) {
         updateStatus.call(this, title, message, 'modal-header-success');
         if (!this.closeable) this.makeCloseable();
-    }
+    };
 
     this.makeCloseable = function() {
         this.$header.append(closeElements.headerEx);
@@ -102,12 +118,15 @@ var ModalWindow = function(options) {
         this.$window.prev($('.modal-backdrop')).remove(); // remove second backdrop created by .modal()
         this.closeable = true;
     };
-};
+
+///////////////////////
+// Private Functions //
+///////////////////////
 
 function appendToSection(shouldEmpty, $section, $toAppend) {
     if (shouldEmpty) $section.empty();
     $section.append($toAppend);
-};
+}
 
 function updateStatus(title, message, headerClass) {
     if (message) {
@@ -119,16 +138,5 @@ function updateStatus(title, message, headerClass) {
     if (title) 
         this.$header.empty().append($('<h2>', { class: 'modal-title', text: title }));
 }
-
-var closeElements = {
-    headerEx: $('<button>', { class: 'close closeable', type: 'button' })
-        .attr('data-dismiss', 'modal')
-        .attr('aria-label', 'Close')
-        .append($('<span>')
-            .attr('aria-hidden', 'true')
-            .html('&times;')),
-    footerButton: $('<button>', { class: 'btn btn-default closeable',  text: 'Close' })
-            .attr('data-dismiss', 'modal')
-};
 
 module.exports = ModalWindow;

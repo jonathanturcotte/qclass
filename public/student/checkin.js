@@ -63,24 +63,24 @@ function build() {
     // Functions
 
     this.displayAlert = function(message, isError) {
-        this.$alert.empty()
+        this.$alert.empty();
         this.$alert.append($('<div>', { 
-            class: `alert alert-${isError === true ? 'danger' : 'success'}`, 
+            class: 'alert alert-' + (isError === true ? 'danger' : 'success'),
             text: message 
         }));
         this.$alert.collapse('show');
     };
-};
+}
 
 function success(data, status, xhr) {
     this.displayAlert('Signed in!', false);
-};
+}
 
 function failure(xhr, status, errorThrown) {
     if (xhr.status && xhr.status === 409) { // Conflict - already signed in
         this.displayAlert('Failed: Already logged in', true);
     }
-    this.displayAlert('Failed' + (xhr.responseText ? `: ${xhr.responseText}` : '!'), true); // Generic fail message, adds responseText if exists
-};
+    this.displayAlert('Failed' + (xhr.responseText ? xhr.responseText : '!'), true); // Generic fail message, adds responseText if exists
+}
 
 module.exports = CheckIn;

@@ -34,7 +34,7 @@ var ClassPage = function(course) {
                     modal.$body.spin()
                         .addClass('spin-min-height');
                     $.post({
-                        url: `/professor/class/start/${course.cID}`,
+                        url: '/professor/class/start/' + course.cID,
                         data: { duration: 30000 },
                         dataType: 'json'
                     }).done(function(data, status, xhr) {
@@ -50,7 +50,7 @@ var ClassPage = function(course) {
         replacePage(this.$page);
         this.sessionTable.startSpinner();
         window.app.classPage = this;
-    }
+    };
 };
 
 function replacePage($newPage) {
@@ -80,7 +80,7 @@ function startAttendance(data, modal) {
             modal.success('Complete');
             modal.$body.find('.start-modal-top-info')
                 .text('Session complete!')
-                .addClass('.start-modal-top-info-finished')
+                .addClass('.start-modal-top-info-finished');
         }).countdown('start');
 }
 

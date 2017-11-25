@@ -14,7 +14,7 @@ var SignInApp = function () {};
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
     this.navbar = new NavBar();
-    this.isProfessor() ? this.buildProfDOM() : this.buildStudentDOM();
+    this.isProfessor() ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
 };
 
 /**

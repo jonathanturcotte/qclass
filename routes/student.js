@@ -14,7 +14,7 @@ router.use(function(req, res, next) {
     if (!netId) return routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
     db.studentExists(netId, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
-        if (!(results.length > 0)) return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
+        if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
         req.user = { 
             netId: results[0].sNetID,
             studentNumber: results[0].stdNum,
