@@ -15,53 +15,61 @@ var ModalWindow  = require('../modalwindow'),
  * @param {string} course.cName
  * @param {string} course.cCode
  */
-var ClassPage = function(course) {
-    if (!course) throw new Error('ClassPage received empty course');
-    this.course = course;  
-
-    /**
-     * Builds the classpage, adds it to the DOM, and updates window.app.classPage
-     */
-    this.build = function() {
-        this.$page = $('<div>', { class: 'classpage' })
-            .append($('<h2>', { class: 'class-page-title-code', text: course.cCode }))
-            .append($('<h3>', { class: 'class-page-title-name', text: course.cName }))
-            .append($('<a>', { class: 'class-page-start-link', href: '#' }) // Start button 
-                .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
-                .click(function() {
-                    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
-                    modal.show();
-                    modal.$body.spin()
-                        .addClass('spin-min-height');
-                    $.post({
-                        url: '/professor/class/start/' + course.cID,
-                        data: { duration: 30000 },
-                        dataType: 'json'
-                    }).done(function(data, status, xhr) {
-                        startAttendance(data, modal);
-                    }).fail(function(xhr, status, errorThrown) {
-                        modal.error('Error', 'Error starting attendance session');
-                    }).always(function(a, status, b) {
-                        modal.$body.spin(false);
-                    });
-                }));
-        // Session table
-        this.sessionTable = new SessionTable(this.course.cID).build(this.$page);
-        replacePage(this.$page);
-        this.sessionTable.startSpinner();
-        window.app.classPage = this;
-    };
+var ClassPage = function() {
+    this.$element = $('.classpage');
 };
 
-function replacePage($newPage) {
-    var $classPage = $('.classpage');
-    if ($classPage.length > 0) 
-        $classPage.replaceWith($newPage);
-    else 
-        $newPage.appendTo($('.main-container'));
+ClassPage.prototype.displayCourse = function (course) {
+    this.course       = course;
+    this.sessionTable = new SessionTable(this.course.cID);
+
+    // Clear the old page
+    this.$element.empty();
+
+    build.call(this);
+};
+
+///////////////////////
+// Private Functions //
+///////////////////////
+
+/**
+ * Builds the classpage, adds it to the DOM
+ */
+function build () {
+    this.$element
+        .append($('<h2>', { class: 'class-page-title-code', text: this.course.cCode }))
+        .append($('<h3>', { class: 'class-page-title-name', text: this.course.cName }))
+        .append($('<a>', { class: 'class-page-start-link', href: '#' }) // Start button
+            .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
+            .click(startAttendance.bind(this, this.course.cID)));
+
+    // Session table
+    this.sessionTable.build(this.$element);
+    this.sessionTable.startSpinner();
 }
 
-function startAttendance(data, modal) {
+function startAttendance(courseID) {
+    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
+
+    modal.show();
+    modal.$body.spin()
+        .addClass('spin-min-height');
+
+    $.post({
+        url: '/professor/class/start/' + courseID,
+        data: { duration: 30000 },
+        dataType: 'json'
+    }).done(function(data, status, xhr) {
+        showAttendanceInfo(data, modal);
+    }).fail(function(xhr, status, errorThrown) {
+        modal.error('Error', 'Error starting attendance session');
+    }).always(function(a, status, b) {
+        modal.$body.spin(false);
+    });
+}
+
+function showAttendanceInfo(data, modal) {
     modal.$header.find($('.modal-title')).text('Running Attendance Session');
     modal.appendToBody([
         $('<p>', { class: 'start-modal-top-info' }),

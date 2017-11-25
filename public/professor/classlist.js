@@ -4,7 +4,7 @@ var ClassPage   = require('./classpage'),
 
 var ClassList = function () {
     this._$element = $('.classlist');
-    this.classes = [];
+    this.classes   = [];
     this.updateClasses();
 };
 
@@ -69,8 +69,8 @@ function buildList () {
 function selectClass (course) {
     $('.classlist-item').removeClass('classlist-item-selected');
     $('#' + course.cID).parent().addClass('classlist-item-selected');
-    var classPage = new ClassPage(course);
-    classPage.build();
+
+    window.app.classPage.displayCourse(course);
 }
 
 function updateSuccess (data, textStatus, jqXHR) {
@@ -104,20 +104,21 @@ function createAddClassModal () {
             $submitButton.remove();
             modal.$body.empty();
             modal.$body
-            .spin()
-            .addClass('spin-min-height');
+                .spin()
+                .addClass('spin-min-height');
+
             $.post({
                 url: '/professor/class/add',
                 data: { code: $cCodeInput.val(), name: $cNameInput.val() },
                 dataType: 'json'
-             }).done(function(status, xhr) {
+            }).done(function(status, xhr) {
                 modal.success("Success", $cCodeInput.val() + ' successfully added!');
                 window.app.classList.updateClasses();
-             }).fail(function(xhr, status, errorThrown) {
+            }).fail(function(xhr, status, errorThrown) {
                 modal.error("Error", xhr.responseText);
-             }).always(function(a, status, b) {
+            }).always(function(a, status, b) {
                 modal.$body.spin(false);
-             }); 
+            });
         });
     modal.show();
 }

@@ -1,6 +1,7 @@
 var NavBar      = require('./navbar'),
     CheckIn     = require('./student/checkin'),
     ClassList   = require('./professor/classlist'),
+    ClassPage   = require('./professor/classpage'),
     ModalWindow = require('./modalwindow');
 
 SITE_NAME = "Q-Class";
@@ -37,8 +38,11 @@ SignInApp.prototype.buildProfDOM = function () {
     $('<div>', { class: "classpage" }).appendTo($container);
 
     this.navbar.buildProfNavbar();
+
     this.classList = new ClassList();
     this.classList.updateClasses();
+
+    this.classPage = new ClassPage();
 };
 
 /**
