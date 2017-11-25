@@ -10,15 +10,17 @@ var ModalWindow  = require('../modalwindow'),
 
 /**
  * Creates a class page, responsible for the central window of the professor site
+*/
+var ClassPage = function() {
+    this.$element = $('.classpage');
+};
+/**
+ * Display's a course page given the course object
  * @param {Object} course The selected course the page should use to construct itself 
  * @param {string} course.cID
  * @param {string} course.cName
  * @param {string} course.cCode
- */
-var ClassPage = function() {
-    this.$element = $('.classpage');
-};
-
+*/
 ClassPage.prototype.displayCourse = function (course) {
     this.course       = course;
     this.sessionTable = new SessionTable(this.course.cID);
@@ -49,6 +51,8 @@ function build () {
     this.sessionTable.startSpinner();
 }
 
+// Creates the attendance modal window, makes the call
+// to the server to start a session.
 function startAttendance(courseID) {
     var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
 
@@ -69,6 +73,7 @@ function startAttendance(courseID) {
     });
 }
 
+// Updates a modal window with an attendance sessions' info
 function showAttendanceInfo(data, modal) {
     modal.$header.find($('.modal-title')).text('Running Attendance Session');
     modal.appendToBody([
