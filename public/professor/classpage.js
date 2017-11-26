@@ -23,12 +23,14 @@ var ClassPage = function() {
 */
 ClassPage.prototype.displayCourse = function (course) {
     this.course       = course;
-    this.sessionTable = new SessionTable(this.course.cID);
 
     // Clear the old page
     this.$element.empty();
-
     build.call(this);
+
+    // Create the appropriate session table
+    this.sessionTable = new SessionTable(this.course.cID, this.$element);
+    this.sessionTable.startSpinner();
 };
 
 ///////////////////////
@@ -45,10 +47,6 @@ function build () {
         .append($('<a>', { class: 'class-page-start-link', href: '#' }) // Start button
             .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
             .click(startAttendance.bind(this, this.course.cID)));
-
-    // Session table
-    this.sessionTable.build(this.$element);
-    this.sessionTable.startSpinner();
 }
 
 // Creates the attendance modal window, makes the call

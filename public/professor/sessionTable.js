@@ -1,42 +1,59 @@
 var ModalWindow = require('../modalwindow');
 
-var SessionTable = function(classID) {
-    this.classID = classID;
-
-    /**
-     * Construct the table
-     * @param {Object=} $appendTo Optional jQuery object to which the table will be appended
-     */
-    this.build = function($appendTo) {
-        this.$spinDiv = $('<div>', { class: 'session-table-spin-div' });
-        this.$tablehead = $('<thead>')
-                .append($('<th>').html('Date'))
-                .append($('<th>').html('Attendance (%)'));
-        this.$tablebody = $('<tbody>')
-            .append($('<tr>')
-                .append($('<td>', { colspan: 2 })
-                    .append($(this.$spinDiv)))); 
-        this.$table = $('<table>', { class: 'session-table table-bordered table-sm table-hover' })
-            .append(this.$tablehead)
-            .append(this.$tablebody);
-        if ($appendTo) this.$table.appendTo($appendTo);
-        $.get('/professor/' + this.classID + '/attendanceSessions')
-            .done(updateTable.bind(this))
-            .fail(failTable.bind(this));
-        return this; // allows creation and buolding on same line, eg. var table = new SessionTable(...).build();
-    };
-
-    this.startSpinner = function() {
-        this.$spinDiv.spin();
-    };
+/**
+ * Creates a session table that displays attendance sessions
+ * @param {String} classID    The ID of the class the table will show sessions of
+ * @param {Object} $container jQuery object to which the table will be appended
+ */
+var SessionTable = function(classID, $container) {
+    this.classID  = classID;
+    this.$element = $container;
+    build.call(this);
+    this.updateSessions();
 };
+
+SessionTable.prototype.updateSessions = function () {
+    $.get('/professor/' + this.classID + '/attendanceSessions')
+        .done(updateTable.bind(this))
+        .fail(failTable.bind(this));
+};
+
+SessionTable.prototype.startSpinner = function () {
+    this.$spinDiv.spin();
+};
+
+SessionTable.prototype.stopSpinner = function () {
+    this.$spinDiv.spin(false);
+};
+
+///////////////////////
+// Private Functions //
+///////////////////////
+
+function build () {
+    // Build the table
+    this.$spinDiv = $('<div>', { class: 'session-table-spin-div' });
+    this.$tablehead = $('<thead>')
+        .append($('<th>').html('Date'))
+        .append($('<th>').html('Attendance (%)'));
+
+    this.$tablebody = $('<tbody>')
+        .append($('<tr>')
+            .append($('<td>', { colspan: 2 })
+                .append($(this.$spinDiv))));
+
+    this.$table = $('<table>', { class: 'session-table table-bordered table-sm table-hover' })
+        .append(this.$tablehead)
+        .append(this.$tablebody);
+
+    this.$table.appendTo(this.$element);
+}
 
 function updateTable(data, status, xhr) {
     this.$tablebody.empty();
     this.data = data;
 
     for (var i = 0; i < this.data.sessions.length; i++) {
-        // Formatting
         var session       = this.data.sessions[i],
             date          = new Date(session.sessDate),
             attendance    = session.studentList.length,
@@ -59,14 +76,10 @@ function updateTable(data, status, xhr) {
             .append(session.$td2);
 
         if (!isEmpty) {
-            // Without this, session gets overridden by subsequent passes
-            // of the loop and every .click handler gets the last version of session
-            with ({ oldSession: session }) {
-                session.$tr.click(function() {
-                    openAttendanceModal(formattedDate, oldSession.studentList);
-                });
-            }
+            // If there was attendance for this session, make it clickable
+            session.$tr.click(openAttendanceModal.bind(this, formattedDate, session.studentList));
         }
+
         this.$tablebody.append(session.$tr);
         this.data.sessions[i] = session;
     }

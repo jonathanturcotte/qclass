@@ -3,7 +3,7 @@ var ClassPage   = require('./classpage'),
 
 
 var ClassList = function () {
-    this._$element = $('.classlist');
+    this.$element = $('.classlist');
     this.classes   = [];
     this.updateClasses();
 };
@@ -26,7 +26,7 @@ ClassList.prototype.selectFirstClass = function () {
 
 function buildList () {
     // Clear any old list items
-    this._$element.empty();
+    this.$element.empty();
 
     // Create the basic sidebar
     var $sidebar = $('<nav>', { class: "d-block bg-list sidebar" });
@@ -63,7 +63,7 @@ function buildList () {
     $button.appendTo($sidebar);
 
     // Append the sidebar to the page
-    $sidebar.appendTo(this._$element);
+    $sidebar.appendTo(this.$element);
 }
 
 function selectClass (course) {
