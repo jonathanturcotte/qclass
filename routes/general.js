@@ -6,14 +6,14 @@ var express     = require('express'),
 
 // GET user info
 router.get('/info', function(req, res, next) {
-    netID = req.cookies.netId;
+    netID = req.cookies.netID;
     
     db.studentExists(netID, function(err, results, fields) {
         if (err) 
             return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length !== 0) {
             res.status(200).json({ 
-                netId: results[0].NetID,
+                netID: results[0].NetID,
                 firstName: results[0].fName,
                 lastName: results[0].lName,
                 isProf: false
@@ -24,7 +24,7 @@ router.get('/info', function(req, res, next) {
                     return routeHelper.sendError(res, err, 'Error checking netID');
                 if (results.length !== 0) {
                     res.status(200).json({ 
-                        netId: results[0].pNetID,
+                        netID: results[0].pNetID,
                         firstName: results[0].fName,
                         lastName: results[0].lName,
                         isProf: true
