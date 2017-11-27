@@ -10,10 +10,10 @@ var pool = mysql.createPool({
     database: "SISystem"
 });
 
-exports.addClass = function(netId, code, name, callback) {
+exports.addClass = function(netID, code, name, callback) {
     var id = uuid();
     var query = `INSERT INTO course (pNetId, cID, cCode, cName) VALUES (?, ?, ?, ?)`;
-    runQuery(query, [netId, id, code, name], function(err, results, fields) {
+    runQuery(query, [netID, id, code, name], function(err, results, fields) {
         if (err) callback(err);
         else callback(err, err ? null : id, results, fields);
     });
@@ -31,7 +31,7 @@ exports.enroll = function(classId, students, callback) {
         var newStudents = [];
         var errorStudents = [];
         async.forEachOf(students, function(student, i, innerCallback) {
-            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netId], function(err, results, fields) {
+            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netID], function(err, results, fields) {
                 if (err) {
                     errorStudents.push(student);
                     innerCallback(err);
@@ -49,7 +49,7 @@ exports.enroll = function(classId, students, callback) {
                             innerCallback();
                         } else { // student exists, need to check current enrollment to avoid attempting duplicates
                             alreadyEnrolledQuery = 'SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?';
-                            runExistenceQuery(alreadyEnrolledQuery, [student.netId, classId], function(err, result) {
+                            runExistenceQuery(alreadyEnrolledQuery, [student.netID, classId], function(err, result) {
                                 if (err) innerCallback(err);
                                 else {
                                     if (!result) toEnroll.push(student);
@@ -68,7 +68,7 @@ exports.enroll = function(classId, students, callback) {
             } else {
                 if (newStudents.length > 0) {
                     for (var i = 0; i < newStudents.length; i++) 
-                        newStudents[i] = [ newStudents[i].netId, newStudents[i].stdNum, newStudents[i].firstName, newStudents[i].lastName ];
+                        newStudents[i] = [ newStudents[i].netID, newStudents[i].stdNum, newStudents[i].firstName, newStudents[i].lastName ];
                     con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [newStudents], function(err, results, fields) {
                         if (err) callback(err);
                         else _runEnrollQuery(con, classId, toEnroll, callback);
@@ -83,25 +83,25 @@ function _runEnrollQuery(con, classId, toEnroll, callback) {
     if (toEnroll.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
     else {
         for (var i = 0; i < toEnroll.length; i++)
-            toEnroll[i] = [toEnroll[i].netId, classId];
+            toEnroll[i] = [toEnroll[i].netID, classId];
         con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [toEnroll], callback);
     }
 }
 
-exports.profExists = function(netId, callback) {
-    runQuery(`SELECT * FROM professor WHERE pNetID = ? LIMIT 1`, [netId], callback);
+exports.profExists = function(netID, callback) {
+    runQuery(`SELECT * FROM professor WHERE pNetID = ? LIMIT 1`, [netID], callback);
 };
 
-exports.studentExists = function(netId, callback) {
-    runQuery(`SELECT * FROM student WHERE sNetID = ? LIMIT 1`, [netId], callback);
+exports.studentExists = function(netID, callback) {
+    runQuery(`SELECT * FROM student WHERE sNetID = ? LIMIT 1`, [netID], callback);
 };
 
-exports.ownsClass = function(classId, netId, callback) {
-    runExistenceQuery(`SELECT * FROM course WHERE pNetID = ? AND cID = ? LIMIT 1`, [netId, classId], callback);
+exports.ownsClass = function(classId, netID, callback) {
+    runExistenceQuery(`SELECT * FROM course WHERE pNetID = ? AND cID = ? LIMIT 1`, [netID, classId], callback);
 };
 
-exports.isEnrolled = function(netId, classId, callback) {
-    runExistenceQuery(`SELECT * FROM  enrolled WHERE sNetID = ? AND cID = ? LIMIT 1`, [netId, classId], callback);
+exports.isEnrolled = function(netID, classId, callback) {
+    runExistenceQuery(`SELECT * FROM  enrolled WHERE sNetID = ? AND cID = ? LIMIT 1`, [netID, classId], callback);
 };
 
 exports.getEnrolledClasses = function(studentId, callback) {
@@ -122,9 +122,9 @@ exports.startAttendance = function(classId, duration, time, callback) {
     runQuery(query, [[[classId, time, duration]]], callback);
 }
 
-exports.recordAttendance = function(netId, classId, time, callback) {
+exports.recordAttendance = function(netID, classId, time, callback) {
     var query = `INSERT INTO attendance (cID, attTime, sNetID) VALUES ?`;
-    runQuery(query, [[[classId, time, netId]]], callback);
+    runQuery(query, [[[classId, time, netID]]], callback);
 }
 
 exports.getTeachesClasses = function(profId, callback) {
