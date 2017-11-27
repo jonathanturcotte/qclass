@@ -109,6 +109,12 @@ router.post('/class/start/:classId', function(req, res, next) {
     } });
 });
 
+router.post('/class/stop/:classId', function(req, res, next) {
+    var result = attendanceSessions.stopClass(req.params.classId);
+    if (!result.success) return routeHelper.sendError(res, null, result.err.message, result.err.status);
+    res.status(204).send();
+});
+
 /** GET all attendance sessions for a certain class
  * used to fill table on professor page
  * contains number of enrolled studnets for attendance calculations

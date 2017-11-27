@@ -16,8 +16,9 @@ var ModalWindow = function(options) {
     this.$window = $('<div>', { id: this.id, class: 'modal fade', role: 'dialog', tabindex: -1, }),
     this.$footer = $('<div>', { class: 'modal-footer' }),
     this.$body   = $('<div>', { class: 'modal-body' }),
+    this.$title  = $('<h4>', { class: 'modal-title', text: this.title }),
     this.$header = $('<div>', { class: 'modal-header' })
-            .append($('<h4>', { class: 'modal-title', text: this.title }));
+            .append(this.$title);
 
     this.$window.append($('<div>', { class: 'modal-dialog', role: 'document' })
         .append($('<div>', { class: 'modal-content' })
@@ -92,22 +93,22 @@ ModalWindow.prototype.success = function (title, message) {
 ModalWindow.prototype.makeCloseable = function () {
     // TODO: make this less ugly
     // The close elements
-    var $headerEx    = $('<button>', { class: 'close closeable', type: 'button' })
+    this.$headerEx = $('<button>', { class: 'close closeable', type: 'button' })
         .attr('data-dismiss', 'modal')
         .attr('aria-label', 'Close')
         .append($('<span>')
             .attr('aria-hidden', 'true')
-            .html('&times;')),
-        $footerButton = $('<button>', { class: 'btn btn-default closeable',  text: 'Close' })
+            .html('&times;'));
+    this.$closeButton = $('<button>', { class: 'btn btn-default closeable',  text: 'Close' })
             .attr('data-dismiss', 'modal');
 
-    this.$header.append($headerEx);
-    this.$footer.append($footerButton);
+    this.$header.append(this.$headerEx);
+    this.$footer.append(this.$closeButton);
 
     this.$window.removeData('bs.modal').modal({
-            backdrop: true,
-            keyboard: true
-        });
+        backdrop: true,
+        keyboard: true
+    });
 
     this.closeable = true;
 };
@@ -130,8 +131,10 @@ function updateStatus(title, message, headerClass) {
             .append($('<p>', { text: message }));
     }
 
-    if (title)
-        this.$header.empty().append($('<h2>', { class: 'modal-title', text: title }));
+    if (title) {
+        this.$title = $('<h4>', { class: 'modal-title', text: title });
+        this.$header.empty().append(this.$title);
+    }
 
     this.$header.addClass(headerClass);
 }

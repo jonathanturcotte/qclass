@@ -5,6 +5,7 @@ const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
     DEFAULT_DURATION = 60000,
     MIN_DURATION = 30000;
 
+    // TODO: add mutex on the sessions object since the setTimeout functions run asynchronously from the request event loop
 var sessions = []; // array of running attendanceSessions, contains objects of the form { classId, code, time }
 
 /**
@@ -87,4 +88,12 @@ exports.getEntryByCode = function(code) {
     else {
         return found;
     }
+};
+
+exports.stopClass = function(classID) {
+    var index = sessions.findIndex(function(e) { return e.classId === classID });
+    if (index === -1)
+        return { success: false, err: { status: 404, message: 'Class not running' } }
+    sessions.splice(index, 1);
+    return { success: true }
 };

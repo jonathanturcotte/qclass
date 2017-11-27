@@ -22,7 +22,7 @@ var ClassPage = function() {
  * @param {string} course.cCode
 */
 ClassPage.prototype.displayCourse = function (course) {
-    this.course       = course;
+    this.course = course;
 
     // Clear the old page
     this.$element.empty();
@@ -52,7 +52,7 @@ function build () {
 // Creates the attendance modal window, makes the call
 // to the server to start a session.
 function startAttendance(courseID) {
-    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false });
+    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session' });
 
     modal.show();
     modal.$body.spin()
@@ -63,8 +63,9 @@ function startAttendance(courseID) {
         data: { duration: 30000 },
         dataType: 'json'
     }).done(function(data, status, xhr) {
-        showAttendanceInfo(data, modal);
-    }).fail(function(xhr, status, errorThrown) {
+        showAttendanceInfo.call(this, data, modal);
+    }.bind(this))
+    .fail(function(xhr, status, errorThrown) {
         modal.error('Error', 'Error starting attendance session');
     }).always(function(a, status, b) {
         modal.$body.spin(false);
@@ -73,23 +74,46 @@ function startAttendance(courseID) {
 
 // Updates a modal window with an attendance sessions' info
 function showAttendanceInfo(data, modal) {
-    modal.$header.find($('.modal-title')).text('Running Attendance Session');
+    var $timerText = $('<h3>', { class: 'start-modal-timer' }),
+        $timerInfo = $('<div>', { class: 'start-modal-running-info' })
+                .append($('<h3>', { class: 'start-modal-code', text: "Code: " + data.code.toUpperCase() }));
+    
+    modal.success('Running Attendance Session');
     modal.appendToBody([
         $('<p>', { class: 'start-modal-top-info' }),
         $('<div>', { class: 'flex flex-start' })
-            .append($('<div>', { class: 'start-modal-running-info' })
-                .append($('<h3>', { class: 'start-modal-code', text: "Code: " + data.code.toUpperCase() })))
+            .append($timerInfo)
             .append($('<div>', { class: 'start-modal-timer-container' }))
-                .append($('<h3>', { class: 'start-modal-timer' }))
+                .append($timerText)
     ], true);
+    modal.$closeButton.hide();
+    $finishButton = $('<button>', { class: 'btn btn-danger', text: 'Finish' })
+        .click(function() {
+            // TODO: spin middle of modal, deactivate finish button, pause timer
+            $.post({
+                url: 'professor/class/stop/' + this.course.cID
+            }).done(function(data, status, xhr) {
+                // TODO: show success message
+                console.log('success');
+            }).fail(function(xhr, status, errorThrown) {
+                // TODO: show failure message
+                console.log('failure');
+            }).always(function(a, status, b) {
+                // TODO: stop timer
+                $finishButton.hide();
+                modal.$closeButton.show();
+            });
+        }.bind(this));
+    modal.$footer.append($finishButton);
     
     // Countdown Timer
-    modal.$body.find($('.start-modal-timer'))
-        .countdown(data.endTime, function(e) {
+    $timerText.countdown(data.endTime, function(e) {
             $(this).text(e.strftime('%-H:%M:%S'));
         }).on('finish.countdown', function(e) {
-            modal.success('Complete');
-            modal.$body.find('.start-modal-top-info')
+            modal.$title.text('Complete');
+            $finishButton.hide();
+            modal.$closeButton.show();
+            $timerInfo
                 .text('Session complete!')
                 .addClass('.start-modal-top-info-finished');
         }).countdown('start');
