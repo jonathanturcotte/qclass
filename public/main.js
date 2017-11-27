@@ -15,15 +15,21 @@ var SignInApp = function () {};
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
     this.navbar = new NavBar();
-    this.isProfessor() ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
+
+    this.getUserInfo();
 };
 
 /**
- * Returns true if a given user id is a professor
- * In reality, currently not sure if we'd do this or SSO could do this
+ * Check if this is netID belongs to a prof
  */
-SignInApp.prototype.isProfessor = function () {
-    return Cookies.get('isProf') === 'true';
+SignInApp.prototype.getUserInfo = function () {
+    // TODO: Decide what should happen if this fails.
+    // Right now we just sign out
+    $.get('/general/info')
+        .done(function (info) {
+            console.log(info);
+            info.isProf ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
+        }.bind(this)).fail(this.signOut.bind(this));
 };
 
 /**

@@ -1,6 +1,6 @@
-var mysql = require('mysql'),
-    uuid = require('uuid/v4'),
-    async = require('async'),
+var mysql         = require('mysql'),
+    uuid          = require('uuid/v4'),
+    async         = require('async'),
     EnrollStudent = require('../models/EnrollStudent');
 
 var pool = mysql.createPool({

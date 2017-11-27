@@ -36,11 +36,6 @@ router.param('classId', function(req, res, next, classId) {
     });
 });
 
-// GET user info
-router.get('/info', function(req, res, next) {
-    res.json(req.user);
-});
-
 // GET all classes associated with a specific professor 
 router.get('/classes', function(req, res, next) {
     db.getTeachesClasses(req.user.netId, function(err, results, fields) {
