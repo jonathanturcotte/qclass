@@ -60,8 +60,7 @@ function updateTable(data, status, xhr) {
             isEmpty       = attendance < 1,
 
             // Format the date as dd/mm/yy hh:mm:ss - note that day and month can be 1 or 2 digits
-            formattedDate = date.getDay() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear().toString().substr(-2) +
-                ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+            formattedDate = formatDate(date);
 
         if (!isEmpty)
             attendance = attendance + ' students (' + (attendance / this.data.numEnrolled * 100).toFixed(1) + '%)';
@@ -114,6 +113,29 @@ function openAttendanceModal(date, studentList) {
     }
     modal.$body.append($table.append($tbody));
     modal.show();
+}
+
+/**
+ * Formats the date into DD/MM/YY hh:mm:ss
+ * @param {Date} date 
+ */
+function formatDate(date) {
+    var day    = formatDateEntry(date.getDate()),
+        month  = formatDateEntry(date.getMonth() + 1),
+        year   = date.getFullYear().toString().substr(-2),
+        hour   = formatDateEntry(date.getHours()),
+        minute = formatDateEntry(date.getMinutes()),
+        second = formatDateEntry(date.getSeconds());
+    return day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second;
+}
+
+/**
+ * Converts a number to a string and prepends a 0 if the value is not already 2-digit
+ * @param {number} num 
+ */
+function formatDateEntry(num) {
+    if (num < 10) return '0' + num;
+    else return '' + num;
 }
 
 module.exports = SessionTable;
