@@ -5,7 +5,6 @@ const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz',
     DEFAULT_DURATION = 60000,
     MIN_DURATION = 30000;
 
-    // TODO: add mutex on the sessions object since the setTimeout functions run asynchronously from the request event loop
 var sessions = []; // array of running attendanceSessions, contains objects of the form { classId, code, time }
 
 /**
@@ -49,30 +48,13 @@ exports.start = function(params) {
             if (err)
                 params.callback(err);
             else {
-                sessions.push({ classId: params.classId, code: code, time: time });
-                setTimeout(stop, params.duration, params.classId);
+                var timeout = setTimeout(_stopClass, params.duration, params.classId);
+                sessions.push({ classId: params.classId, code: code, time: time, timeout: timeout });
                 params.callback(null, code, time + params.duration);
             }
         });
     }
 };
-
-/**
- * Stop the running attendance session for a class.
- * Returns true on success, false if the classId is not found
- * @param {string} classId 
- */
-var stop = function(classId) {
-    var index = sessions.findIndex(function(e) { return e.classId === classId });
-    if (index === -1) {
-        console.warn(`attendanceSessions.stop(): no entry found for classId '${classId}'`);
-        return false;
-    }
-    sessions.splice(index, 1); 
-    console.log(`Stopped attendance session for ${classId}`);
-    return true;
-}
-exports.stop = stop;
 
 /**
  * Get the classId associated with a running session code.
@@ -90,10 +72,32 @@ exports.getEntryByCode = function(code) {
     }
 };
 
-exports.stopClass = function(classID) {
+/**
+ * Stop the running attendance session for a class.
+ * Returns an object with a success boolean and an err property if success is false
+ * err contains status {number} and message {string}
+ * If manual is truthy the timeout associated with the entry will be cleared
+ * @param {string} classID 
+ * @param {boolean} manual
+ */
+var _stopClass = function(classID, manual) {
     var index = sessions.findIndex(function(e) { return e.classId === classID });
-    if (index === -1)
-        return { success: false, err: { status: 404, message: 'Class not running' } }
+    if (index === -1) {
+        console.warn('attendanceSessions.stop(): no entry found for classId ' + classId);
+        return { success: false, err: { status: 404, message: 'Class not running' } };
+    }
+    if (manual) clearTimeout(sessions[index].timeout);
     sessions.splice(index, 1);
-    return { success: true }
+    console.log('Stopped attendance session for ' + classID);
+    return { success: true };
+};
+
+/**
+ * Stop the running attendance session for a class.
+ * Returns an object with a success boolean and an err property if success is false
+ * err contains status {number} and message {string}
+ * @param {string} classID 
+ */
+exports.stopClass = function(classID) {
+    return _stopClass(classID, true);
 };
