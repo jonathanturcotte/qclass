@@ -24,7 +24,7 @@ var express      = require('express'),
 
     // Create the app and server
     app          = express(),
-    server       = https.createServer(sslOptions, app).listen(8443);
+    server       = https.createServer(sslOptions, app).listen(443);
 
 // Initialize the socketIO
 app.io = io.initialize();

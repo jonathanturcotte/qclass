@@ -1,9 +1,9 @@
 {
-  "name": "projectcm",
-  "version": "0.0.0",
+  "name": "qclass",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node ./app.js",
     "build": "./node_modules/.bin/webpack --devtool source-map",
     "watch": "./node_modules/.bin/webpack --watch --progress --devtool source-map",
     "release": "./node_modules/.bin/webpack --plugin uglifyjs-webpack-plugin"
