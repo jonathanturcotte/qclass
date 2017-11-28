@@ -126,7 +126,7 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 // TODO: Figure out how to handle errors in the file download; possible solution to return URL and store file on server, UI then fetches it
 // Aggregate Info: student | attendance (%)
 // Session Info: Total Number of students + Percent Attendance
-//               List of students in attendance: name, netID, std#   
+//               List of students in attendance: name, netID, std#
 router.get('/:classId/exportAttendance', function(req, res, next) {
     var classId = req.params.classId;
     db.aggregateInfo(classId, function(err, attInfo, fields) {
