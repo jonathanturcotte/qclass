@@ -142,7 +142,7 @@ function createImportModal () {
         .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
         .append($file);
     modal.$footer
-        .prepend($importButton);
+        .prepend(this.$importButton);
     this.$importButton
        .click(importXLSX.bind(this, modal, $file));
     modal.show();
