@@ -74,32 +74,38 @@ function startAttendance(courseID) {
 
 // Updates a modal window with an attendance sessions' info
 function showAttendanceInfo(data, modal) {
-    var $timerText = $('<h3>', { class: 'start-modal-timer' }),
-        $timerInfo = $('<div>', { class: 'start-modal-running-info' })
-                .append($('<h3>', { class: 'start-modal-code', text: "Code: " + data.code.toUpperCase() }));
+    var $timerInfo = $('<div>', { class: 'start-modal-running-info' })
+            .append($('<h3>', { class: 'start-modal-code', text: "Code: " + data.code.toUpperCase() })),
+        $timerText = $('<h3>', { class: 'start-modal-timer' }),
+        $timerContainer = $('<div>', { class: 'start-modal-timer-container' })
+            .append($timerText);
     
     modal.success('Running Attendance Session');
     modal.appendToBody([
         $('<p>', { class: 'start-modal-top-info' }),
         $('<div>', { class: 'flex flex-start' })
             .append($timerInfo)
-            .append($('<div>', { class: 'start-modal-timer-container' }))
-                .append($timerText)
+            .append($timerContainer)
     ], true);
     modal.$closeButton.hide();
     $finishButton = $('<button>', { class: 'btn btn-danger', text: 'Finish' })
         .click(function() {
-            // TODO: spin middle of modal, deactivate finish button, pause timer
+            $finishButton.addClass('disabled');
+            $timerText.countdown('stop');
+            modal.$body.spin();
             $.post({
                 url: 'professor/class/stop/' + this.course.cID
             }).done(function(data, status, xhr) {
-                // TODO: show success message
-                console.log('success');
+                $timerContainer.empty().append($('<div>')
+                    .html('Ended session successfully'));
             }).fail(function(xhr, status, errorThrown) {
-                // TODO: show failure message
-                console.log('failure');
+                var text = 'Error ending session';
+                if (xhr.responseText) text += ': ' + xhr.responseText;
+                else text += '!';
+                $timerContainer.empty().append($('<div>', { class: 'text-danger' })
+                    .html(text));
             }).always(function(a, status, b) {
-                // TODO: stop timer
+                modal.$body.spin(false);
                 $finishButton.hide();
                 modal.$closeButton.show();
             });
