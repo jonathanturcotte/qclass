@@ -8,7 +8,7 @@ var express      = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser   = require('body-parser'),
     helmet       = require('helmet'),
-    csv          = require('express-csv');
+    csv          = require('express-csv'),
 
     // Setup SSL options
     sslOptions = {
@@ -23,7 +23,7 @@ var express      = require('express'),
     io           = require('./api/socket'),
 
     // Create the app and server
-    app          = express();
+    app          = express(),
     server       = https.createServer(sslOptions, app).listen(8443);
 
 // Initialize the socketIO

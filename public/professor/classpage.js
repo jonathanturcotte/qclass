@@ -122,86 +122,88 @@ function showAttendanceInfo(data, modal) {
     
     // Countdown Timer
     $timerText.countdown(data.endTime, function(e) {
-            $(this).text(e.strftime('%-H:%M:%S'));
-        }).on('finish.countdown', function(e) {
-            modal.$title.text('Complete');
-            $finishButton.hide();
-            modal.$closeButton.show();
-            $timerInfo
-                .text('Session complete!')
-                .addClass('.start-modal-top-info-finished');
-        }).countdown('start');
+        $(this).text(e.strftime('%-H:%M:%S'));
+    }).on('finish.countdown', function(e) {
+        modal.$title.text('Complete');
+        $finishButton.hide();
+        modal.$closeButton.show();
+        $timerInfo
+            .text('Session complete!')
+            .addClass('.start-modal-top-info-finished');
+    }).countdown('start');
 }
 
 function createImportModal () {
     var modal = new ModalWindow({ id: 'importModal', title: 'Import Classlist'}),
-        $file = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' }),
-        $importButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Import', id: 'importButton' });
+        $file = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' });
+    this.$importButton = $('<button>', { type: 'submit', class: 'btn btn-primary', text: 'Import', id: 'importButton' });
+    
     modal.$body
         .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
         .append($file);
     modal.$footer
         .prepend($importButton);
-    $importButton
-       .click(function () {
-            var file   = $file.get(0).files[0],
-                reader = new FileReader(),
-                cID    = this.course.cID;
-            
-            $importButton.remove();
-            modal.$body.empty();
-            modal.$body
-                .spin()
-                .addClass('spin-min-height');
-          
-            if (!file){
-                modal.error('Error', 'No file submitted');
-                return;
-            } else if (!checkFileExtension(file)) {
+    this.$importButton
+       .click(importXLSX.bind(this, modal, $file));
+    modal.show();
+}
+
+function importXLSX(modal, $file) {
+    var file   = $file.get(0).files[0],
+        reader = new FileReader(),
+        cID    = this.course.cID;
+    
+    this.$importButton.remove();
+    modal.$body.empty();
+    modal.$body
+        .spin()
+        .addClass('spin-min-height');
+  
+    if (!file){
+        modal.error('Error', 'No file submitted');
+        return;
+    } else if (!checkFileExtension(file)) {
+        modal.error('Error', 'Incorrect file type submitted');
+        return;
+    } else {            
+        reader.onload = function(e) {
+            var sheetData     = new Uint8Array(e.target.result),
+                workbook = null;
+
+            try {
+                workbook = XLSX.read(sheetData, { type: 'array' });
+            } catch(error) {
                 modal.error('Error', 'Incorrect file type submitted');
                 return;
-            } else {            
-                reader.onload = function(e) {
-                    var sheetData     = new Uint8Array(e.target.result),
-                        workbook = null;
-
-                    try{
-                        workbook = XLSX.read(sheetData, { type: 'array' });
-                    }catch(error){
-                        modal.error('Error', 'Incorrect file type submitted');
-                        return;
-                    }
-
-                    var sheet          = workbook.Sheets[workbook.SheetNames[0]],
-                        jsonSheet      = XLSX.utils.sheet_to_json(sheet, { header: ["stdNum", "name", "email", "dept", "year"] }),
-                        result         = {},
-                        formattedSheet = [];
-                   
-                    result = checkFormat    (jsonSheet);
-                    //check if any errors caught in the file's format
-                    if(result.error) { 
-                        modal.error('Error', result.error);
-                        return;
-                    }                    
-                    // if no error, send formatted sheet
-                    formattedSheet = result.sheet;
-                    $.post({
-                        url: 'professor/class/enrollClass/' + cID,
-                        data: JSON.stringify(formattedSheet),
-                        contentType: 'application/json'
-                    }).done(function(status, xhr) {
-                        modal.success('Success', 'Classlist successfully added!');
-                    }).fail(function(xhr, status, errorThrown) {
-                        modal.error("Error", xhr.responseText);
-                    }).always(function(a, status, b) {
-                        modal.$body.spin(false);
-                    });
-                };
-                reader.readAsArrayBuffer(file);
             }
-        }.bind(this));
-            
-    modal.show();
+
+            var sheet          = workbook.Sheets[workbook.SheetNames[0]],
+                jsonSheet      = XLSX.utils.sheet_to_json(sheet, { header: ["stdNum", "name", "email", "dept", "year"] }),
+                result         = {},
+                formattedSheet = [];
+           
+            result = checkFormat(jsonSheet);
+            //check if any errors caught in the file's format
+            if(result.error) { 
+                modal.error('Error', result.error);
+                return;
+            }                    
+            // if no error, send formatted sheet
+            formattedSheet = result.sheet;
+            $.post({
+                url: 'professor/class/enrollClass/' + cID,
+                data: JSON.stringify(formattedSheet),
+                contentType: 'application/json'
+            }).done(function(status, xhr) {
+                modal.success('Success', 'Classlist successfully added!');
+            }).fail(function(xhr, status, errorThrown) {
+                modal.error("Error", xhr.responseText);
+            }).always(function(a, status, b) {
+                modal.$body.spin(false);
+            });
+        };
+        reader.readAsArrayBuffer(file);
+    }
 }
 
 function createAddStudentModal () {
@@ -211,7 +213,7 @@ function createAddStudentModal () {
         $fName  = $('<input>', {type: 'text', name: 'fName', id: 'fName', class: 'form-control'  }),
         $lName  = $('<input>', {type: 'text', name: 'lName', id: 'lName', class: 'form-control'  }),
         $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' }),
-        //spans man
+        //spans
         $netIdSpan  = $('<span>', { class: "text-danger", style: 'margin-left: 120px; display: none'}),
         $stdNumSpan = $('<span>', { class: "text-danger", style: 'margin-left: 120px; display: none'}),
         $fNameSpan  = $('<span>', { class: "text-danger", style: 'margin-left: 120px; display: none'}),
@@ -242,14 +244,13 @@ function createAddStudentModal () {
         .prepend($submitButton);
 
     $submitButton
-        .click(function() {
+        .click(function() { // Not a separate function due to how many objects it requires in this scope
             var netId  = $netId.val(),
                 stdNum = $stdNum.val(),
                 fName  = $fName.val(),
                 lName  = $lName.val(),
                 errors = findErrors(netId, stdNum, fName, lName),
                 flag = 0;
-
             
             for(var i = 0; i < errors.length; i++) {
                 if(!errors[i]) {
@@ -326,10 +327,10 @@ function createExportModal () {
     var modal         = new ModalWindow({ id: 'exportModal', title: 'Export Attendance Information'}),
         $fileName     = $('<input>', {type: 'text', id: 'fileName', name: 'fileName', style: 'margin-bottom: 20px'}),
         $fileType     = $('<select>', {class: 'btn btn-secondary dropdown-toggle dropdown-toggle-split', id: 'fileType', name: 'fileType'} ),
-        $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' }),
         $overallCheck = $('<input>', {type: 'checkbox', id: 'overall', name: 'overall'}),
         $indivCheck   = $('<input>', {type: 'checkbox', id: 'session', name: 'session'}),
         $checkDiv     = $('<div>', {style: 'display: none'});
+    this.$exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
     modal.$body
         .append($('<p>', {text: 'Specify output file name and type:'}))
         .append($fileName)
@@ -348,7 +349,7 @@ function createExportModal () {
         */
         
     modal.$footer
-        .prepend($exportButton);
+        .prepend(this.$exportButton);
     
     /*
     $fileType.change(function () {
@@ -359,54 +360,56 @@ function createExportModal () {
     });
     */
 
-    $exportButton
-        .click(function () {
-            var cID = this.course.cID;
-            $exportButton.remove();
-            modal.$body.empty();
-            modal.$body
-            .spin()
-            .addClass('spin-min-height');
-            $.get({
-                url: '/professor/' + cID + '/exportAttendance',
-                data: {fileName: $fileName.val(), fileType: $fileType.val()}
-             }).done(function(data,status, xhr) {
-                if($fileType.val() === 'csv') { 
-                    window.location.href = this.url;  
-                    modal.success("Success", "File Successfully Downloaded");
-                }
-                else {
-                    // Need to write to workbook, only have sheet
-                    var workbook = createSheets(data);
-                    /* bookType can be any supported output type */
-                    var wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
-                    var wbout = XLSX.write(workbook,wopts);
-                    /* the saveAs call downloads a file on the local machine */
-                    var blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
-                    var xlName;
-                    if(!$fileName.val())
-                        xlName = "attendance.xlsx";
-                    else 
-                        xlName = $fileName.val() + ".xlsx";
-                    saveData(blob, xlName);
-                    modal.success("Success", "File Successfully Downloaded");
-                }
-             }).fail(function(xhr, status, errorThrown) {
-                modal.error("Error", xhr.responseText);
-             }).always(function(a, status, b) {
-                modal.$body.spin(false);
-             });
-             
-        }.bind(this));
-    
+    this.$exportButton
+        .click(exportClick.bind(this, modal, $fileName, $fileType));
     modal.show();
 }
+
+function exportClick(modal, $fileName, $fileType) {
+    var cID = this.course.cID;
+    this.$exportButton.remove();
+    modal.$body.empty();
+    modal.$body
+        .spin()
+        .addClass('spin-min-height');
+    $.get({
+        url: '/professor/' + cID + '/exportAttendance',
+        data: {fileName: $fileName.val(), fileType: $fileType.val()}
+     }).done(function (data, status, xhr) {
+         exportSuccess.call(this, data, status, xhr, $fileType, $fileName, modal)
+     }).fail(function(xhr, status, errorThrown) {
+        modal.error("Error", xhr.responseText);
+     }).always(function(a, status, b) {
+        modal.$body.spin(false);
+     });   
+}
+
+function exportSuccess(data, status, xhr, $fileType, $fileName, modal) {
+    if ($fileType.val() === 'csv') { 
+        window.location.href = this.url;  
+        modal.success("Success", "File Successfully Downloaded");
+    } else {
+        // Need to write to workbook, only have sheet
+        var workbook = createSheets(data);
+        /* bookType can be any supported output type */
+        var wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
+        var wbout = XLSX.write(workbook,wopts);
+        /* the saveAs call downloads a file on the local machine */
+        var blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+        var xlName;
+        if(!$fileName.val())
+            xlName = "attendance.xlsx";
+        else 
+            xlName = $fileName.val() + ".xlsx";
+        saveData(blob, xlName);
+        modal.success("Success", "File Successfully Downloaded");
+    }
+ }
 
 function saveData (data, fileName) {
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
-    //blob = new Blob([json], {type: "octet/stream"}),
     url = window.URL.createObjectURL(data);
     a.href = url;
     a.download = fileName;
@@ -506,7 +509,7 @@ function findErrors (netId, stdNum, fName, lName) {
     // check student number
     if (!stdNum || typeof(stdNum) !== 'string' || stdNum.length != 8) {
         if(!stdNum)
-            result[1] = "No Student # Provided" ;
+            result[1] = "No Student # Provided";
         else
             result[1] = "Improper Student # Format (Ex. 10050150)";
     }

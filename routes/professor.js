@@ -134,17 +134,17 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
         fileType = req.query.fileType;
     db.aggregateInfo(classId, function(err, attInfo, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance information for ' + classId);
-        if (attInfo.length == 0) return routeHelper.sendError(res, err, 'No Attendance Information for Course');
+        if (attInfo.length === 0) return routeHelper.sendError(res, null, 'No Attendance Information for Course');
         else {
             db.getNumSession(classId, function(err, numSessions, fields) {
                 if (err) return routeHelper.sendError(res, err, 'Error retrieving number of sessions');
-                if (numSessions.length == 0) routeHelper.sendError(res, err, 'No Attendance sessions for couse');
+                if (numSessions.length === 0) routeHelper.sendError(res, null, 'No Attendance sessions for couse');
                 else {
                     for(var i = 0; i < attInfo.length; i++)
                         attInfo[i].attPercent = (attInfo[i].attCount / numSessions.length)*100; 
                     db.getSessionAttInfo(classId, function(err, sessInfo, fields) {
                         if (err) return routeHelper.sendError(res, err, `Error retrieving session information`);
-                        if (sessInfo.length == 0) return routeHelper.sendError(res, null, `No Session Information for course`);
+                        if (sessInfo.length === 0) return routeHelper.sendError(res, null, `No Session Information for course`);
                         result = [];
                         //result[0] = { sNetID: "Overall Attendance Info" };
                         result[0] = { NetID: "NetID" , col2: "Attended (Total)", col3: "Attended (%)" }
@@ -219,10 +219,10 @@ function enroll(reqStudents, classId, res) {
         return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
     // Validate each entry in the students array
     for (var i = 0; i < reqStudents.length; i++) {
+        var student;
         try {
-            var student = new EnrollStudent(reqStudents[i]);
-        }
-        catch (e) {
+            student = new EnrollStudent(reqStudents[i]);
+        } catch (e) {
             return routeHelper.sendError(res, e, `Invalid student in list at position ${i}`, 400);
         }
         students.push(student);
