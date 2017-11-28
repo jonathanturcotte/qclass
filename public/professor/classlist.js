@@ -3,8 +3,8 @@ var ClassPage   = require('./classpage'),
 
 
 var ClassList = function () {
-    this._$element = $('.classlist');
-    this.classes = [];
+    this.$element = $('.classlist');
+    this.classes   = [];
     this.updateClasses();
 };
 
@@ -26,14 +26,14 @@ ClassList.prototype.selectFirstClass = function () {
 
 function buildList () {
     // Clear any old list items
-    this._$element.empty();
+    this.$element.empty();
 
     // Create the basic sidebar
     var $sidebar = $('<nav>', { class: "d-block bg-list sidebar" });
 
     // If there are no classes, show an informational message
     if (this.classes.length === 0) {
-        var $message = $('<p>', { class: "sidebar-empty-message text-light" });
+        var $message = $('<p>', { class: "sidebar-empty-message text-light noselect" });
         $message.append($('<i>', { text: "Add classes to have them show up here."} ));
         $message.appendTo($sidebar);
     } else {
@@ -43,7 +43,7 @@ function buildList () {
         // Create a list tag for each class
         this.classes.forEach(function (course) {
             $('<li>', { class: 'nav-item classlist-item' })
-                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link text-truncate text-white', href: '#', text: course.cCode + ":\n" + course.cName }))
+                .append($('<a>', { id: course.cID, class: 'nav-link classlist-link text-truncate text-white noselect', href: '#', text: course.cCode + ":\n" + course.cName }))
                 .click(selectClass.bind(this, course))
                 .appendTo($list);
         });
@@ -63,14 +63,14 @@ function buildList () {
     $button.appendTo($sidebar);
 
     // Append the sidebar to the page
-    $sidebar.appendTo(this._$element);
+    $sidebar.appendTo(this.$element);
 }
 
 function selectClass (course) {
     $('.classlist-item').removeClass('classlist-item-selected');
     $('#' + course.cID).parent().addClass('classlist-item-selected');
-    var classPage = new ClassPage(course);
-    classPage.build();
+
+    window.app.classPage.displayCourse(course);
 }
 
 function updateSuccess (data, textStatus, jqXHR) {
@@ -104,20 +104,21 @@ function createAddClassModal () {
             $submitButton.remove();
             modal.$body.empty();
             modal.$body
-            .spin()
-            .addClass('spin-min-height');
+                .spin()
+                .addClass('spin-min-height');
+
             $.post({
                 url: '/professor/class/add',
                 data: { code: $cCodeInput.val(), name: $cNameInput.val() },
                 dataType: 'json'
-             }).done(function(status, xhr) {
+            }).done(function(status, xhr) {
                 modal.success("Success", $cCodeInput.val() + ' successfully added!');
                 window.app.classList.updateClasses();
-             }).fail(function(xhr, status, errorThrown) {
+            }).fail(function(xhr, status, errorThrown) {
                 modal.error("Error", xhr.responseText);
-             }).always(function(a, status, b) {
+            }).always(function(a, status, b) {
                 modal.$body.spin(false);
-             }); 
+            });
         });
     modal.show();
 }

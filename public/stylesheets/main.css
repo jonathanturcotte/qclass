@@ -142,10 +142,11 @@ body {
     display: flex;
     justify-content: center;
     width: 100%;
+    margin-left: 20px;
 }
 
 .start-modal-code {
-
+    white-space: nowrap;
 }
 
 .student-checkin {
@@ -166,13 +167,45 @@ body {
     font-family: Consolas,Monaco,"Lucida Console","Liberation Mono","DejaVu Sans Mono","Bitstream Vera Sans Mono","Courier New", monospace;
     text-align: center;
     text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.student-submit-button {
+    width: 100%
 }
 
 .session-table-container {
     margin-top: 15px;
 }
 
-.session-table-container tbody {
-    overflow-y: auto;    /* Trigger vertical scroll    */
-    overflow-x: hidden;  /* Hide the horizontal scroll */
-    height: 10px;
+.session-table {
+    background-color: white;
+}
+
+.session-table-spin-div {
+    height: 55px;
+    position: relative;
+}
+
+.centered-table {
+    margin: auto;
+}
+
+.attendance-modal-body {
+    overflow-y: auto;
+    max-height: 550px;
+}
+
+.attendance-modal-date {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.attendance-modal-table th, td {
+    padding-right: 7px;
+    padding-left: 7px;
+}
+
+ .attendance-modal-table thead {
+    border-bottom: rgb(43, 43, 43)
+} 

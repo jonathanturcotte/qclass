@@ -15,7 +15,7 @@ router.use(function(req, res, next) {
     if (!netId) return routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
     db.profExists(netId, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
-        if (!(results.length > 0)) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
+        if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
         req.user = { 
             netId: results[0].pNetID,
             firstName: results[0].fName,
@@ -72,14 +72,17 @@ router.post('/class/add', function(req, res, next) {
 
 // For enrolling an entire classlist
 router.post('/class/enrollClass/:classId', function(req, res, next) {
-    var stdList        = req.body;
-    enroll(stdList, req.params.classId, res);         // Reminder: note this function can throw error without stopping execution
+    enroll(req.body, req.params.classId, res); // Reminder: note this function can throw error without stopping execution
 });
 
 // For enrolling a single student
 router.post('/class/enrollStudent/:classId', function(req, res, next) {
-    var std = [{ netId: req.body.netId, stdNum: req.body.stdNum, firstName: req.body.firstName, lastName: req.body.lastName}] ;
-
+    var std = [{ 
+        netId: req.body.netId, 
+        stdNum: req.body.stdNum, 
+        firstName: req.body.firstName, 
+        lastName: req.body.lastName
+    }];
     enroll(std, req.params.classId, res);
 });
 
@@ -96,6 +99,12 @@ router.post('/class/start/:classId', function(req, res, next) {
     } });
 });
 
+router.post('/class/stop/:classId', function(req, res, next) {
+    var result = attendanceSessions.stopClass(req.params.classId);
+    if (!result.success) return routeHelper.sendError(res, null, result.err.message, result.err.status);
+    res.status(204).send();
+});
+
 /** GET all attendance sessions for a certain class
  * used to fill table on professor page
  * contains number of enrolled studnets for attendance calculations
@@ -104,14 +113,14 @@ router.post('/class/start/:classId', function(req, res, next) {
 router.get('/:classId/attendanceSessions', function(req, res, next) {
     db.getSessionAttInfo(req.params.classId, function(err, sessions, fields) {
         if (err) return routeHelper.sendError(res, err, `Error retrieving attendance sessions for ${req.user.netId}`);
-        if (sessions.length == 0) res.json({ numEnrolled: 0, sessions: [] });
+        if (sessions.length === 0) res.json({ numEnrolled: 0, sessions: [] });
         else {
             db.getEnrolledStudents(req.params.classId, function(err, enrolled, fields) {
                 if (err) return routeHelper.sendError(res, err);
                 var attSessions = organizeAttendanceSession(sessions);
                 res.json({ numEnrolled: enrolled.length, sessions: attSessions });
             });
-        };
+        }
     });
 });
 
@@ -120,22 +129,22 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 // Session Info: Total Number of students + Percent Attendance
 //               List of students in attendance: name, netId, std#   
 router.get('/:classId/exportAttendance', function(req, res, next) {
-    var classId        = req.params.classId,
-        fileName       = req.query.fileName,
-        fileType       = req.query.fileType;
+    var classId  = req.params.classId,
+        fileName = req.query.fileName,
+        fileType = req.query.fileType;
     db.aggregateInfo(classId, function(err, attInfo, fields) {
-        if (err) return routeHelper.sendError(res, err, `Error retrieving attendance information for ${classId}`);
-        if (attInfo.length == 0) return routeHelper.sendError(res, err, `No Attendance Information for Course`);
+        if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance information for ' + classId);
+        if (attInfo.length == 0) return routeHelper.sendError(res, err, 'No Attendance Information for Course');
         else {
             db.getNumSession(classId, function(err, numSessions, fields) {
-                if (err) return routeHelper.sendError(res, err, `Error retrieving number of sessions `);
-                if (numSessions.length == 0) routeHelper.sendError(res, err, `No Attendance sessions for couse`);
+                if (err) return routeHelper.sendError(res, err, 'Error retrieving number of sessions');
+                if (numSessions.length == 0) routeHelper.sendError(res, err, 'No Attendance sessions for couse');
                 else {
                     for(var i = 0; i < attInfo.length; i++)
                         attInfo[i].attPercent = (attInfo[i].attCount / numSessions.length)*100; 
                     db.getSessionAttInfo(classId, function(err, sessInfo, fields) {
                         if (err) return routeHelper.sendError(res, err, `Error retrieving session information`);
-                        if (sessInfo.length == 0) return routeHelper.sendError(res, err, `No Session Information for course`);
+                        if (sessInfo.length == 0) return routeHelper.sendError(res, null, `No Session Information for course`);
                         result = [];
                         //result[0] = { sNetID: "Overall Attendance Info" };
                         result[0] = { NetID: "NetID" , col2: "Attended (Total)", col3: "Attended (%)" }
@@ -166,14 +175,12 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                         }
                         else {
                             res.json(result);
-                        }
-                                          
+                        }               
                     });
                 }
             });
         }
     });
-    
 });
 
 // pass in ordered session results from db

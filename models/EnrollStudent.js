@@ -4,11 +4,12 @@
 module.exports = class EnrollStudent {
     constructor(student) {
         if (!student) throw new Error();
-        this.netId = student.netId;
-        this.stdNum = student.stdNum;
+
+        this.netId     = student.netId;
+        this.stdNum    = student.stdNum;
         this.firstName = student.firstName;
         this.lastName = student.lastName;
-        if (!this.netId || typeof(this.netId) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(this.netId))) // TODO
+        if (!this.netId || typeof(this.netId) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(this.netId)))
             throw new Error();
         if (!this.stdNum || typeof(this.stdNum) !== 'string' || this.stdNum.length != 8)
             throw new Error();
