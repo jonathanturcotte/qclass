@@ -16,6 +16,7 @@ router.get('/user-info', function(req, res, next) {
                 netID: results[0].NetID,
                 firstName: results[0].fName,
                 lastName: results[0].lName,
+                stdNum: results[0].stdNum,
                 isProf: false
              });
         } else {
