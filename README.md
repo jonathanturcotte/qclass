@@ -23,7 +23,13 @@ Cookies is a global, so either manual setting through the developer console or c
 The project is located on the AWS server under `/opt/Q-Clicker-Web`
 
 #### General
-Make sure to run every command as sudo, as node can only use ports < 1000 if it's running as root. As a result, every command you do must use sudo.
+There is an easy start script, `startServer.sh`, that will pull any updates, update the database, webpack and uglify the frontend js, and start the server. It starts in the foreground, TODO is have it start it in the background. To run the script:
+
+```
+sudo ./startServer.sh
+```
+
+Otherwise just make sure to run every command as sudo, as node can only use ports < 1000 if it's running as root:
 ```
 sudo git pull origin master
 sudo npm install
