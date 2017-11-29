@@ -20,5 +20,10 @@
     "serve-favicon": "~2.3.2",
     "socket.io": "2.0.3",
     "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "express-csv": "^0.6.0",
+    "webpack": "^3.8.1",
+    "xlsx": "^0.11.10"
   }
 }
