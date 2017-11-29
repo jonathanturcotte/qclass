@@ -6,11 +6,9 @@ var express     = require('express'),
 
 // GET user info
 router.get('/user-info', function(req, res, next) {
-    var netID = req.cookies.netID;
-
     // As students should make up the majority of the users,
     // check if they're a student first
-    db.studentExists(netID, function(err, results, fields) {
+    db.studentExists(req.user.netID, function(err, results, fields) {
         if (err)
             return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length !== 0) {
@@ -22,7 +20,7 @@ router.get('/user-info', function(req, res, next) {
              });
         } else {
             // Otherwise check if they're a prof
-            db.profExists(netID, function(err, results, fields) {
+            db.profExists(req.user.netID, function(err, results, fields) {
                 if (err)
                     return routeHelper.sendError(res, err, 'Error checking netID');
                 if (results.length !== 0) {
