@@ -5,8 +5,8 @@ var express     = require('express'),
     db          = require('../api/db');
 
 // GET user info
-router.get('/info', function(req, res, next) {
-    netID = req.cookies.netID;
+router.get('/user-info', function(req, res, next) {
+    var netID = req.cookies.netID;
 
     // As students should make up the majority of the users,
     // check if they're a student first
@@ -14,7 +14,7 @@ router.get('/info', function(req, res, next) {
         if (err)
             return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length !== 0) {
-            res.status(200).json({
+            res.json({
                 netID: results[0].NetID,
                 firstName: results[0].fName,
                 lastName: results[0].lName,
@@ -26,7 +26,7 @@ router.get('/info', function(req, res, next) {
                 if (err)
                     return routeHelper.sendError(res, err, 'Error checking netID');
                 if (results.length !== 0) {
-                    res.status(200).json({
+                    res.json({
                         netID: results[0].pNetID,
                         firstName: results[0].fName,
                         lastName: results[0].lName,

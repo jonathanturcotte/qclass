@@ -111,7 +111,7 @@ router.post('/class/start/:classId', function(req, res, next) {
  */
 router.get('/:classId/attendanceSessions', function(req, res, next) {
     db.getSessionAttInfo(req.params.classId, function(err, sessions, fields) {
-        if (err) return routeHelper.sendError(res, err, `Error retrieving attendance sessions for ${req.user.netID}`);
+        if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance sessions for ' +req.user.netID);
         if (sessions.length === 0) res.json({ numEnrolled: 0, sessions: [] });
         else {
             db.getEnrolledStudents(req.params.classId, function(err, enrolled, fields) {

@@ -40,7 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/professor', professor);
 app.use('/student', student);
-app.use('/general', general);
+app.use('/', general);
 
 // Use Helmet to help cover any common security vulnerabilities
 app.use(helmet());

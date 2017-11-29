@@ -89,19 +89,19 @@ function _runEnrollQuery(con, classId, toEnroll, callback) {
 }
 
 exports.profExists = function(netID, callback) {
-    runQuery(`SELECT * FROM professor WHERE pNetID = ? LIMIT 1`, [netID], callback);
+    runQuery('SELECT * FROM professor WHERE pNetID = ? LIMIT 1', [netID], callback);
 };
 
 exports.studentExists = function(netID, callback) {
-    runQuery(`SELECT * FROM student WHERE sNetID = ? LIMIT 1`, [netID], callback);
+    runQuery('SELECT * FROM student WHERE sNetID = ? LIMIT 1', [netID], callback);
 };
 
 exports.ownsClass = function(classId, netID, callback) {
-    runExistenceQuery(`SELECT * FROM course WHERE pNetID = ? AND cID = ? LIMIT 1`, [netID, classId], callback);
+    runExistenceQuery('SELECT * FROM course WHERE pNetID = ? AND cID = ? LIMIT 1', [netID, classId], callback);
 };
 
 exports.isEnrolled = function(netID, classId, callback) {
-    runExistenceQuery(`SELECT * FROM  enrolled WHERE sNetID = ? AND cID = ? LIMIT 1`, [netID, classId], callback);
+    runExistenceQuery('SELECT * FROM  enrolled WHERE sNetID = ? AND cID = ? LIMIT 1', [netID, classId], callback);
 };
 
 exports.getEnrolledClasses = function(studentId, callback) {
@@ -123,7 +123,7 @@ exports.startAttendance = function(classId, duration, time, callback) {
 }
 
 exports.recordAttendance = function(netID, classId, time, callback) {
-    var query = `INSERT INTO attendance (cID, attTime, sNetID) VALUES ?`;
+    var query = 'INSERT INTO attendance (cID, attTime, sNetID) VALUES ?';
     runQuery(query, [[[classId, time, netID]]], callback);
 }
 
