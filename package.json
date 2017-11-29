@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "express-csv": "^0.6.0",
+    "helmet": "^3.9.0",
     "webpack": "^3.8.1",
     "xlsx": "^0.11.10"
   }
