@@ -9,6 +9,7 @@ var express      = require('express'),
     bodyParser   = require('body-parser'),
     helmet       = require('helmet'),
     csv          = require('express-csv'),
+    auth         = require('./api/auth'),
 
     // Setup SSL options
     sslOptions = {
@@ -38,9 +39,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/professor', professor);
-app.use('/student', student);
+app.use(auth.authenticate); // Run authentication first when any route is called
 app.use('/', general);
+app.use('/student', student);
+app.use('/professor', professor);
 
 // Use Helmet to help cover any common security vulnerabilities
 app.use(helmet());
