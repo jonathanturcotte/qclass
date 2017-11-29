@@ -95,7 +95,8 @@ function showAttendanceInfo(data, modal) {
             .append($timerInfo)
             .append($timerContainer)
     ], true);
-    modal.$closeButton.hide();
+    modal.$closeButton.text('Hide');
+
     $finishButton = $('<button>', { class: 'btn btn-danger', text: 'Finish' })
         .click(function() {
             $finishButton.addClass('disabled');
@@ -126,7 +127,6 @@ function showAttendanceInfo(data, modal) {
     }).on('finish.countdown', function(e) {
         modal.$title.text('Complete');
         $finishButton.hide();
-        modal.$closeButton.show();
         $timerInfo
             .text('Session complete!')
             .addClass('.start-modal-top-info-finished');
