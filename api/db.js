@@ -151,7 +151,7 @@ exports.aggregateInfo = function(classId, callback) {
                 FROM enrolled
                 WHERE enrolled.cID = ?) AS T1
                     LEFT JOIN (SELECT *
-                               FROM attendance NATURAL JOIN attendancesession) AS T2
+                               FROM attendance NATURAL JOIN attendanceSession) AS T2
                                ON (T1.sNetID = T2.sNetID))
          GROUP BY sNetID`;
     runQuery(query, [classId], callback);
