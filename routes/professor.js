@@ -11,9 +11,7 @@ var express            = require('express'),
  * If successful, req.user will contain an object with the netID, firstName and lastName of the prof
  */ 
 router.use(function(req, res, next) {
-    var netID = req.cookies.netID;
-    if (!netID) return routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
-    db.profExists(netID, function(err, results, fields) {
+    db.profExists(netId, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
         req.user = { 
