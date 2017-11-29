@@ -4,6 +4,7 @@ This is the web-application portion of the Q-Clicker project. The web-applicatio
 Created as a Queen's University ELEC 498 project.
 
 ## Development and Testing
+### Webpack
 The project is webpacked. Open two shells and navigate to the root of the repo, then run
  `npm start` in one to start the server, and `npm run watch` in the other to
  build the front-end bundle.
@@ -12,9 +13,31 @@ Other commands that are available to change the behaviour of webpack are `npm ru
  which builds the bundle once without watching for changes, and `npm run release`,
  which runs uglifyjs on the source, and then bundles it once.
 
+### Cookies
 Authentication stub - server parses the netID cookie
 To set from the client side, just run Cookies.set('netID', '12ozs'); with whatever netID you actually want in place of netID.
 Cookies is a global, so either manual setting through the developer console or calling it in client code works
+
+### Running on Linux AWS
+#### Location
+The project is located on the AWS server under `/opt/Q-Clicker-Web`
+
+#### General
+Make sure to run every command as sudo, as node can only use ports < 1000 if it's running as root. As a result, every command you do must use sudo.
+```
+sudo git pull origin master
+sudo npm install
+sudo npm start
+sudo npm run watch
+etc.
+```
+
+#### NodeJs Version
+By default my version of node was too old (4.7) and needed to be updated:
+```
+wget -qO- https://deb.nodesource.com/setup_7.x | sudo bash -
+sudo apt-get install -y nodejs
+```
 
 ## Database Test Information
 Run SISystem.sql to refresh database
