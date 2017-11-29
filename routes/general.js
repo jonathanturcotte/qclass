@@ -31,7 +31,7 @@ router.get('/user-info', function(req, res, next) {
                         isProf: true
                      });
                 } else {
-                    res.status(403).send("NetID not found: " + netID);
+                    res.status(403).send("NetID not found: " + req.user.netID);
                 }
             });
         }
