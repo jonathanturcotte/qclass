@@ -5,7 +5,7 @@ module.exports = class EnrollStudent {
     constructor(student) {
         if (!student) throw new Error();
 
-        this.netId     = student.netId;
+        this.netID     = student.netID;
         this.stdNum    = student.stdNum;
         this.firstName = student.firstName;
         this.lastName = student.lastName;

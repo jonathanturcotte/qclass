@@ -19,6 +19,7 @@ var express      = require('express'),
     // Require our routes and APIs
     professor    = require('./routes/professor'),
     student      = require('./routes/student'),
+    general      = require('./routes/general'),
     db           = require('./api/db'),
     io           = require('./api/socket'),
 
@@ -39,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/professor', professor);
 app.use('/student', student);
+app.use('/', general);
 
 // Use Helmet to help cover any common security vulnerabilities
 app.use(helmet());
