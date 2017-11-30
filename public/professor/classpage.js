@@ -116,6 +116,7 @@ function showAttendanceInfo(data, modal) {
             }).always(function(a, status, b) {
                 modal.$body.spin(false);
                 $finishButton.hide();
+                modal.$closeButton.text('Close');
                 modal.$closeButton.show();
             });
         }.bind(this));
