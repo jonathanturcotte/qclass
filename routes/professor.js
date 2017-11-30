@@ -6,21 +6,16 @@ var express            = require('express'),
     attendanceSessions = require('../api/data/attendanceSessions'),
     EnrollStudent      = require('../models/EnrollStudent');
 
-/**
- * Authenticate every request to the professor API against the DB
- * If successful, req.user will contain an object with the netID, firstName and lastName of the prof
- */ 
+// Authenticate every request to the professor API against the DB
+// If successful, req.user will gain the firstName and lastName of the prof 
 router.use(function(req, res, next) {
-    var netID = req.cookies.netID;
-    if (!netID) return routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
-    db.profExists(netID, function(err, results, fields) {
+    db.profExists(req.user.netID, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
-        req.user = { 
-            netID: results[0].pNetID,
-            firstName: results[0].fName,
-            lastName: results[0].lName
-        };
+        
+        req.user.firstName = results[0].fName;
+        req.user.lastName = results[0].lName;
+        
         next();
     });
 });
@@ -73,7 +68,7 @@ router.post('/class/enrollClass/:classId', function(req, res, next) {
 // For enrolling a single student
 router.post('/class/enrollStudent/:classId', function(req, res, next) {
     var std = [{ 
-        netId: req.body.netId, 
+        netID: req.user.netID, 
         stdNum: req.body.stdNum, 
         firstName: req.body.firstName, 
         lastName: req.body.lastName

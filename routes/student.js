@@ -5,22 +5,17 @@ var express = require('express'),
     db = require('../api/db'),
     attendanceSessions = require('../api/data/attendanceSessions');
 
-/**
- * Authenticate every request to the professor API against the DB
- * If successful, req.user will contain an object with the netID, studentNumber, firstName and lastName of the prof
- */ 
+// Authenticate every request to the professor API against the DB
+// If successful, req.user will gain the studentNumber, firstName and lastName of the student
 router.use(function(req, res, next) {
-    var netID = req.cookies.netID;
-    if (!netID) return routeHelper.sendError(res, null, 'Forbidden - No netID provided', 403);
-    db.studentExists(netID, function(err, results, fields) {
+    db.studentExists(req.user.netID, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
-        req.user = { 
-            netID: results[0].sNetID,
-            studentNumber: results[0].stdNum,
-            firstName: results[0].fName,
-            lastName: results[0].lName
-        };
+        
+        req.user.studentNumber = results[0].stdNum;
+        req.user.firstName = results[0].fName;
+        req.user.lastName = results[0].lName;
+        
         next();
     });
 });
