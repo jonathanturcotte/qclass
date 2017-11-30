@@ -68,7 +68,7 @@ router.post('/class/enrollClass/:classId', function(req, res, next) {
 // For enrolling a single student
 router.post('/class/enrollStudent/:classId', function(req, res, next) {
     var std = [{ 
-        netID: req.user.netID, 
+        netID: req.body.netID,
         stdNum: req.body.stdNum, 
         firstName: req.body.firstName, 
         lastName: req.body.lastName

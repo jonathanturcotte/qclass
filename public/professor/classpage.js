@@ -208,7 +208,7 @@ function importXLSX(modal, $file) {
 
 function createAddStudentModal () {
     var modal   = new ModalWindow({ id: 'addStdModal', title: 'Add Student'}),
-        $netId  = $('<input>', {type: 'text', name: 'netId', id: 'netId', class: 'form-control' }),
+        $netID  = $('<input>', {type: 'text', name: 'netID', id: 'netID', class: 'form-control' }),
         $stdNum = $('<input>', {type: 'text', name: 'stdNum', id: 'stdNum', class: 'form-control' }),
         $fName  = $('<input>', {type: 'text', name: 'fName', id: 'fName', class: 'form-control'  }),
         $lName  = $('<input>', {type: 'text', name: 'lName', id: 'lName', class: 'form-control'  }),
@@ -223,7 +223,7 @@ function createAddStudentModal () {
         .append($('<div>', { class: 'form-group has-danger form-inline', style: 'margin-bottom: 5px' })
             .append($('<span>', { text: "NetID:", style: 'width: 100px' }))
             .append($('<div>', { class: 'col-sm-5' })
-                .append($netId)))
+                .append($netID)))
         .append($stdNumSpan)
         .append($('<div>', { class: 'form-group has-danger form-inline', style: 'margin-bottom: 5px' })
             .append($('<span>', { text: "Student #:", style: 'width: 100px' }))
@@ -245,11 +245,11 @@ function createAddStudentModal () {
 
     $submitButton
         .click(function() { // Not a separate function due to how many objects it requires in this scope
-            var netId  = $netId.val(),
+            var netID  = $netID.val(),
                 stdNum = $stdNum.val(),
                 fName  = $fName.val(),
                 lName  = $lName.val(),
-                errors = findErrors(netId, stdNum, fName, lName),
+                errors = findErrors(netID, stdNum, fName, lName),
                 flag = 0;
             
             for(var i = 0; i < errors.length; i++) {
@@ -257,7 +257,7 @@ function createAddStudentModal () {
                     switch(i){                        
                         case 0: 
                             $netIdSpan.hide();
-                            $netId.removeClass('is-invalid');
+                            $netID.removeClass('is-invalid');
                             break;
                         case 1:
                             $stdNumSpan.hide();
@@ -278,7 +278,7 @@ function createAddStudentModal () {
                         case 0: 
                             $netIdSpan.show();
                             $netIdSpan.text(errors[i]);
-                            $netId.addClass('is-invalid');
+                            $netID.addClass('is-invalid');
                             break;
                         case 1:
                             $stdNumSpan.show();
@@ -309,7 +309,7 @@ function createAddStudentModal () {
                 .addClass('spin-min-height');
             $.post({
                 url: '/professor/class/enrollStudent/' + this.course.cID,
-                data: { netId: netId, stdNum: stdNum, firstName: fName, lastName: lName },
+                data: { netID: netID, stdNum: stdNum, firstName: fName, lastName: lName },
                 dataType: 'json'
             }).done(function(data, status, xhr) {
                 modal.success('Success', 'Student successfully added!');        
@@ -459,7 +459,7 @@ function checkFormat(sheet) {
         processedStds = [],
         name          = [],
         email         = [],
-        netId,
+        netID,
         stdNum,
         firstName,
         lastName,
@@ -479,7 +479,7 @@ function checkFormat(sheet) {
             result.error = 'Improper email format at row ' + i;
             return result;             
         }
-        netId = email[0];
+        netID = email[0];
         // Get student Number
         stdNum = sheet[i].stdNum;
         // Check for valid Name
@@ -491,17 +491,17 @@ function checkFormat(sheet) {
         firstName = name[1];
         lastName = name[0];
         // Set entry in valid student list
-        processedStds[i] = {netId: netId, stdNum: stdNum, firstName: firstName, lastName: lastName}; 
+        processedStds[i] = {netID: netID, stdNum: stdNum, firstName: firstName, lastName: lastName}; 
     }
     result.sheet = processedStds;
     return result;
 }
 
-function findErrors (netId, stdNum, fName, lName) {
+function findErrors (netID, stdNum, fName, lName) {
     var result = [false, false, false, false];
     // check netID
-    if (!netId || typeof(netId) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(netId))) {
-        if(!netId)
+    if (!netID || typeof(netID) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(netID))) {
+        if(!netID)
             result[0] = "No NetID Provided";
         else
             result[0] = "Improper NetID Format (Ex. 12xyz3)";            
