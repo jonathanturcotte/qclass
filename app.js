@@ -11,10 +11,15 @@ var express      = require('express'),
     csv          = require('express-csv'),
     auth         = require('./api/auth'),
 
-    // Setup SSL options
+    keyPath      = '/etc/letsencrypt/live/qclass.ca/privkey.pem',
+    certPath     = '/etc/letsencrypt/live/qclass.ca/fullchain.pem',
+
+    // Setup SSL options, checking to see if the real certs exist
+    // before falling back to our unsigned ones. This is so that
+    // we can continue developing locally without having to change anything.
     sslOptions = {
-        key: fs.readFileSync('app.key'),
-        cert: fs.readFileSync('app.cert')
+        key:  fs.existsSync(keyPath)  ? fs.readFileSync(keyPath)  : fs.readFileSync('app.key'),
+        cert: fs.existsSync(certPath) ? fs.readFileSync(certPath) : fs.readFileSync('app.cert')
     },
 
     // Require our routes and APIs
