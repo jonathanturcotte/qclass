@@ -39,10 +39,10 @@ app.io = io.initialize();
 
 // Ensure that all traffic is being routed through https
 app.all('*', function (req, res, next) {
-    if(req.secure) { return next(); }
-    else {
+    if (req.secure)
+        return next();
+    else
         res.redirect('https://' + req.hostname + req.url);
-    }
 });
 
 // uncomment after placing your favicon in /public
