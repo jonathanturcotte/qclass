@@ -5,9 +5,9 @@ var ModalWindow = require('../modalwindow');
  * @param {String} classID    The ID of the class the table will show sessions of
  * @param {Object} $container jQuery object to which the table will be appended
  */
-var SessionTable = function(classID, $container) {
+var SessionTable = function(classID, $appendTarget) {
     this.classID  = classID;
-    this.$element = $container;
+    this.$appendTarget = $appendTarget;
     build.call(this);
     this.updateSessions();
 };
@@ -30,23 +30,29 @@ SessionTable.prototype.stopSpinner = function () {
 // Private Functions //
 ///////////////////////
 
+// Build the table
 function build () {
-    // Build the table
+    this.$container = $('<div>', { class: 'session-table-container' });
+
     this.$spinDiv = $('<div>', { class: 'session-table-spin-div' });
     this.$tablehead = $('<thead>')
-        .append($('<th>').html('Date'))
-        .append($('<th>').html('Attendance (%)'));
+        .append($('<tr>')
+            .append($('<th>').html('Date'))
+            .append($('<th>').html('Attendance (%)')));
 
     this.$tablebody = $('<tbody>')
         .append($('<tr>')
             .append($('<td>', { colspan: 2 })
                 .append($(this.$spinDiv))));
 
-    this.$table = $('<table>', { class: 'session-table table-bordered table-sm table-hover' })
+    this.$table1 = $('<table>', { class: 'session-table session-table1 table-bordered table-sm table-hover' })
         .append(this.$tablehead)
-        .append(this.$tablebody);
+        .appendTo(this.$container);
+    this.$table2 = $('<table>', { class: 'session-table session-table2 table-bordered table-sm table-hover' })
+        .append(this.$tablebody)
+        .appendTo(this.$container);
 
-    this.$table.appendTo(this.$element);
+    this.$container.appendTo(this.$appendTarget);
 }
 
 function updateTable(data, status, xhr) {
