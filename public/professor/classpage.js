@@ -54,27 +54,30 @@ function build () {
                 .click(createExportModal.bind(this))))
         .append($('<a>', { class: 'class-page-start-link', href: '#' }) // Start button
             .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
-            .click(startAttendance.bind(this, this.course.cID)));
+            .click(startAttendance.bind(this)));
 }
 
 // Creates the attendance modal window, makes the call
 // to the server to start a session.
-function startAttendance(courseID) {
-    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session' });
+function startAttendance() {
+    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session' }),
+        course = this.course;
 
     modal.show();
     modal.$body.spin()
         .addClass('spin-min-height');
 
     $.post({
-        url: '/professor/class/start/' + courseID,
+        url: '/professor/class/start/' + course.cID,
         data: { duration: 30000 },
         dataType: 'json'
     }).done(function(data, status, xhr) {
         showAttendanceInfo.call(this, data, modal);
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
-        modal.error('Error', 'Error starting attendance session');
+        if (xhr.status === 409)
+            modal.error('Error - Running', 'A session is already running for ' + course.cCode);
+        else modal.error('Error', 'Error starting attendance session');
     }).always(function(a, status, b) {
         modal.$body.spin(false);
     });
@@ -111,13 +114,16 @@ function showAttendanceInfo(data, modal) {
                 var text = 'Error ending session';
                 if (xhr.responseText) text += ': ' + xhr.responseText;
                 else text += '!';
-                $timerContainer.empty().append($('<div>', { class: 'text-danger' })
+                $timerContainer
+                    .empty()
+                    .append($('<div>', { class: 'text-danger' })
                     .html(text));
             }).always(function(a, status, b) {
                 modal.$body.spin(false);
                 $finishButton.hide();
-                modal.$closeButton.text('Close');
-                modal.$closeButton.show();
+                modal.$closeButton
+                    .text('Close')
+                    .show();
             });
         }.bind(this));
     modal.$footer.append($finishButton);
