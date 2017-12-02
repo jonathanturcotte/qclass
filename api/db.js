@@ -146,13 +146,16 @@ exports.getAttendanceSessions = function(classId, callback) {
 
 exports.aggregateInfo = function(classId, callback) {
     var query = 
-        `SELECT T1.sNetID, COUNT(T2.attTime) AS attCount 
-         FROM ((SELECT *
-                FROM enrolled
-                WHERE enrolled.cID = ?) AS T1
-                    LEFT JOIN (SELECT *
-                               FROM attendance NATURAL JOIN attendanceSession) AS T2
-                               ON (T1.sNetID = T2.sNetID))
+        `SELECT T1.sNetID, s.stdNum, s.fName, s.lName, COUNT(T2.attTime) AS attCount 
+         FROM (SELECT *
+               FROM enrolled
+               WHERE enrolled.cID = ?) AS T1
+            LEFT JOIN (SELECT * 
+                       FROM attendance 
+                           NATURAL JOIN attendanceSession) AS T2
+                ON T1.sNetID = T2.sNetID
+            LEFT JOIN student s
+                ON s.sNetID = T1.sNetID
          GROUP BY sNetID`;
     runQuery(query, [classId], callback);
 }
