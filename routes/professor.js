@@ -90,7 +90,6 @@ router.post('/class/start/:classId', function(req, res, next) {
 
     if (!isNaN(duration)) {
         duration = Number(duration);
-        console.log('duration: ' + duration + " of objtype: " + (typeof duration));
         attendanceSessions.start({ 
             classId:  req.params.classId,
             duration: duration,
