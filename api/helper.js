@@ -14,7 +14,6 @@ exports.printArray = function(array, delimiter = ', ') {
  * @param {number} min 
  * @param {number} max 
  */
-exports.randomInt = function(min, max)
-{
+exports.randomInt = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
-}
+};

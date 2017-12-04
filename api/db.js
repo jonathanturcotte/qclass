@@ -4,10 +4,10 @@ var mysql         = require('mysql'),
     EnrollStudent = require('../models/EnrollStudent');
 
 var pool = mysql.createPool({
-    host: "localhost",
-    user: "root",
-    password: "password",
-    database: "SISystem"
+    host:       "localhost",
+    user:       "root",
+    password:   "password",
+    database:   "SISystem"
 });
 
 exports.addClass = function(netID, code, name, callback) {
@@ -43,7 +43,7 @@ exports.enroll = function(classId, students, callback) {
                         errorStudents.push(student);
                         innerCallback(new Error('Selct query returned more than 1 row'));
                     } else {
-                        if (results.length == 0) { // student does not exist, insert student
+                        if (results.length === 0) { // student does not exist, insert student
                             newStudents.push(student);
                             toEnroll.push(student);
                             innerCallback();
@@ -75,7 +75,7 @@ exports.enroll = function(classId, students, callback) {
                     });
                 } else _runEnrollQuery(con, classId, toEnroll, callback);
             }
-        })
+        });
     });
 };
 
@@ -120,12 +120,12 @@ exports.getEnrolledStudents = function(classID, callback) {
 exports.startAttendance = function(classId, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
     runQuery(query, [[[classId, time, duration]]], callback);
-}
+};
 
 exports.recordAttendance = function(netID, classId, time, callback) {
     var query = 'INSERT INTO attendance (cID, attTime, sNetID) VALUES ?';
     runQuery(query, [[[classId, time, netID]]], callback);
-}
+};
 
 exports.getTeachesClasses = function(profId, callback) {
     var query = 
@@ -133,7 +133,7 @@ exports.getTeachesClasses = function(profId, callback) {
          FROM course
          WHERE pNetID = ?`;
     runQuery(query, [profId], callback);
-}
+};
 
 exports.getAttendanceSessions = function(classId, callback) {
     var query =
@@ -142,7 +142,7 @@ exports.getAttendanceSessions = function(classId, callback) {
          WHERE cID = ? 
          GROUP BY attTime`;
     runQuery(query, [classId], callback);
-}
+};
 
 exports.aggregateInfo = function(classId, callback) {
     var query = 
@@ -158,15 +158,15 @@ exports.aggregateInfo = function(classId, callback) {
                 ON s.sNetID = T1.sNetID
          GROUP BY sNetID`;
     runQuery(query, [classId], callback);
-}
+};
 
 exports.getNumSession = function(classId, callback) {
     var query = 
         `SELECT *
          FROM attendanceSession
-         WHERE cID = ?`
+         WHERE cID = ?`;
     runQuery(query, [classId], callback);
-}
+};
 
 exports.getSessionAttInfo = function(classId, callback) {
     var query =
@@ -179,7 +179,7 @@ exports.getSessionAttInfo = function(classId, callback) {
                     ON a.sNetID = s.sNetID
         ORDER BY sess.attTime`;
     runQuery(query, [classId], callback);
-}
+};
 
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
@@ -204,7 +204,7 @@ function runExistenceQuery(query, values, callback) {
  */
 function runQuery(query, values, callback) {
     useConnection(callback, function(con) {
-        if (values) con.query(query, values, callback)
+        if (values) con.query(query, values, callback);
         else con.query(query, callback);
     });
 }
@@ -224,34 +224,4 @@ function useConnection(callback, queryFunc) {
             con.release();
         }
     });
-}; 
-
-// Below are legacy Q&A queries
-
-// exports.getLectures = function(classId, callback) {
-//     var query = 
-//         `SELECT *
-//          FROM lecture
-//          WHERE lecture.cID = '${classId}'`;
-//     runQuery({ query: query, callback: callback });
-// };
-
-// exports.getActiveLecture = function(classId, callback) {
-//     var now = Date.now();
-//     var query = 
-//         `SELECT *
-//         FROM lecture
-//         WHERE cID = '${classId}'
-//             AND `; //TODO: finish query
-//     runQuery({ query: query, callback: function (err, results, fields) {
-//         if (err)
-//             callback(err);
-//         else if (results.length < 1) {
-//             callback();
-//         } else { 
-//             if (results.length > 1) 
-//                 console.log(`Warning: db.getActiveLecture query returned more than one result: ${results}`);
-//             callback(undefined, results[0], fields);
-//         }
-//     } });
-// }
+}

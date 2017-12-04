@@ -1,7 +1,6 @@
 var express     = require('express'),
     router      = express.Router(),
     routeHelper = require('./helper'),
-    helper      = require('../api/helper'),
     db          = require('../api/db');
 
 // GET user info

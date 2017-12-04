@@ -1,5 +1,10 @@
-var io = require('socket.io')();
-var validClassIds = [];
+/*
+* Experimental socket support, currently not being used.
+* Could be implemented for Q&A stretch goal. 
+**/
+
+var io            = require('socket.io')(),
+    validClassIds = [];
 
 exports.initialize = function() {
     io.on('connection', function(socket) {
@@ -23,4 +28,4 @@ exports.startClass = function(classId) {
 
 exports.stopClass = function(classId) {
     validClassIds.pop(classId);
-}
+};

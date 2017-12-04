@@ -1,7 +1,7 @@
 var express            = require('express'),
     router             = express.Router(),
     routeHelper        = require('./helper'),
-    helper             = require('../api/helper'),
+    apiHelper          = require('../api/helper'),
     db                 = require('../api/db'),
     attendanceSessions = require('../api/data/attendanceSessions'),
     EnrollStudent      = require('../models/EnrollStudent');
@@ -14,16 +14,21 @@ router.use(function(req, res, next) {
         if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
         
         req.user.firstName = results[0].fName;
-        req.user.lastName = results[0].lName;
+        req.user.lastName  = results[0].lName;
         
+        // TODO: Redirect to the SSO login page
+
         next();
     });
 });
 
 router.param('classId', function(req, res, next, classId) {
-    if (!classId) return routeHelper.sendError(res, null, 'Empty classId', 400);
+    if (!classId)
+        return routeHelper.sendError(res, null, 'Empty classId', 400);
+
     if (!routeHelper.regex.class.id.test(classId))
         return routeHelper.sendError(res, null, 'Invalid classId', 400);
+
     db.ownsClass(classId, req.user.netID, function(err, result) {
         if (err) return routeHelper.sendError(res, err, 'Error processing request');
         if (!result) return routeHelper.sendError(res, null, 'User does not own the requested class', 403);
@@ -43,10 +48,13 @@ router.get('/classes', function(req, res, next) {
 router.post('/class/add', function(req, res, next) { 
     var code = req.body.code,
         name = req.body.name;
+
     if (!routeHelper.regex.class.code.test(code)) 
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
+
     if (name.length < 3 || name.length > 100 || !routeHelper.regex.class.name.test(name)) 
         return routeHelper.sendError(res, null, 'Invalid class name', 400);
+
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err);
         for (var i = 0; i < results.length; i++) {
@@ -79,14 +87,19 @@ router.post('/class/enrollStudent/:classId', function(req, res, next) {
 // Start an attendance session for a class, return the code to the professor
 router.post('/class/start/:classId', function(req, res, next) {
     var duration = req.body.duration;
-    if (!duration || !/^\d+$/.test(duration))
-        duration = null;
-    else
-        duration = duration - 0;
-    attendanceSessions.start({ classId: req.params.classId, duration: duration, callback: function(err, code, endTime) {
-        if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
-        res.json({ code: code, endTime: endTime });
-    } });
+
+    if (!isNaN(duration)) {
+        duration = Number(duration);
+        console.log('duration: ' + duration + " of objtype: " + (typeof duration));
+        attendanceSessions.start({ 
+            classId:  req.params.classId,
+            duration: duration,
+            callback: function(err, code, endTime) {
+                if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
+                res.json({ code: code, endTime: endTime });        
+            }
+        });
+    }
 });
 
 router.post('/class/stop/:classId', function(req, res, next) {
@@ -96,13 +109,13 @@ router.post('/class/stop/:classId', function(req, res, next) {
 });
 
 /** GET all attendance sessions for a certain class
- * used to fill table on professor page
+ * used to fill session table on professor page
  * contains number of enrolled studnets for attendance calculations
  * Each entry in sessions has the session time and a list of students 
  */
 router.get('/:classId/attendanceSessions', function(req, res, next) {
     db.getSessionAttInfo(req.params.classId, function(err, sessions, fields) {
-        if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance sessions for ' +req.user.netID);
+        if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance sessions for ' + req.user.netID);
         if (sessions.length === 0) res.json({ numEnrolled: 0, sessions: [] });
         else {
             db.getEnrolledStudents(req.params.classId, function(err, enrolled, fields) {
@@ -115,6 +128,7 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 });
 
 // TODO: Figure out how to handle errors in the file download; possible solution to return URL and store file on server, UI then fetches it
+// TODO: Cleanup
 // Aggregate Info: student | attendance (%)
 // Session Info: Total Number of students + Percent Attendance
 //               List of students in attendance: name, netID, std#
@@ -125,7 +139,7 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
 
     db.aggregateInfo(classId, function(err, attInfo, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance information for ' + classId);
-        if (attInfo.length === 0) 
+        if (attInfo.length === 0)
             return routeHelper.sendError(res, null, 'No Attendance Information for Course');
         
         db.getNumSession(classId, function(err, numSessions, fields) {
@@ -144,16 +158,16 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                 
                 // General Info Formatting
                 result = [];
-                result[0] = { col1: "NetID", col2: 'Student #', col3: 'First Name', col4: 'Last Name', col5: 'Attended (Total)', col6: 'Attended (%)' }
+                result[0] = { col1: "NetID", col2: 'Student #', col3: 'First Name', col4: 'Last Name', col5: 'Attended (Total)', col6: 'Attended (%)' };
                 for(var i = 0; i < attInfo.length;i++)
                     result[i + 1] = attInfo[i];
                 var index = attInfo.length + 1;
                 result[index++] = {};
 
                 // Session Info Formatting
+                var j    = 0,
+                    date = 0;
                 result[index++] = { col1: 'NetID', col2: 'Student #', col3: 'First Name', col4: 'Last Name' };                                           
-                var j = 0;
-                var date = 0;
                 while (j < sessInfo.length) {
                     if (date === sessInfo[j].attTime) {
                         result[index++] = { "NetID": sessInfo[j].sNetID, "Student #": sessInfo[j].stdNum, "First Name": sessInfo[j].fName, "Last Name": sessInfo[j].lName };
@@ -178,8 +192,8 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
     });
 });
 
-// pass in ordered session results from db
-// returns json with each entry containing session date + list of students in attendance
+// Pass in ordered session results from db
+// Returns json with each entry containing session date + list of students in attendance
 function organizeAttendanceSession(sessInfo) {
     var j = 0,
         i = 0,
@@ -191,7 +205,8 @@ function organizeAttendanceSession(sessInfo) {
         if (date === sessInfo[j].attTime) {
             if (sessInfo[j].sNetID)
                 session[i++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
-            else // set session to empty if session entry has no student - this indicates a sesison with no attendances
+            else 
+                // set session to empty if session entry has no student - this indicates a session with no attendances
                 session = [];
             j++;
         } else {
@@ -209,12 +224,14 @@ function organizeAttendanceSession(sessInfo) {
 // Runs the general enroll function that adds (if needed) and enrolls each student
 // reqStudents can contain a single student or an entire classList
 function enroll(reqStudents, classId, res) {
-    var students    = [];
+    var students    = [],
+        student;
+
     if (!reqStudents || !Array.isArray(reqStudents) || reqStudents.length < 1)
         return routeHelper.sendError(res, null, 'Student list was either not provided by user or invalid', 400);
+
     // Validate each entry in the students array
     for (var i = 0; i < reqStudents.length; i++) {
-        var student;
         try {
             student = new EnrollStudent(reqStudents[i]);
         } catch (e) {
@@ -222,8 +239,9 @@ function enroll(reqStudents, classId, res) {
         }
         students.push(student);
     }
+
     db.enroll(classId, students, function(err, results, fields) {
-        if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${helper.printArray(err.errorStudents)}` : ''}`);
+        if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${apiHelper.printArray(err.errorStudents)}` : ''}`);
         console.log(`Inserted ${results.affectedRows} students`);
         res.status(201).json({ 
             affectedRows: results.affectedRows 

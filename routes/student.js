@@ -1,8 +1,7 @@
-var express = require('express'),
-    router = express.Router(),
-    routeHelper = require('./helper'),
-    helper = require('../api/helper'),
-    db = require('../api/db'),
+var express            = require('express'),
+    router             = express.Router(),
+    db                 = require('../api/db'),
+    routeHelper        = require('./helper'),
     attendanceSessions = require('../api/data/attendanceSessions');
 
 // Authenticate every request to the professor API against the DB
@@ -13,8 +12,8 @@ router.use(function(req, res, next) {
         if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
         
         req.user.studentNumber = results[0].stdNum;
-        req.user.firstName = results[0].fName;
-        req.user.lastName = results[0].lName;
+        req.user.firstName     = results[0].fName;
+        req.user.lastName      = results[0].lName;
         
         next();
     });
@@ -27,14 +26,21 @@ router.get('/info', function(req, res, next) {
 
 // Student sign in 
 router.post('/sign-in/:code', function(req, res, next) {
-    var code = req.params.code;
+    var code = req.params.code,
+        session;
+
     if (!code || code.length != 5)
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
-    var session = attendanceSessions.getEntryByCode(code);
-    if (!session) return routeHelper.sendError(res, null, 'Class not found for provided code', 404);
+
+    session = attendanceSessions.getEntryByCode(code);
+
+    if (!session)
+        return routeHelper.sendError(res, null, 'Class not found for provided code', 404);
+
     db.isEnrolled(req.user.netID, session.classId, function(err, result) {
         if (err) return routeHelper.sendError(res, err, '');
         if (!result) return routeHelper.sendError(res, null, 'User not a member of the requested class', 403);
+
         db.recordAttendance(req.user.netID, session.classId, session.time, function(err, results, fields) {
             if (err) {
                 if (err.errno && err.errno === 1062)

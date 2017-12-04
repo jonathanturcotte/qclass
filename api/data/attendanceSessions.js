@@ -1,6 +1,7 @@
 var db        = require('../db'),
-    randToken = require('rand-token'),
-    _         = require('underscore');
+    _         = require('underscore'),
+    randToken = require('rand-token');
+
 
 const ALPHABET         = '0123456789abcdefghijklmnopqrstuvwxyz',
       DEFAULT_DURATION = 60000,
