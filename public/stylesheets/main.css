@@ -1,6 +1,6 @@
 body {
     /* Padding for the navbar */
-    padding-top: 70px;
+    padding-top: 56px;
     /* Background pattern from Subtle Patterns */
     background: rgba(0, 0, 0, 0) url("/images/dust_scratches.png") repeat scroll 0% 0%;
 }
@@ -15,16 +15,17 @@ body {
                                         supported by Chrome and Opera */
 }
 
+.remove-container-padding {
+    padding: 0;
+}
+
 /* Sidebar/Classlist */
 .sidebar {
-    min-height: calc(100vh - 50px);
-    max-height: calc(100vh - 50px);
+    min-height: calc(100vh - 56px);
+    max-height: calc(100vh - 56px);
     background: #5677fc;
     min-width: 300px;
     max-width: 300px;
-    margin-left: -20px;
-    margin-top: -20px;
-    float: left;
     overflow-y: auto;
 }
 
@@ -73,8 +74,12 @@ body {
 }
 
 .classpage {
-    margin-left: 30px;
-    float: left;
+    padding-top: 20px;
+    padding-left: 30px;
+    max-height: calc(100vh - 76px);
+    min-height: calc(100vh - 76px);
+    width: calc(100vw - 300px);
+    overflow-y: auto;
 }
 
 .hidden {
@@ -175,11 +180,40 @@ body {
 }
 
 .session-table-container {
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 .session-table {
     background-color: white;
+}
+
+.session-table1 {
+    border-bottom: 0;
+}
+
+.session-table2 {
+    border-top: 0;
+}
+
+.session-table thead tr {
+    display: block;
+    position: relative;
+}
+
+.session-table tbody {
+    display: block;
+    overflow: auto;
+    max-height: 364px;    
+}
+
+.session-table > tbody > tr > td:first-child,
+.session-table > thead > tr > th:first-child {
+    width: 140px;
+}
+
+.session-table > tbody > tr > td:last-child,
+.session-table > thead > tr > th:last-child {
+    width: 140px;
 }
 
 .session-table-spin-div {

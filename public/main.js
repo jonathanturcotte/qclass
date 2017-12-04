@@ -27,7 +27,6 @@ SignInApp.prototype.getUserInfo = function () {
     // Right now we just sign out
     $.get('/user-info')
         .done(function (info) {
-            console.log(info);
             info.isProf ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
         }.bind(this)).fail(this.signOut.bind(this));
 };
