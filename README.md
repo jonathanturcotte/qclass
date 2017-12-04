@@ -1,5 +1,5 @@
-# Q-Clicker-Web
-This is the web-application portion of the Q-Clicker project. The web-application provides the professor with a management interface, and handles connections to the student mobile application.
+# QClass
+QClass is an educational attendance tool designed to provide professors with the ability to better track student attendance. This web-application is a management interface for professors looking to setup, run, and report on class attendance sessions. It also doubles as the check-in website for students looking to report that they are in attendance.
 
 Created as a Queen's University ELEC 498 project.
 
@@ -14,11 +14,26 @@ Other commands that are available to change the behaviour of webpack are `npm ru
  which runs uglifyjs on the source, and then bundles it once.
 
 ### Cookies
-Authentication stub - server parses the netID cookie
-To set from the client side, just run Cookies.set('netID', '12ozs'); with whatever netID you actually want in place of netID.
+A goal of this project is to integrate it with Queen's Single Sign-On system. Until then, however, authentication has been stubbed using a cookie with a 'netID' field. 
+
+To set the cookie from the client side, just run Cookies.set('netID', 'NETID'); with whatever netID you actually want in place of NETID.
 Cookies is a global, so either manual setting through the developer console or calling it in client code works
 
-### Running on Linux AWS
+Currently valid netIDs are:
+
+#### Professor NetIDs
+1pvb69,
+10yfl1,
+15jc3,
+10boo3,
+12hdm
+
+#### Student NetIDs
+12cjd2,
+12ozs,
+11jlt10
+
+### Running on the Linux AWS
 #### Location
 The project is located on the AWS server under `/opt/Q-Clicker-Web`
 
@@ -46,10 +61,7 @@ sudo apt-get install -y nodejs
 ```
 
 ## Database Test Information
-Run SISystem.sql to refresh database
-
-10yfl1 owns zero classes
-1pvb69 owns 12 classes
+Run SISystem.sql to refresh the database.
 
 ## Authors
 Jonathan Turcotte,
