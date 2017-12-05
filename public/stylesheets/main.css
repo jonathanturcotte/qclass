@@ -99,6 +99,16 @@ body {
     height: 150px;
 }
 
+.class-attendance-div-left {
+    float: left;
+    padding-right: 30px;
+}
+
+.class-attendance-div-right {
+    float: left;
+    padding-top: 40px;
+}
+
 .class-attendance-label {
     display: block;
 }
@@ -108,6 +118,10 @@ body {
 }
 
 .class-export-div {
+    height: 40px;
+}
+
+.class-export-button {
     float: right;
 }
 

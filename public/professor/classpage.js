@@ -62,7 +62,7 @@ function build () {
         .click(startAttendance.bind(this))
         .appendTo($attDivLeft);
 
-    $('<label>', { text: 'Select an attendance duration:', class: 'class-duration-label' })
+    $('<label>', { text: 'Check-in duration:', class: 'class-duration-label' })
         .appendTo($attDivRight);
     $('<select>', { class: 'class-duration-select' }).appendTo($attDivRight);
 
@@ -71,7 +71,7 @@ function build () {
     $attDivRight.appendTo($attDiv);
 
     // The export button
-    $('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
+    $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
         .click(this.exporter.createExportModal.bind(this))
         .appendTo($exportDiv);
 
