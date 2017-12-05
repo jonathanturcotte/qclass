@@ -224,6 +224,8 @@ body {
 
 .session-table-container {
     margin-top: 20px;
+    min-height: 330px;
+    max-height: 330px;
 }
 
 .session-table {

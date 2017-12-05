@@ -81,8 +81,8 @@ function build () {
 
     this.$element.append($topDiv)
         .append($attDiv)
-        .append($exportDiv)
-        .append($sessionDiv);
+        .append($sessionDiv)
+        .append($exportDiv);
 }
 
 
@@ -91,7 +91,7 @@ function build () {
 // remove an enrolled student, add a new student, and 
 // import a classlist.
 function editClass() {
-
+    // TODO: Complete
 }
 
 // Creates the attendance modal window, makes the call
