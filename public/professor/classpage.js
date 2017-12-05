@@ -104,8 +104,9 @@ function showAttendanceInfo(data, modal) {
             $.post({
                 url: 'professor/class/stop/' + this.course.cID
             }).done(function(data, status, xhr) {
-                $timerContainer.empty().append($('<div>')
-                    .html('Ended session successfully'));
+                $timerContainer
+                    .empty()
+                    .append($('<div>', { text: 'Ended session successfully.', style: 'padding-top: 5px' }));
             }).fail(function(xhr, status, errorThrown) {
                 var text = 'Error ending session';
                 if (xhr.responseText) text += ': ' + xhr.responseText;
@@ -134,6 +135,9 @@ function showAttendanceInfo(data, modal) {
             .text('Session complete!')
             .addClass('.start-modal-top-info-finished');
     }).countdown('start');
+
+    // Refresh the session table when the attendance session is closed
+    modal.$closeButton.click(this.sessionTable.updateSessions.bind(this.sessionTable));
 }
 
 module.exports = ClassPage;
