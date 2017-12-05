@@ -76,10 +76,39 @@ body {
 .classpage {
     padding-top: 20px;
     padding-left: 30px;
+    padding-right: 15px;
     max-height: calc(100vh - 76px);
     min-height: calc(100vh - 76px);
     width: calc(100vw - 300px);
     overflow-y: auto;
+}
+
+.class-top-div {
+    height: 110px;
+}
+
+.class-title-div {
+    float: left;
+}
+
+.class-edit-div {
+    float: right;
+}
+
+.class-attendance-div {
+    height: 150px;
+}
+
+.class-attendance-label {
+    display: block;
+}
+
+.class-duration-label {
+    padding-right: 10px;
+}
+
+.class-export-div {
+    float: right;
 }
 
 .hidden {

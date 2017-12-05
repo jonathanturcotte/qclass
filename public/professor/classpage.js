@@ -24,10 +24,6 @@ ClassPage.prototype.displayCourse = function (course) {
     // Clear the old page
     this.$element.empty();
     build.call(this);
-
-    // Create the appropriate session table
-    this.sessionTable = new SessionTable(this.course.cID, this.$element);
-    this.sessionTable.startSpinner();
 };
 
 ///////////////////////
@@ -38,19 +34,64 @@ ClassPage.prototype.displayCourse = function (course) {
  * Builds the classpage, adds it to the DOM
  */
 function build () {
-    this.$element
-        .append($('<h2>', { class: 'class-page-title-code', text: this.course.cCode }))
-        .append($('<h3>', { class: 'class-page-title-name', text: this.course.cName }))
-        .append($('<div>', { class: 'block',  style: 'margin-bottom: 50px'})
-            .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Import Classlist', style: 'margin-right: 15px' })
-                .click(this.importer.createImportModal.bind(this)))
-            .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Add Student', style: 'margin-right: 15px' })
-                .click(this.importer.createAddStudentModal.bind(this)))
-            .append($('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
-                .click(this.exporter.createExportModal.bind(this))))
-        .append($('<a>', { class: 'class-page-start-link', href: '#' }) // Start button
-            .append($('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }))
-            .click(startAttendance.bind(this)));
+    var $topDiv      = $('<div>', { class: 'class-top-div' }),
+        $titleDiv    = $('<div>', { class: 'class-title-div' }),
+        $editDiv     = $('<div>', { class: 'class-edit-div' }),
+        $attDiv      = $('<div>', { class: 'class-attendance-div' }),
+        $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
+        $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
+        $exportDiv   = $('<div>', { class: 'class-export-div' }),
+        $sessionDiv  = $('<div>', { class: 'class-session-table-div' });
+
+    // Construct the title and course code
+    $('<h2>', { class: 'class-title-code', text: this.course.cCode }).appendTo($titleDiv);
+    $('<h3>', { class: 'class-title-name', text: this.course.cName }).appendTo($titleDiv);
+    $titleDiv.appendTo($topDiv);
+
+    // Add the edit button
+    $('<button>', { class: 'edit-btn btn btn-danger btn-square btn-xl', text: 'Edit Class' })
+        .click(editClass.bind(this))
+        .appendTo($editDiv);
+    $editDiv.appendTo($topDiv);
+
+    // The attendance div and options
+    $('<label>', { text: 'Start an attendance session:', class: 'class-attendance-label' })
+    .appendTo($attDiv);
+
+    $('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' })
+        .click(startAttendance.bind(this))
+        .appendTo($attDivLeft);
+
+    $('<label>', { text: 'Select an attendance duration:', class: 'class-duration-label' })
+        .appendTo($attDivRight);
+    $('<select>', { class: 'class-duration-select' }).appendTo($attDivRight);
+
+
+    $attDivLeft.appendTo($attDiv);
+    $attDivRight.appendTo($attDiv);
+
+    // The export button
+    $('<button>', { class: 'btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
+        .click(this.exporter.createExportModal.bind(this))
+        .appendTo($exportDiv);
+
+    // The session table
+    this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
+    this.sessionTable.startSpinner();
+
+    this.$element.append($topDiv)
+        .append($attDiv)
+        .append($exportDiv)
+        .append($sessionDiv);
+}
+
+
+// Opens the edit class modal, allowing the professor to
+// change the class name/code, view enrolled students,
+// remove an enrolled student, add a new student, and 
+// import a classlist.
+function editClass() {
+
 }
 
 // Creates the attendance modal window, makes the call
