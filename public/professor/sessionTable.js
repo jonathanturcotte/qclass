@@ -59,7 +59,9 @@ function updateTable(data, status, xhr) {
     this.$tablebody.empty();
     this.data = data;
 
-    for (var i = 0; i < this.data.sessions.length; i++) {
+    // Add in reverse order to ensure that the latest sessions
+    // are at the top of the table
+    for (var i = this.data.sessions.length - 1; i >= 0; i--) {
         var session       = this.data.sessions[i],
             date          = new Date(session.sessDate),
             attendance    = session.studentList.length,
