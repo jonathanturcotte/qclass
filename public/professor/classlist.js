@@ -94,7 +94,7 @@ function createAddClassModal () {
 
     modal.$body
         .append($('<p>', {text: 'Course Code:'}))
-        .append($cCodeInput) 
+        .append($cCodeInput)
         .append($('<p>', {text: 'Course Name:'}))
         .append($cNameInput);
     modal.$footer

@@ -91,13 +91,76 @@ function build () {
 // remove an enrolled student, add a new student, and 
 // import a classlist.
 function editClass() {
-    // TODO: Complete
+    var modal = new ModalWindow({ id: 'editModal', title: 'Edit Class' });
+    $cCodeInput   = $('<input>', { type: 'text', name: 'cCode', id: 'cCode' }),
+    $cCodeDiv     = $('<div>', { class: 'edit-code-div' }),
+    $cNameInput   = $('<input>', { type: 'text', name: 'cName', id: 'cName' }),
+    $cNameDiv     = $('<div>', { class: 'edit-name-div' }),
+    $buttonDiv    = $('<div>', { class: 'edit-button-div container' }),
+    $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitEditClasses' });
+
+    $cCodeDiv.append($('<label>', { text: 'Course code: ' }))
+        .append($cCodeInput);
+    $cNameDiv.append($('<label>', { text: 'Course name: ' }))
+        .append($cNameInput);
+
+    // Add the row of buttons
+    var $row = $('<div>', { class: 'row' });
+
+    // Import classlist button
+    $('<div>', { class: 'col' }).append(
+        $('<button>', { text: 'Import Classlist', class: 'btn btn-danger btn-square btn-xl' })
+            .click(this.importer.createImportModal)
+    ).appendTo($row);
+
+    // Add student button
+    $('<div>', { class: 'col' }).append(
+        $('<button>', { text: 'Add Student', class: 'btn btn-danger btn-square btn-xl' })
+            .click(this.importer.createAddStudentModal)
+    ).appendTo($row);
+
+    // Edit course administrators button
+    $('<div>', { class: 'col' }).append(
+    $('<button>', { text: 'Administrators', class: 'btn btn-danger btn-square btn-xl' })
+        .click(editAdministrators.bind(this))
+    ).appendTo($row);
+    $buttonDiv.append($row);
+
+    modal.$body.append($cCodeDiv)
+        .append($cNameDiv)
+        .append($buttonDiv);
+
+    modal.$footer
+        .prepend($submitButton);
+
+    // $submitButton
+    //     .click(function () {
+    //         $submitButton.remove();
+    //         modal.$body.empty();
+    //         modal.$body
+    //             .spin()
+    //             .addClass('spin-min-height');
+
+    //         $.post({
+    //             url: '/professor/class/add',
+    //             data: { code: $cCodeInput.val(), name: $cNameInput.val() },
+    //             dataType: 'json'
+    //         }).done(function(status, xhr) {
+    //             modal.success("Success", $cCodeInput.val() + ' successfully added!');
+    //             window.app.classList.updateClasses();
+    //         }).fail(function(xhr, status, errorThrown) {
+    //             modal.error("Error", xhr.responseText);
+    //         }).always(function(a, status, b) {
+    //             modal.$body.spin(false);
+    //         });
+    //     });
+    modal.show();
 }
 
 // Creates the attendance modal window, makes the call
 // to the server to start a session.
 function startAttendance() {
-    var modal = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session' }),
+    var modal  = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session' }),
         course = this.course;
 
     modal.show();
@@ -179,6 +242,10 @@ function showAttendanceInfo(data, modal) {
 
     // Refresh the session table when the attendance session is closed
     modal.$closeButton.click(this.sessionTable.updateSessions.bind(this.sessionTable));
+}
+
+function editAdministrators() {
+    //TODO: complete
 }
 
 module.exports = ClassPage;

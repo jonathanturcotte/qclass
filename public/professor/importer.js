@@ -4,16 +4,16 @@ var XLSX         = require('xlsx'),
 var Importer = function () {};
 
 Importer.prototype.createImportModal = function () {
-    var modal = new ModalWindow({ id: 'importModal', title: 'Import Classlist'}),
-        $file = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' });
-    this.$importButton = $('<button>', { type: 'submit', class: 'btn btn-primary', text: 'Import', id: 'importButton' });
+    var modal         = new ModalWindow({ id: 'importModal', title: 'Import Classlist'}),
+        $file         = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' }),
+        $importButton = $('<button>', { type: 'submit', class: 'btn btn-primary', text: 'Import', id: 'importButton' });
     
     modal.$body
         .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
         .append($file);
     modal.$footer
-        .prepend(this.$importButton);
-    this.$importButton
+        .prepend($importButton);
+    $importButton
        .click(importXLSX.bind(this, modal, $file));
     modal.show();
 };
