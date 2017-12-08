@@ -125,6 +125,15 @@ body {
     float: right;
 }
 
+.class-import-button {
+    float: right;
+}
+
+.class-addstudent-button {
+    float: right;
+    margin-right: 20px
+}
+
 .hidden {
     display: none;
 }

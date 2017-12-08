@@ -40,8 +40,9 @@ function build () {
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
-        $exportDiv   = $('<div>', { class: 'class-export-div' }),
-        $sessionDiv  = $('<div>', { class: 'class-session-table-div' });
+        $tableRow    = $('<div>', { class: 'row' }),
+        $sessionDiv  = $('<div>', { class: 'class-session-table-div col' }),
+        $studentDiv  = $('<div>', { class: 'class-student-table-div col' });
 
     // Construct the title and course code
     $('<h2>', { class: 'class-title-code', text: this.course.cCode }).appendTo($titleDiv);
@@ -49,8 +50,8 @@ function build () {
     $titleDiv.appendTo($topDiv);
 
     // Add the edit button
-    $('<button>', { class: 'edit-btn btn btn-danger btn-square btn-xl', text: 'Edit Class' })
-        .click(editClass.bind(this))
+    $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
+        .click(editAdministrators.bind(this))
         .appendTo($editDiv);
     $editDiv.appendTo($topDiv);
 
@@ -66,95 +67,41 @@ function build () {
         .appendTo($attDivRight);
     $('<select>', { class: 'class-duration-select' }).appendTo($attDivRight);
 
-
     $attDivLeft.appendTo($attDiv);
     $attDivRight.appendTo($attDiv);
 
-    // The export button
-    $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
-        .click(this.exporter.createExportModal.bind(this))
-        .appendTo($exportDiv);
-
-    // The session table
+    // The session table and export button
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
     this.sessionTable.startSpinner();
 
+    $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
+        .click(this.exporter.createExportModal.bind(this))
+        .appendTo($sessionDiv);
+
+    // The student table and associated buttons
+    // TODO: add actual student table and stop setting width/height here
+    // this.studentTable = new StudentTable(this.course.cID, $studentDiv);
+    var $fakeTable = $('<div>')
+        .width(600)
+        .height(350)
+        .appendTo($studentDiv);
+
+    $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
+        .click(this.importer.createImportModal)
+        .appendTo($studentDiv);
+
+    $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
+        .click(this.importer.createAddStudentModal)
+        .appendTo($studentDiv);
+
+    // Conatiner that puts the following tables in a row
+    // if the view is large enough, otherwise puts them one below the other
+    $tableRow.append($sessionDiv)
+        .append($studentDiv);
+
     this.$element.append($topDiv)
         .append($attDiv)
-        .append($sessionDiv)
-        .append($exportDiv);
-}
-
-
-// Opens the edit class modal, allowing the professor to
-// change the class name/code, view enrolled students,
-// remove an enrolled student, add a new student, and 
-// import a classlist.
-function editClass() {
-    var modal = new ModalWindow({ id: 'editModal', title: 'Edit Class' });
-    $cCodeInput   = $('<input>', { type: 'text', name: 'cCode', id: 'cCode' }),
-    $cCodeDiv     = $('<div>', { class: 'edit-code-div' }),
-    $cNameInput   = $('<input>', { type: 'text', name: 'cName', id: 'cName' }),
-    $cNameDiv     = $('<div>', { class: 'edit-name-div' }),
-    $buttonDiv    = $('<div>', { class: 'edit-button-div container' }),
-    $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitEditClasses' });
-
-    $cCodeDiv.append($('<label>', { text: 'Course code: ' }))
-        .append($cCodeInput);
-    $cNameDiv.append($('<label>', { text: 'Course name: ' }))
-        .append($cNameInput);
-
-    // Add the row of buttons
-    var $row = $('<div>', { class: 'row' });
-
-    // Import classlist button
-    $('<div>', { class: 'col' }).append(
-        $('<button>', { text: 'Import Classlist', class: 'btn btn-danger btn-square btn-xl' })
-            .click(this.importer.createImportModal)
-    ).appendTo($row);
-
-    // Add student button
-    $('<div>', { class: 'col' }).append(
-        $('<button>', { text: 'Add Student', class: 'btn btn-danger btn-square btn-xl' })
-            .click(this.importer.createAddStudentModal)
-    ).appendTo($row);
-
-    // Edit course administrators button
-    $('<div>', { class: 'col' }).append(
-    $('<button>', { text: 'Administrators', class: 'btn btn-danger btn-square btn-xl' })
-        .click(editAdministrators.bind(this))
-    ).appendTo($row);
-    $buttonDiv.append($row);
-
-    modal.$body.append($cCodeDiv)
-        .append($cNameDiv)
-        .append($buttonDiv);
-
-    modal.$footer
-        .prepend($submitButton);
-
-    // $submitButton
-    //     .click(function () {
-    //         $submitButton.remove();
-    //         modal.$body.empty();
-    //         modal.$body
-    //             .spin()
-    //             .addClass('spin-min-height');
-
-    //         $.post({
-    //             url: '/professor/class/add',
-    //             data: { code: $cCodeInput.val(), name: $cNameInput.val() },
-    //             dataType: 'json'
-    //         }).done(function(status, xhr) {
-    //             modal.success("Success", $cCodeInput.val() + ' successfully added!');
-    //             window.app.classList.updateClasses();
-    //         }).fail(function(xhr, status, errorThrown) {
-    //             modal.error("Error", xhr.responseText);
-    //         }).always(function(a, status, b) {
-    //             modal.$body.spin(false);
-    //         });
-    //     });
-    modal.show();
+        .append($tableRow);
 }
 
 // Creates the attendance modal window, makes the call
