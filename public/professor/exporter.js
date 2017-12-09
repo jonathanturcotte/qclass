@@ -73,26 +73,38 @@ function exportClick(modal, $fileName, $fileType) {
 }
 
 function exportSuccess(data, status, xhr, $fileType, $fileName, modal) {
-    if ($fileType.val() === 'csv') { 
-        window.location.href = this.url;  
-        modal.success("Success", "File Successfully Downloaded");
+       
+    // Need to write to workbook, only have sheet
+    var workbook = createSheets(data, $fileType.val()),
+        xlName,
+        fileData;
+    // check file type
+    if ($fileType.val() === 'csv') {
+        if(!$fileName.val())
+            xlName = "attendance.csv";
+        else
+            xlName = $fileName.val() + ".csv";
+        //set file data to csv
+        fileData = workbook;
+        
     } else {
-        // Need to write to workbook, only have sheet
-        var workbook = createSheets(data);
         /* bookType can be any supported output type */
         var wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
-        var wbout = XLSX.write(workbook,wopts);
+        fileData = XLSX.write(workbook,wopts);
         /* the saveAs call downloads a file on the local machine */
-        var blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
-        var xlName;
         if(!$fileName.val())
             xlName = "attendance.xlsx";
         else 
             xlName = $fileName.val() + ".xlsx";
-        saveData(blob, xlName);
-        modal.success("Success", "File Successfully Downloaded");
+       
     }
-    }
+
+    var blob = new Blob([s2ab(fileData)], { type: "application/octet-stream" });
+    saveData(blob, xlName);
+
+    modal.success("Success", "File Successfully Downloaded");
+    
+}
 
 function saveData (data, fileName) {
     var a = document.createElement("a");
@@ -105,27 +117,46 @@ function saveData (data, fileName) {
     window.URL.revokeObjectURL(url);
 }
 
-function createSheets(json) {
-    var sheet1 = [],
-        sheet2 = [],
-        wb     = { SheetNames:[], Sheets:{} },
-        i      = 1,
-        j      = 0;
-    while (json[i].hasOwnProperty('sNetID')) {
-        sheet1[j++] = json[i];
-        i++;
-    }
-    j = 0;
-    for(i = i + 2; i < json.length; i++)
-        sheet2[j++] = json[i];
+function createSheets(data, fileType) {
+    var overallInfo = [],
+        sessionInfo = [],
+        wb     = { SheetNames:[], Sheets:{} };
     
-    wb.SheetNames.push('Overall Att');
-    wb.Sheets['Overall Att'] = XLSX.utils.json_to_sheet(sheet1, { header: ["sNetID", "attCount", "attPercent"] });
-    
-    wb.SheetNames.push('Session Info');
-    wb.Sheets['Session Info'] = XLSX.utils.json_to_sheet(sheet2, { header: ["NetID", "Student #", "First Name", "Last Name"], dateNF: 'dd"."mm"."yyyy'});
+    for(var i = 0; i < data[0].length; i++) 
+        overallInfo[i] = data[0][i];
 
-    return wb;
+    for(i = 0; i < data[1].length; i++)
+        sessionInfo[i] = data[1][i];
+    
+    // cover to xlsx sheets
+    var sheet1 = XLSX.utils.json_to_sheet(overallInfo, { header: [ "NetID",
+                                                         "Student #",
+                                                         "First Name",
+                                                         "Last Name",
+                                                         "Attendance (#)",
+                                                         "Attendance (%)"] });
+    var sheet2 = XLSX.utils.json_to_sheet(sessionInfo, { header: ["NetID", 
+                                                         "Student #", 
+                                                         "First Name", 
+                                                         "Last Name"], 
+                                                dateNF: 'dd"."mm"."yyyy'});
+
+    if (fileType === 'csv') {
+        csvInfo  = "Overall Attendance Information";
+        csvInfo += XLSX.utils.sheet_to_csv(sheet1);
+        csvInfo += '\n';
+        csvInfo += "Session Information\n";
+        csvInfo += XLSX.utils.sheet_to_csv(sheet2);
+        result = csvInfo;
+
+    } else {
+        wb.SheetNames.push('Overall Att');
+        wb.Sheets['Overall Att'] = sheet1;     
+        wb.SheetNames.push('Session Info');
+        wb.Sheets['Session Info'] = sheet2;
+        result = wb;
+    }
+    return result;
 }
 
 function s2ab(s) {

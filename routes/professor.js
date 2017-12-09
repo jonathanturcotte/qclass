@@ -132,9 +132,7 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 // Session Info: Total Number of students + Percent Attendance
 //               List of students in attendance: name, netID, std#
 router.get('/:classId/exportAttendance', function(req, res, next) {
-    var classId  = req.params.classId,
-        fileName = req.query.fileName,
-        fileType = req.query.fileType;
+    var classId  = req.params.classId;
 
     db.aggregateInfo(classId, function(err, attInfo, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance information for ' + classId);
@@ -157,35 +155,37 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                 
                 // General Info Formatting
                 result = [];
-                result[0] = { col1: "NetID", col2: 'Student #', col3: 'First Name', col4: 'Last Name', col5: 'Attended (Total)', col6: 'Attended (%)' };
-                for(var i = 0; i < attInfo.length;i++)
-                    result[i + 1] = attInfo[i];
-                var index = attInfo.length + 1;
-                result[index++] = {};
+                overallData = [];
+                sessionData = [];
+                for(var i = 0; i < attInfo.length;i++) {
+                    overallData[i] = {"NetID"          : attInfo[i].sNetID,
+                                      "Student #"      : attInfo[i].stdNum,
+                                      "First Name"     : attInfo[i].fName,
+                                      "Last Name"      : attInfo[i].lName,
+                                      "Attendance (#)" : attInfo[i].attCount,
+                                      "Attendance (%)" : attInfo[i].attPercent};
+                }
+                
+                result[0] = overallData;
 
                 // Session Info Formatting
                 var j    = 0,
+                    k    = 0,
                     date = 0;
-                result[index++] = { col1: 'NetID', col2: 'Student #', col3: 'First Name', col4: 'Last Name' };                                           
                 while (j < sessInfo.length) {
                     if (date === sessInfo[j].attTime) {
-                        result[index++] = { "NetID": sessInfo[j].sNetID, "Student #": sessInfo[j].stdNum, "First Name": sessInfo[j].fName, "Last Name": sessInfo[j].lName };
+                        sessionData[k++] = { "NetID": sessInfo[j].sNetID, "Student #": sessInfo[j].stdNum, "First Name": sessInfo[j].fName, "Last Name": sessInfo[j].lName };
                         j++;
                     } else {
                         date = sessInfo[j].attTime;
-                        result[index++] = {};
-                        result[index++] = { "NetID": (new Date(date)).toDateString() };
+                        sessionData[k++] = {};
+                        sessionData[k++] = { "NetID": (new Date(date)).toDateString() };
                     }
                 }
+                result[1] = sessionData;
                 
-                if (fileType === 'csv') {
-                    if (!fileName)
-                        fileName = 'attendance';                 
-                    res.setHeader('Content-disposition', 'attachment; filename=\"' + fileName + '.csv\"');
-                    res.csv(result);
-                } else {
-                    res.json(result);
-                }               
+                res.json(result);
+                               
             });
         });
     });
