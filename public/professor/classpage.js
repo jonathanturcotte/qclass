@@ -1,7 +1,8 @@
 var ModalWindow  = require('../modalwindow'),
     SessionTable = require('./sessionTable'),
     Exporter     = require('./exporter'),
-    Importer     = require('./importer');
+    Importer     = require('./importer'),
+    Editable     = require('../components/editable');
 
 /**
  * Creates a class page, responsible for the central window of the professor site
@@ -36,6 +37,8 @@ ClassPage.prototype.displayCourse = function (course) {
 function build () {
     var $topDiv      = $('<div>', { class: 'class-top-div' }),
         $titleDiv    = $('<div>', { class: 'class-title-div' }),
+        $nameDiv     = $('<div>'),
+        $codeDiv     = $('<div>'),
         $editDiv     = $('<div>', { class: 'class-edit-div' }),
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
@@ -44,9 +47,21 @@ function build () {
         $sessionDiv  = $('<div>', { class: 'class-session-table-div col' }),
         $studentDiv  = $('<div>', { class: 'class-student-table-div col' });
 
-    // Construct the title and course code
-    $('<h2>', { class: 'class-title-code', text: this.course.cCode }).appendTo($titleDiv);
-    $('<h3>', { class: 'class-title-name', text: this.course.cName }).appendTo($titleDiv);
+    // Construct the title and course code, and make them in-line editable
+    // Wrap each in a div so that Editable can append an edit icon in-line on hover
+
+    var $titleCode = $('<h2>', { class: 'class-title-code', text: this.course.cCode })
+        .css('display', 'inline-block')
+        .appendTo($codeDiv);
+    var $titleName = $('<h3>', { class: 'class-title-name', text: this.course.cName })
+        .css('display', 'inline-block')
+        .appendTo($nameDiv);
+
+    new Editable($titleName, editTitle.bind(this));
+    new Editable($titleCode, editCode.bind(this));
+
+    $codeDiv.appendTo($titleDiv);
+    $nameDiv.appendTo($titleDiv);
     $titleDiv.appendTo($topDiv);
 
     // Add the edit button
@@ -194,5 +209,15 @@ function showAttendanceInfo(data, modal) {
 function editAdministrators() {
     //TODO: complete
 }
+
+function editTitle() {
+    //TODO: complete
+}
+
+function editCode() {
+    //TODO: complete
+}
+
+
 
 module.exports = ClassPage;

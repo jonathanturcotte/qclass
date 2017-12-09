@@ -95,6 +95,20 @@ body {
     float: right;
 }
 
+.editable-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url('/images/pencil.svg');
+    background-size: 20px 20px;
+    margin-left: 10px;
+    margin-bottom: 15px;
+}
+
+.editable-icon-hidden {
+    display: none;
+}
+
 .class-attendance-div {
     height: 150px;
 }
