@@ -102,7 +102,7 @@ body {
     background: url('/images/pencil.svg');
     background-size: 20px 20px;
     margin-left: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 }
 
 .editable-icon-hidden {

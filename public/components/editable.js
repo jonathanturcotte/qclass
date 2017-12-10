@@ -32,7 +32,7 @@ function makeEditable () {
     storeResetValue.call(this);
 
     // Add the edit icon, and display/hide it when hovering
-    this.$el.parent().append($('<img>', { class: 'editable-icon editable-icon-hidden' }));
+    this.$el.parent().append($('<div>', { class: 'editable-icon editable-icon-hidden' }));
     this.$el.hover(showEditIcon.bind(this), hideEditIcon.bind(this));
 
     // Handle enter and esc keypresses
@@ -68,6 +68,7 @@ function handleKeypress (e) {
         // Undo the changes
         resetValue.call(this);
         this.$el.blur();
+        hideEditIcon.call(this);
     }
 }
 
@@ -96,6 +97,9 @@ function submitChanges () {
             this.$el.blur();
         }.bind(this));
     }
+
+    // Hide the icon whether or not the value has changed
+    hideEditIcon.call(this);
 }
 
 function showEditIcon () {
@@ -103,7 +107,9 @@ function showEditIcon () {
 }
 
 function hideEditIcon() {
-    this.$el.parent().children('.editable-icon').addClass('editable-icon-hidden');
+    // Don't hide the icon if the user is actively editing the field
+    if (!this.$el.is(':focus'))
+        this.$el.parent().children('.editable-icon').addClass('editable-icon-hidden');
 }
 
 module.exports = Editable;
