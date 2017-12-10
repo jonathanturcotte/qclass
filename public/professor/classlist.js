@@ -8,16 +8,41 @@ var ClassList = function () {
     this.updateClasses();
 };
 
-
+/**
+ * Fetches the professors classes from the server, builds the
+ * classlist and selects the first class
+ */
 ClassList.prototype.updateClasses = function () {
     $.get('/professor/classes')
         .done(updateSuccess.bind(this))
         .fail(updateFail.bind(this));
 };
 
+/**
+ * Selects the first class in the list
+ */
 ClassList.prototype.selectFirstClass = function () {
     if (this.classes.length !== 0)
         selectClass(this.classes[0]);
+};
+
+/**
+ * Update a classlist item without refreshing the entire list
+ * @param {string} id       // Course ID
+ * @param {string} field    // The desired field to update: 'name' or 'code'
+ * @param {string} value    // The new value
+ */
+ClassList.prototype.updateClassText = function (id, field, value) {
+    for (var i = 0; i < this.classes.length; i++){
+        if (id === this.classes[i].cID){
+            if (field === 'name')
+                this.classes[i].cName = value;
+            else if (field === 'code')
+                this.classes[i].cCode = value;
+
+            $('#' + id).text(this.classes[i].cCode + ":\n" + this.classes[i].cName);
+        }
+    }
 };
 
 ///////////////////////

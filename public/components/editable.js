@@ -86,6 +86,9 @@ function submitChanges () {
         $.post(args).done(function(status, xhr) {
             this.resetValue = newVal;
             toastr.success('Successfully updated class ' + this.field);
+
+            // Update the classlist listing
+            window.app.classList.updateClassText(this.cID, this.field, newVal);
         }.bind(this)).fail(function(xhr, status, errorThrown) {
             resetValue.call(this);
             toastr.error('Failed to update class ' + this.field + ': ' + xhr.responseText);
