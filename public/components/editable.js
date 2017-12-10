@@ -20,7 +20,7 @@ var Editable = function ($el, cID, field, route) {
 
 function makeEditable () {
     // Make the element editable, but disable spellcheck and such
-    this.$el.attr({ 
+    this.$el.attr({
         'contenteditable': 'true',
         'autocomplete'   : 'off',
         'autocorrect'    : 'off',
@@ -52,7 +52,7 @@ function resetValue () {
 
 function handleKeypress (e) {
     keyCode = e.which;
-    
+
     if (keyCode === 13) {
         // Enter
         e.stopPropagation();
@@ -103,7 +103,6 @@ function showEditIcon () {
 }
 
 function hideEditIcon() {
-    var $parent = 
     this.$el.parent().children('.editable-icon').addClass('editable-icon-hidden');
 }
 

@@ -63,6 +63,7 @@ router.post('/class/add', function(req, res, next) {
         }
         db.addClass(req.user.netID, code, name, function(err, id, results, fields) {
             if (err) return routeHelper.sendError(res, err, 'Error adding class');
+            res.status(201).json({ classId: id });
         });
     });
 });
