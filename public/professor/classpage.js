@@ -57,8 +57,8 @@ function build () {
         .css('display', 'inline-block')
         .appendTo($nameDiv);
 
-    new Editable($titleName, editTitle.bind(this));
-    new Editable($titleCode, editCode.bind(this));
+    this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName');
+    this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode');
 
     $codeDiv.appendTo($titleDiv);
     $nameDiv.appendTo($titleDiv);

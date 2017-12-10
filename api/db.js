@@ -12,10 +12,18 @@ var pool = mysql.createPool({
 
 exports.addClass = function(netID, code, name, callback) {
     var id = uuid();
-    var query = `INSERT INTO course (pNetId, cID, cCode, cName) VALUES (?, ?, ?, ?)`;
+    var query = 'INSERT INTO course (pNetId, cID, cCode, cName) VALUES (?, ?, ?, ?)';
     runQuery(query, [netID, id, code, name], function(err, results, fields) {
         if (err) callback(err);
         else callback(err, err ? null : id, results, fields);
+    });
+};
+
+exports.editClass = function(netID, cID, code, name, callback) {
+    var query = 'UPDATE course SET cCode=?, cName=? WHERE cID=?';
+
+    runQuery(query, [code, name, cID], function (err) {
+        callback(err);
     });
 };
 

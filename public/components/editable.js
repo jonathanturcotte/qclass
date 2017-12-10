@@ -4,10 +4,12 @@
  * @param {Object} $el      jQuery element to make editable
  * @param {Object} ajaxCall The ajaxcall to run
  */
-var Editable = function ($el, ajaxCall) {
-    this.$el        = $el;
-    this.ajaxCall   = ajaxCall;
-    this.resetValue = '';
+var Editable = function ($el, cID, field, route) {
+    this.$el        = $el;      // The element to make editable
+    this.cID        = cID;      // The course id that this field is associated with
+    this.field      = field;    // The name of the field that this element changes on the db side
+    this.route      = route;    // The route to call using ajax
+    this.resetValue = '';       // The last valid version of the text in this element
 
     makeEditable.call(this);
 };
@@ -35,6 +37,9 @@ function makeEditable () {
 
     // Handle enter and esc keypresses
     this.$el.keydown(handleKeypress.bind(this));
+
+    // Submit when the user clicks away
+    this.$el.blur(submitChanges.bind(this));
 }
 
 function storeResetValue () {
@@ -50,13 +55,43 @@ function handleKeypress (e) {
     
     if (keyCode === 13) {
         // Enter
+        e.stopPropagation();
+        e.preventDefault();
+
         // Try to submit the changes
-        this.$el.blur();
+        submitChanges.call(this);
     } else if (keyCode === 27) {
         // Esc
+        e.stopPropagation();
+        e.preventDefault();
+
         // Undo the changes
-        this.$el.blur();
         resetValue.call(this);
+        this.$el.blur();
+    }
+}
+
+function submitChanges () {
+    var newVal = this.$el.text();
+
+    // Only submit if there's actually been changes.
+    // Prevents submitting on ESC keypress.
+    if (newVal !== this.resetValue){
+        var args = {
+            url: this.route,
+            data: { cID: this.cID }
+        };
+        args.data[this.field] = newVal;
+
+        $.post(args).done(function(status, xhr) {
+            this.resetValue = newVal;
+            toastr.success('Successfully updated class ' + this.field);
+        }.bind(this)).fail(function(xhr, status, errorThrown) {
+            resetValue.call(this);
+            toastr.error('Failed to update class ' + this.field + ': ' + xhr.responseText);
+        }.bind(this)).always(function(a, status, b) {
+            this.$el.blur();
+        }.bind(this));
     }
 }
 

@@ -14,6 +14,7 @@ var SignInApp = function () {};
  */
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
+    initToastNotifications();
     this.navbar = new NavBar();
 
     this.getUserInfo();
@@ -69,6 +70,26 @@ SignInApp.prototype.signOut = function () {
     // TODO - sign out from SSO and redirect to queen's page maybe?
     console.log('Signing-out.');
 };
+
+function initToastNotifications () {
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-bottom-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+      };
+}
 
 // When the page is loaded, create our main ui object
 $(function () {

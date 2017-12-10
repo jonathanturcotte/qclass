@@ -63,7 +63,56 @@ router.post('/class/add', function(req, res, next) {
         }
         db.addClass(req.user.netID, code, name, function(err, id, results, fields) {
             if (err) return routeHelper.sendError(res, err, 'Error adding class');
-            res.status(201).json({ classId: id }); 
+        });
+    });
+});
+
+// Edit an existing class name
+router.post('/class/editName', function(req, res, next) {
+    var name = req.body.name,
+        cID  = req.body.cID;
+
+    if (name.length < 3 || name.length > 100 || !routeHelper.regex.class.name.test(name))
+        return routeHelper.sendError(res, null, 'Invalid class name', 400);
+
+    db.getTeachesClasses(req.user.netID, function(err, results, fields) {
+        var found = false;
+
+        if (err) return routeHelper.sendError(res, err);
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].cID === cID)
+                found = results[i];
+        }
+
+        if (!found) return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
+        db.editClass(req.user.netID, cID, found.cCode, name, function(err) {
+            if (err) return routeHelper.sendError(res, err, 'Error editing class name');
+            else res.send('');
+        });
+    });
+});
+
+// Edit an existing class code
+router.post('/class/editCode', function(req, res, next) {
+    var code = req.body.code,
+        cID  = req.body.cID;
+
+    if (!routeHelper.regex.class.code.test(code))
+        return routeHelper.sendError(res, null, 'Invalid code format', 400);
+
+    db.getTeachesClasses(req.user.netID, function(err, results, fields) {
+        var found = false;
+
+        if (err) return routeHelper.sendError(res, err);
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].cID === cID)
+                found = results[i];
+        }
+
+        if (!found) return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
+        db.editClass(req.user.netID, cID, code, found.cName, function(err) {
+            if (err) return routeHelper.sendError(res, err, 'Error editing class code');
+            else res.send('');
         });
     });
 });
