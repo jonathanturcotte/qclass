@@ -8,7 +8,18 @@ var ModalWindow = require('../modalwindow'),
  */
 var SessionTable = function(classID, $appendTarget) {
     this.classID  = classID;
-    this.table = new Table(['session-table'], 300, 200, ['Date', 'Attendance', 'Rate', 'Actions'], $appendTarget);
+    this.table = new Table(
+        ['session-table'], 
+        300, 
+        385, 
+        [
+            ['Date', 140], 
+            ['Attendance', 96], 
+            ['Rate', 66], 
+            ['Actions', 87]
+        ], 
+        $appendTarget
+    );
     this.updateSessions();
 };
 
@@ -34,11 +45,11 @@ function updateTable(data, status, xhr) {
         session.date               = new Date(session.sessDate);
         session.attendanceCount    = session.studentList.length;
         session.attendancePercent  = 0,
-        session.formattedDate = formatDate(session.date);
+        session.formattedDate      = formatDate(session.date);
 
         var isEmpty = session.attendanceCount < 1;
         if (!isEmpty)
-            session.attendancePercent = session.attendance / this.data.numEnrolled * 100;
+            session.attendancePercent = session.attendanceCount / this.data.numEnrolled * 100;
         else
             session.attendancePercent = 0;
         
@@ -61,7 +72,7 @@ function updateTable(data, status, xhr) {
         // Add new row to table
         tableData.push([
             $date, 
-            session.attendanceCount + '/' + session.studentList.length, 
+            session.attendanceCount + '/' + this.data.numEnrolled, 
             session.attendancePercent.toFixed(1) + ' %', 
             $actions
         ]);

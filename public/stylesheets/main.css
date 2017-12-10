@@ -224,42 +224,36 @@ body {
 
 .session-table-container {
     margin-top: 20px;
-    min-height: 330px;
-    max-height: 330px;
-    /* display: none; */
 }
 
 .session-table {
+
+}
+
+.qtable {
     background-color: white;
 }
 
-.table1 {
+.qtable1 {
     border-bottom: 0;
 }
 
-.table2 {
+.qtable2 {
     border-top: 0;
 }
 
-.session-table thead tr {
+.qtable thead tr {
     display: block;
     position: relative;
 }
 
-.session-table tbody {
+.qtable tbody {
     display: block;
-    overflow: auto;
-    max-height: 364px;    
+    overflow: auto;    
 }
 
-.session-table > tbody > tr > td:first-child,
-.session-table > thead > tr > th:first-child {
-    width: 140px;
-}
-
-.session-table > tbody > tr > td:last-child,
-.session-table > thead > tr > th:last-child {
-    width: 140px;
+.qtable td {
+    text-align: center;
 }
 
 .spin-div {
