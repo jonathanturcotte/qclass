@@ -77,7 +77,6 @@ function build () {
 
     // The session table
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
-    this.sessionTable.startSpinner();
 
     this.$element.append($topDiv)
         .append($attDiv)

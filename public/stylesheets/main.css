@@ -226,17 +226,18 @@ body {
     margin-top: 20px;
     min-height: 330px;
     max-height: 330px;
+    /* display: none; */
 }
 
 .session-table {
     background-color: white;
 }
 
-.session-table1 {
+.table1 {
     border-bottom: 0;
 }
 
-.session-table2 {
+.table2 {
     border-top: 0;
 }
 
@@ -261,7 +262,7 @@ body {
     width: 140px;
 }
 
-.session-table-spin-div {
+.spin-div {
     height: 55px;
     position: relative;
 }
