@@ -86,13 +86,13 @@ function submitChanges () {
 
         $.post(args).done(function(status, xhr) {
             this.resetValue = newVal;
-            toastr.success('Successfully updated class ' + this.field);
+            toastr.success('Successfully updated class ' + this.field, 'Saved successfully');
 
             // Update the classlist listing
             window.app.classList.updateClassText(this.cID, this.field, newVal);
         }.bind(this)).fail(function(xhr, status, errorThrown) {
             resetValue.call(this);
-            toastr.error('Failed to update class ' + this.field + ': ' + xhr.responseText);
+            toastr.error('Failed to update class ' + this.field + ': ' + xhr.responseText, 'Failed to save changes');
         }.bind(this)).always(function(a, status, b) {
             this.$el.blur();
         }.bind(this));

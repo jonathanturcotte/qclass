@@ -122,7 +122,7 @@ function build () {
 // Creates the attendance modal window, makes the call
 // to the server to start a session.
 function startAttendance() {
-    var modal  = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session' }),
+    var modal  = new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false }),
         course = this.course;
 
     modal.show();
@@ -138,7 +138,7 @@ function startAttendance() {
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         if (xhr.status === 409)
-            modal.error('Error - Running', 'A session is already running for ' + course.cCode);
+            modal.error('Error - Already Running', 'A session is already running for ' + course.cCode);
         else modal.error('Error', 'Error starting attendance session');
     }).always(function(a, status, b) {
         modal.$body.spin(false);
@@ -160,47 +160,63 @@ function showAttendanceInfo(data, modal) {
             .append($timerInfo)
             .append($timerContainer)
     ], true);
-    modal.$closeButton.text('Hide');
 
-    $finishButton = $('<button>', { class: 'btn btn-danger', text: 'Finish' })
+    // Hide button starts the persistent notification and hides the modal
+    modal.$hideButton = $('<button>', { class: 'btn', text: 'Hide'});
+    modal.$hideButton.click(function () {
+        hideRunningAttendance.call(this, this.course, data);
+        modal.hide.call(modal);
+    }.bind(this)).appendTo(modal.$footer);
+
+    modal.$finishButton = $('<button>', { class: 'btn btn-danger', text: 'Finish' })
         .click(function() {
-            $finishButton.addClass('disabled');
+            modal.$finishButton.addClass('disabled');
             $timerText.countdown('stop');
             modal.$body.spin();
             $.post({
                 url: 'professor/class/stop/' + this.course.cID
             }).done(function(data, status, xhr) {
-                $timerContainer
-                    .empty()
-                    .append($('<div>', { text: 'Ended session successfully.', style: 'padding-top: 5px' }));
-            }).fail(function(xhr, status, errorThrown) {
-                var text = 'Error ending session';
-                if (xhr.responseText) text += ': ' + xhr.responseText;
-                else text += '!';
-                $timerContainer
-                    .empty()
-                    .append($('<div>', { class: 'text-danger' })
-                    .html(text));
-            }).always(function(a, status, b) {
+                endAttendanceSession.call(this, modal, data, true);
+            }.bind(this)).fail(function(xhr, status, errorThrown) {
+                endAttendanceSession.call(this, modal, xhr, false);
+            }.bind(this)).always(function(a, status, b) {
                 modal.$body.spin(false);
-                $finishButton.hide();
-                modal.$closeButton
-                    .text('Close')
-                    .show();
             });
-        }.bind(this));
-    modal.$footer.append($finishButton);
+        }.bind(this))
+        .appendTo(modal.$footer);
     
     // Countdown Timer
     $timerText.countdown(data.endTime, function(e) {
         $(this).text(e.strftime('%-H:%M:%S'));
-    }).on('finish.countdown', function(e) {
-        modal.$title.text('Complete');
-        $finishButton.hide();
-        $timerInfo
-            .text('Session complete!')
-            .addClass('.start-modal-top-info-finished');
-    }).countdown('start');
+    }).on('finish.countdown', endAttendanceSession.bind(this, modal, {}, true))
+        .countdown('start');
+}
+
+function endAttendanceSession(modal, data, success){
+    var $timerContainer = $('.start-modal-timer-container');
+
+    if (!success){
+        // On failure, display the error
+        var text = 'Error ending session';
+        if (data.responseText) text += ': ' + data.responseText;
+        else text += '!';
+
+        $timerContainer.empty()
+            .append($('<div>', { class: 'text-danger' })
+            .html(text));
+    } else {
+        // On success, show completion
+        modal.$title.text('Session Complete');
+        $timerContainer
+            .empty()
+            .append($('<div>', { text: 'Ended session successfully.', style: 'padding-top: 5px' }));
+    }
+
+    // Remove the finish button, remove the hide button
+    // Make the modal closeable
+    modal.$finishButton.hide();
+    modal.$hideButton.hide();
+    modal.makeCloseable.call(modal);
 
     // Refresh the session table when the attendance session is closed
     modal.$closeButton.click(this.sessionTable.updateSessions.bind(this.sessionTable));
@@ -210,14 +226,29 @@ function editAdministrators() {
     //TODO: complete
 }
 
-function editTitle() {
-    //TODO: complete
-}
+function hideRunningAttendance(course, data) {
+    // Make sure that we don't bother opening a notification
+    // for a session that is finished
+    if (Date.now() < data.endTime){
+        // Override the default toastr notifications so that this doesn't
+        // automatically get dismissed. On click re-open the attendance modal
+        var options = {
+            'timeOut': '0',
+            'extendedTimeOut': '0',
+            'onclick': function () {
+                var modal  = new ModalWindow({ id: 'startModal', title: 'Running Attendance Session', closeable: false });
 
-function editCode() {
-    //TODO: complete
-}
+                modal.show();
+                modal.$body.spin()
+                    .addClass('spin-min-height');
 
+                showAttendanceInfo.call(this, data, modal);
+            }.bind(this)
+        };
+
+        toastr.info('Code: ' + data.code.toUpperCase(), 'Running session for ' + course.cCode, options);
+    }
+}
 
 
 module.exports = ClassPage;

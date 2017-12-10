@@ -9,7 +9,7 @@ var ModalWindow = function(options) {
     // Initialization with defaults
     this.id         = options.id        || 'modal-window';
     this.title      = options.title     || '';
-    this.closeable  = options.closeable || true;
+    this.closeable  = options.closeable === undefined ? true : options.closeable;
 
     // Construction of the elements
     $('#' + this.id).remove();
@@ -79,15 +79,11 @@ ModalWindow.prototype.error = function (title, message) {
 /**
  * Transitions modal style to a success state.
  * The body is replaced with the message if given, and if a title is given the title is changed.
- * Non-closeable modals will become closeable
  * @param {string=} message
  * @param {string=} title
  */
 ModalWindow.prototype.success = function (title, message) {
     updateStatus.call(this, title, message, 'modal-header-success');
-
-    if (!this.closeable)
-        this.makeCloseable();
 };
 
 ModalWindow.prototype.makeCloseable = function () {
