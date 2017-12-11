@@ -15,8 +15,8 @@ var SignInApp = function () {};
 SignInApp.prototype.init = function () {
     document.title = SITE_NAME;
     initToastNotifications();
-    this.navbar = new NavBar();
 
+    this.navbar = new NavBar();
     this.getUserInfo();
 };
 
@@ -29,7 +29,7 @@ SignInApp.prototype.getUserInfo = function () {
     $.get('/user-info')
         .done(function (info) {
             info.isProf ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
-        }.bind(this)).fail(this.signOut.bind(this));
+        }.bind(this)).fail(this.signOut);
 };
 
 /**

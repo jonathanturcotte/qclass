@@ -311,3 +311,7 @@ body {
  .attendance-modal-table thead {
     border-bottom: rgb(43, 43, 43)
 } 
+
+#toast-container {
+    z-index: 1039;
+}
