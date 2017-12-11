@@ -79,16 +79,19 @@ router.post('/class/editName', function(req, res, next) {
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
         var found = false;
 
-        if (err) return routeHelper.sendError(res, err);
+        if (err)
+            return routeHelper.sendError(res, err);
         for (var i = 0; i < results.length; i++) {
             if (results[i].cID === cID)
                 found = results[i];
         }
 
-        if (!found) return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
+        if (!found)
+            return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
         db.editClass(req.user.netID, cID, found.cCode, name, function(err) {
-            if (err) return routeHelper.sendError(res, err, 'Error editing class name');
-            else res.send('');
+            if (err)
+                return routeHelper.sendError(res, err, 'Error editing class name');
+            res.send('');
         });
     });
 });
@@ -104,16 +107,19 @@ router.post('/class/editCode', function(req, res, next) {
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
         var found = false;
 
-        if (err) return routeHelper.sendError(res, err);
+        if (err)
+            return routeHelper.sendError(res, err);
         for (var i = 0; i < results.length; i++) {
             if (results[i].cID === cID)
                 found = results[i];
         }
 
-        if (!found) return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
+        if (!found)
+            return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
         db.editClass(req.user.netID, cID, code, found.cName, function(err) {
-            if (err) return routeHelper.sendError(res, err, 'Error editing class code');
-            else res.send('');
+            if (err)
+                return routeHelper.sendError(res, err, 'Error editing class code');
+            res.send('');
         });
     });
 });
