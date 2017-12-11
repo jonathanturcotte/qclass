@@ -39,6 +39,7 @@ SessionManager.prototype.startSession = function (course) {
     }
 };
 
+// End a session early
 SessionManager.prototype.endSession = function(course){
     // Get the session associated with the course
     var session = getSession(course, this.sessions);
@@ -48,7 +49,7 @@ SessionManager.prototype.endSession = function(course){
         // Display the modal if it's currently hidden
         session.modal.show();
 
-        // TODO: Remove the notification if it's present
+        removeToastNotification(session.course.cID);
         
         var $timerContainer = $('.start-modal-timer-container'),
             $timerText      = $('.start-modal-timer');
@@ -100,6 +101,7 @@ SessionManager.prototype.hideSession = function (course) {
         var options = {
             'timeOut': '0',
             'extendedTimeOut': '0',
+            'toastClass': 'toast toast-session-' + course.cID,
             'onclick': function () { this.showSession(course); }.bind(this)
         };
 
@@ -120,6 +122,7 @@ SessionManager.prototype.showSession = function (course) {
 // Private Functions //
 ///////////////////////
 
+// Build the running session modal
 function buildModal(session) {
     var $timerInfo = $('<div>', { class: 'start-modal-running-info' })
         .append($('<h3>', { class: 'start-modal-code', text: "Code: " + session.code.toUpperCase() })),
@@ -147,18 +150,22 @@ function buildModal(session) {
     // Countdown Timer
     $timerText.countdown(session.endTime, function(e) {
         $(this).text(e.strftime('%-H:%M:%S'));
-    }).on('finish.countdown', function (s) { displaySessionEnded.call(this, s); }.bind(this, session))
+    }).on('finish.countdown', function (s) {
+        displaySessionEnded.call(this, s);
+    }.bind(this, session))
         .countdown('start');
 }
 
+// Display in the modal that the session is complete. Does not
+// interact in any way with the server. To interrupt a running
+// session early, see endSession
 function displaySessionEnded(session) {
     // Display the modal if it's currently hidden
     session.modal.show();
     
     var $timerContainer = $('.start-modal-timer-container');
 
-    // TODO: Remove the notification if it's present
-
+    removeToastNotification(session.course.cID);
 
     session.modal.$title.text('Session Complete');
     $timerContainer
@@ -177,10 +184,25 @@ function displaySessionEnded(session) {
         }
 
         // Always remove the session from the session manager
+        // and remove the modal from the DOM (instead of just
+        // hiding it)  when the hide animation is over
+        session.modal.$window.on('hidden.bs.modal', function (e) {
+            session.modal.remove();
+        });
+
         this.sessions = _.without(this.sessions, session);
     }.bind(this));
 }
 
+// Find and remove the toastr notification for a running session
+// if it exists
+function removeToastNotification(id) {
+    var $toast = $('.toast-session-' + id).parent();
+    if ($toast)
+        toastr.clear($toast);
+}
+
+// Create a new session for a given course and return it
 function createSession(course) {
     return {
     course  : course,
@@ -190,6 +212,8 @@ function createSession(course) {
     };
 }
 
+// Given a course and a list of sessions, find the session that
+// is for the course and return it if it's found
 function getSession(course, sessions) {
     for (var i = 0; i < sessions.length; i++){
         if (sessions[i].course.cID === course.cID){

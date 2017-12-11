@@ -109,6 +109,10 @@ ModalWindow.prototype.makeCloseable = function () {
     this.closeable = true;
 };
 
+ModalWindow.prototype.remove = function () {
+    this.$window.remove();
+};
+
 ///////////////////////
 // Private Functions //
 ///////////////////////
