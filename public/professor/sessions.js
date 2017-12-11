@@ -7,31 +7,36 @@ var SessionManager = function () {
 // Creates the attendance modal window, makes the call
 // to the server to start a session.
 SessionManager.prototype.startSession = function (course) {
-    var session = createSession(course);
-
-    session.modal.show();
-    session.modal.$body.spin()
-        .addClass('spin-min-height');
-
-    $.post({
-        url: '/professor/class/start/' + course.cID,
-        data: { duration: 30000 },
-        dataType: 'json'
-    }).done(function(data, status, xhr) {
-        // This is a valid session, so append it's information to the session
-        $.extend(session, data);
-        this.sessions.push(session);
-        buildModal.call(this, session);
+    if (getSession(course, this.sessions)){
+        // If this session already exists, just show it
         this.showSession(course);
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        if (xhr.status === 409)
-            session.modal.error('Error - Already Running', 'A session is already running for ' + course.cCode);
-        else
-            session.modal.error('Error', 'Error starting attendance session');
-    }).always(function(a, status, b) {
-        session.modal.$body.spin(false);
-    });
+    } else {
+        var session = createSession(course);
+
+        session.modal.show();
+        session.modal.$body.spin()
+            .addClass('spin-min-height');
+
+        $.post({
+            url: '/professor/class/start/' + course.cID,
+            data: { duration: 30000 },
+            dataType: 'json'
+        }).done(function(data, status, xhr) {
+            // This is a valid session, so append it's information to the session
+            $.extend(session, data);
+            this.sessions.push(session);
+            buildModal.call(this, session);
+            this.showSession(course);
+        }.bind(this))
+        .fail(function(xhr, status, errorThrown) {
+            if (xhr.status === 409)
+                session.modal.error('Error - Already Running', 'A session is already running for ' + course.cCode);
+            else
+                session.modal.error('Error', 'Error starting attendance session');
+        }).always(function(a, status, b) {
+            session.modal.$body.spin(false);
+        });
+    }
 };
 
 SessionManager.prototype.endSession = function(course){
@@ -73,7 +78,10 @@ SessionManager.prototype.endSession = function(course){
             // Remove the finish button, remove the hide button
             // Make the modal closeable
             session.modal.$body.spin(false);
-        });
+
+            // Always remove the session from the session manager
+            this.sessions = _.without(this.sessions, session);
+        }.bind(this));
     }
 };
 
