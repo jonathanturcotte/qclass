@@ -76,11 +76,83 @@ body {
 .classpage {
     padding-top: 20px;
     padding-left: 30px;
+    padding-right: 15px;
     max-height: calc(100vh - 76px);
     min-height: calc(100vh - 76px);
     width: calc(100vw - 300px);
     overflow-y: auto;
 }
+
+.class-top-div {
+    height: 110px;
+}
+
+.class-title-div {
+    float: left;
+}
+
+.class-edit-div {
+    float: right;
+}
+
+.editable-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url('/images/pencil.svg');
+    background-size: 20px 20px;
+    margin-left: 10px;
+    margin-bottom: 5px;
+}
+
+.editable-icon-hidden {
+    display: none;
+}
+
+.class-attendance-div {
+    height: 150px;
+}
+
+.class-attendance-div-left {
+    float: left;
+    padding-right: 30px;
+}
+
+.class-attendance-div-right {
+    float: left;
+    padding-top: 40px;
+}
+
+.class-attendance-label {
+    display: block;
+}
+
+.class-duration-label {
+    padding-right: 10px;
+}
+
+.class-export-div {
+    height: 40px;
+}
+
+.class-export-button {
+    margin-top: 10px;
+}
+
+.class-import-button {
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.class-addstudent-button {
+    margin-top: 10px;
+}
+
+.class-table-column-div {
+    text-align: center;
+    padding-top: 15px;
+}
+
 
 .hidden {
     display: none;
@@ -179,44 +251,34 @@ body {
     width: 100%
 }
 
-.session-table-container {
-    margin-top: 20px;
-}
-
-.session-table {
+.qtable {
     background-color: white;
+    text-align: center;
 }
 
-.session-table1 {
+.qtable1 {
     border-bottom: 0;
 }
 
-.session-table2 {
+.qtable2 {
     border-top: 0;
 }
 
-.session-table thead tr {
+.qtable thead tr {
     display: block;
     position: relative;
 }
 
-.session-table tbody {
+.qtable tbody {
     display: block;
-    overflow: auto;
-    max-height: 364px;    
+    overflow: auto;    
 }
 
-.session-table > tbody > tr > td:first-child,
-.session-table > thead > tr > th:first-child {
-    width: 140px;
+.qtable td {
+    text-align: center;
 }
 
-.session-table > tbody > tr > td:last-child,
-.session-table > thead > tr > th:last-child {
-    width: 140px;
-}
-
-.session-table-spin-div {
+.spin-div {
     height: 55px;
     position: relative;
 }
@@ -243,3 +305,7 @@ body {
  .attendance-modal-table thead {
     border-bottom: rgb(43, 43, 43)
 } 
+
+#toast-container {
+    z-index: 1039;
+}
