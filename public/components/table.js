@@ -17,7 +17,7 @@ var Table = function (classList, height, width, columns, $appendTarget) {
     }
     
     // Store references
-    this.$element = $('<div>', { class: 'session-table-container' });
+    this.$element = $('<div>', { class: 'table-container' });
     this.columns = columns;
 
     // Set table as two separate tables to allow for fixed headers while scrolling
