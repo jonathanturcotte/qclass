@@ -1,5 +1,5 @@
 var ModalWindow = require('../modalwindow'),
-    Table = require('../components/table');
+    Table       = require('../components/table');
 
 /**
  * Creates a session table that displays attendance sessions
@@ -27,7 +27,7 @@ SessionTable.prototype.updateSessions = function () {
     $.get('/professor/' + this.classID + '/attendanceSessions')
         .done(updateTable.bind(this))
         .fail(failTable.bind(this));
-}
+};
 
 ///////////////////////
 // Private Functions //
@@ -44,7 +44,7 @@ function updateTable(data, status, xhr) {
 
         session.date               = new Date(session.sessDate);
         session.attendanceCount    = session.studentList.length;
-        session.attendancePercent  = 0,
+        session.attendancePercent  = 0;
         session.formattedDate      = formatDate(session.date);
 
         var isEmpty = session.attendanceCount < 1;

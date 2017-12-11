@@ -136,16 +136,16 @@ body {
 }
 
 .class-export-button {
-    float: right;
+    margin-top: 10px;
 }
 
 .class-import-button {
-    float: right;
+    margin-top: 10px;
+    margin-right: 10px;
 }
 
 .class-addstudent-button {
-    float: right;
-    margin-right: 20px
+    margin-top: 10px;
 }
 
 .hidden {

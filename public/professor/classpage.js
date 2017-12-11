@@ -45,9 +45,9 @@ function build () {
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
-        $tableRow    = $('<div>', { class: 'row' }),
-        $sessionDiv  = $('<div>', { class: 'class-session-table-div col' }),
-        $studentDiv  = $('<div>', { class: 'class-student-table-div col' });
+        $tableRow    = $('<div>', { class: 'class-content row' }),
+        $tableCol1   = $('<div>', { class: 'class-session-table-div text-center col' }),
+        $tableCol2   = $('<div>', { class: 'class-student-table-div text-center col' });
 
     // Construct the title and course code, and make them in-line editable
     // Wrap each in a div so that Editable can append an edit icon in-line on hover
@@ -88,18 +88,23 @@ function build () {
     $attDivRight.appendTo($attDiv);
 
     // The session table and export button
+    var $sessionDiv = $('<div>', { style: 'text-align: right; display: inline-block;' });
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
 
     $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
         .click(this.exporter.createExportModal.bind(this))
         .appendTo($sessionDiv);
 
+    $sessionDiv.appendTo($tableCol1);
+
     // The student table and associated buttons
     // TODO: add actual student table and stop setting width/height here
     // this.studentTable = new StudentTable(this.course.cID, $studentDiv);
+    var $studentDiv = $('<div>', { style: 'text-align: right; display: inline-block;' });
     var $fakeTable = $('<div>')
-        .width(600)
-        .height(350)
+        .width(400)
+        .height(300)
+        .css({ background: 'white'})
         .appendTo($studentDiv);
 
     $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
@@ -110,10 +115,12 @@ function build () {
         .click(this.importer.createAddStudentModal)
         .appendTo($studentDiv);
 
+    $studentDiv.appendTo($tableCol2);
+
     // Conatiner that puts the following tables in a row
     // if the view is large enough, otherwise puts them one below the other
-    $tableRow.append($sessionDiv)
-        .append($studentDiv);
+    $tableRow.append($tableCol1)
+        .append($tableCol2);
 
     this.$element.append($topDiv)
         .append($attDiv)
