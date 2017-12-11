@@ -114,6 +114,8 @@ SessionManager.prototype.showSession = function (course) {
     var session = getSession(course, this.sessions);
 
     if (session) {      
+        // Close the notification if it's open, then show the modal
+        removeToastNotification(course.cID);
         session.modal.show();
     }
 };
