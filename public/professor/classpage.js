@@ -22,7 +22,7 @@ var ClassPage = function() {
  * @param {string} course.cCode
 */
 ClassPage.prototype.displayCourse = function (course) {
-    this.course  = course;
+    this.course = course;
 
     // Clear the old page
     this.$element.empty();
@@ -51,7 +51,6 @@ function build () {
 
     // Construct the title and course code, and make them in-line editable
     // Wrap each in a div so that Editable can append an edit icon in-line on hover
-
     var $titleCode = $('<h2>', { class: 'class-title-code', text: this.course.cCode })
         .css('display', 'inline-block')
         .appendTo($codeDiv);

@@ -22,9 +22,7 @@ exports.addClass = function(netID, code, name, callback) {
 exports.editClass = function(netID, cID, code, name, callback) {
     var query = 'UPDATE course SET cCode=?, cName=? WHERE cID=?';
 
-    runQuery(query, [code, name, cID], function (err) {
-        callback(err);
-    });
+    runQuery(query, [code, name, cID], callback);
 };
 
 /**

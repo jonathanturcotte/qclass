@@ -3,18 +3,18 @@ var XLSX         = require('xlsx'),
 
 var Importer = function () {};
 
-Importer.prototype.createImportModal = function () {
+Importer.prototype.createImportModal = function (course) {
     var modal         = new ModalWindow({ id: 'importModal', title: 'Import Classlist'}),
-        $file         = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' }),
-        $importButton = $('<button>', { type: 'submit', class: 'btn btn-primary', text: 'Import', id: 'importButton' });
-    
+        $file         = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' });
+
+    modal.$importButton = $('<button>', { type: 'submit', class: 'btn btn-primary', text: 'Import', id: 'importButton' });
     modal.$body
         .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
         .append($file);
     modal.$footer
-        .prepend($importButton);
-    $importButton
-       .click(importXLSX.bind(this, modal, $file));
+        .prepend(modal.$importButton);
+    modal.$importButton
+       .click(importXLSX.bind(this, course, modal, $file));
     modal.show();
 };
 
@@ -141,12 +141,12 @@ Importer.prototype.createAddStudentModal = function () {
 // Private Functions //
 ///////////////////////
 
-function importXLSX(modal, $file) {
+function importXLSX(course, modal, $file) {
     var file   = $file.get(0).files[0],
         reader = new FileReader(),
-        cID    = this.course.cID;
-    
-    this.$importButton.remove();
+        cID    = course.cID;
+
+    modal.$importButton.remove();
     modal.$body.empty();
     modal.$body
         .spin()
@@ -160,8 +160,8 @@ function importXLSX(modal, $file) {
         return;
     } else {            
         reader.onload = function(e) {
-            var sheetData     = new Uint8Array(e.target.result),
-                workbook = null;
+            var sheetData = new Uint8Array(e.target.result),
+                workbook  = null;
 
             try {
                 workbook = XLSX.read(sheetData, { type: 'array' });
@@ -230,6 +230,13 @@ function findErrors (netID, stdNum, fName, lName) {
             result[3] = "Last Name Too Long";
     }
     return result;        
+}
+
+function checkFileExtension(file) {
+    var splitArr  = file.name.split('.'),
+        length = splitArr.length,
+        extension = splitArr[length-1];
+    return "xlsx" === extension;
 }
 
 module.exports = Importer;
