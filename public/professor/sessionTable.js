@@ -1,4 +1,5 @@
-var ModalWindow = require('../modalwindow');
+var ModalWindow = require('../modalwindow'),
+    Table = require('../components/table');
 
 /**
  * Creates a session table that displays attendance sessions
@@ -7,8 +8,18 @@ var ModalWindow = require('../modalwindow');
  */
 var SessionTable = function(classID, $appendTarget) {
     this.classID  = classID;
-    this.$appendTarget = $appendTarget;
-    build.call(this);
+    this.table = new Table(
+        ['session-table'], 
+        300, 
+        385, 
+        [
+            ['Date', 140], 
+            ['Attendance', 96], 
+            ['Rate', 66], 
+            ['Actions', 87]
+        ], 
+        $appendTarget
+    );
     this.updateSessions();
 };
 
@@ -16,87 +27,62 @@ SessionTable.prototype.updateSessions = function () {
     $.get('/professor/' + this.classID + '/attendanceSessions')
         .done(updateTable.bind(this))
         .fail(failTable.bind(this));
-};
-
-SessionTable.prototype.startSpinner = function () {
-    this.$spinDiv.spin();
-};
-
-SessionTable.prototype.stopSpinner = function () {
-    this.$spinDiv.spin(false);
-};
+}
 
 ///////////////////////
 // Private Functions //
 ///////////////////////
 
-// Build the table
-function build () {
-    this.$container = $('<div>', { class: 'session-table-container' });
-
-    this.$spinDiv = $('<div>', { class: 'session-table-spin-div' });
-    this.$tablehead = $('<thead>')
-        .append($('<tr>')
-            .append($('<th>').html('Date'))
-            .append($('<th>').html('Attendance (%)')));
-
-    this.$tablebody = $('<tbody>')
-        .append($('<tr>')
-            .append($('<td>', { colspan: 2 })
-                .append($(this.$spinDiv))));
-
-    this.$table1 = $('<table>', { class: 'session-table session-table1 table-bordered table-sm table-hover' })
-        .append(this.$tablehead)
-        .appendTo(this.$container);
-    this.$table2 = $('<table>', { class: 'session-table session-table2 table-bordered table-sm table-hover' })
-        .append(this.$tablebody)
-        .appendTo(this.$container);
-
-    this.$container.appendTo(this.$appendTarget);
-}
-
 function updateTable(data, status, xhr) {
-    this.$tablebody.empty();
+    var tableData = [];
     this.data = data;
 
     // Add in reverse order to ensure that the latest sessions
     // are at the top of the table
     for (var i = this.data.sessions.length - 1; i >= 0; i--) {
-        var session       = this.data.sessions[i],
-            date          = new Date(session.sessDate),
-            attendance    = session.studentList.length,
-            isEmpty       = attendance < 1,
+        var session = this.data.sessions[i];
 
-            // Format the date as dd/mm/yy hh:mm:ss - note that day and month can be 1 or 2 digits
-            formattedDate = formatDate(date);
+        session.date               = new Date(session.sessDate);
+        session.attendanceCount    = session.studentList.length;
+        session.attendancePercent  = 0,
+        session.formattedDate      = formatDate(session.date);
 
+        var isEmpty = session.attendanceCount < 1;
         if (!isEmpty)
-            attendance = attendance + ' students (' + (attendance / this.data.numEnrolled * 100).toFixed(1) + '%)';
+            session.attendancePercent = session.attendanceCount / this.data.numEnrolled * 100;
         else
-            attendance = attendance + ' students';
+            session.attendancePercent = 0;
         
         // Create main row 
-        session.$td1 = $('<td>', { title: date.toString() }).text(formattedDate); 
-        session.$td2 = $('<td>').text(attendance);
-        session.$tr  = $('<tr>', { class: 'accordion-toggle', title: 'Click to view students in attendance' })
-            .append(session.$td1)
-            .append(session.$td2);
+        var $date = $('<td>', { title: session.date.toString() }).text(session.formattedDate),
+            $button = $('<button>', { class: 'btn btn-default', text: 'Expand' }),
+            $actions = $('<td>')
+                .append($button); 
 
+        // If there was attendance for this session, make it clickable
         if (!isEmpty) {
-            // If there was attendance for this session, make it clickable
-            session.$tr.click(openAttendanceModal.bind(this, formattedDate, session.studentList));
+            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.studentList));
+        } else {
+            $button.prop('disabled', true);
         }
 
-        this.$tablebody.append(session.$tr);
+        // Store session data for future use
         this.data.sessions[i] = session;
+
+        // Add new row to table
+        tableData.push([
+            $date, 
+            session.attendanceCount + '/' + this.data.numEnrolled, 
+            session.attendancePercent.toFixed(1) + ' %', 
+            $actions
+        ]);
     }
-    this.$spinDiv.remove();
+    // Fill table with formatted data
+    this.table.fill(tableData);
 }
 
 function failTable(xhr, status, errorThrown) {
-    this.$table.addClass('table-danger');
-    this.$spinDiv.remove();
-    this.$tablebody.empty().append($('<p>', { class: 'text-danger', text: 'Error getting attendance sessions: ' + status }));
+    this.table.error('Error getting attendance sessions: ' + status);
 }
 
 function openAttendanceModal(date, studentList) {

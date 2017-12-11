@@ -89,7 +89,6 @@ function build () {
 
     // The session table and export button
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
-    this.sessionTable.startSpinner();
 
     $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
         .click(this.exporter.createExportModal.bind(this))
