@@ -148,6 +148,12 @@ body {
     margin-top: 10px;
 }
 
+.class-table-column-div {
+    text-align: center;
+    padding-top: 15px;
+}
+
+
 .hidden {
     display: none;
 }
@@ -247,6 +253,7 @@ body {
 
 .qtable {
     background-color: white;
+    text-align: center;
 }
 
 .qtable1 {

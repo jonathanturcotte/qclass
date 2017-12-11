@@ -46,8 +46,8 @@ function build () {
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
         $tableRow    = $('<div>', { class: 'class-content row' }),
-        $tableCol1   = $('<div>', { class: 'class-session-table-div text-center col' }),
-        $tableCol2   = $('<div>', { class: 'class-student-table-div text-center col' });
+        $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
+        $tableCol2   = $('<div>', { class: 'class-table-column-div col' });
 
     // Construct the title and course code, and make them in-line editable
     // Wrap each in a div so that Editable can append an edit icon in-line on hover
