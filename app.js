@@ -34,6 +34,9 @@ var express      = require('express'),
     http         = http.createServer(app).listen(80),
     https        = https.createServer(sslOptions, app).listen(443);
 
+// Use Helmet to help cover any common security vulnerabilities
+app.use(helmet());
+
 // Initialize the socketIO
 app.io = io.initialize();
 
@@ -57,9 +60,6 @@ app.use(auth.authenticate); // Run authentication first when any route is called
 app.use('/', general);
 app.use('/student', student);
 app.use('/professor', professor);
-
-// Use Helmet to help cover any common security vulnerabilities
-app.use(helmet());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
