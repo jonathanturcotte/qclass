@@ -42,19 +42,15 @@ var Table = function (classList, height, width, columns, $appendTarget) {
         .append($tr)
         .appendTo(this.$table1);
 
-    // Basic body structure    
-    this.$spinDiv = $('<div>', { class: 'spin-div' });
+    // Basic body structure
     this.$tbody = $('<tbody>', { height: height - 36.5  })
-        .append($('<tr>')
-            .append($('<td>', { colspan: this.columns.length })
-                .append($(this.$spinDiv))))
         .appendTo(this.$table2);
 
     // Append to DOM early
     $appendTarget.append(this.$element);
 
-    this.$spinDiv.spin();
     this.$element.show();
+    this.$tbody.spin();
 };
 
 /**

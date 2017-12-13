@@ -42,67 +42,69 @@ function build () {
         $nameDiv     = $('<div>'),
         $codeDiv     = $('<div>'),
         $editDiv     = $('<div>', { class: 'class-edit-div' }),
+        $titleCode   = $('<h2>', { class: 'class-title-code title-field', text: this.course.cCode }),
+        $titleName   = $('<h3>', { class: 'class-title-name title-field', text: this.course.cName }),
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
         $tableRow    = $('<div>', { class: 'class-content row' }),
         $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
-        $tableCol2   = $('<div>', { class: 'class-table-column-div col' });
+        $tableCol2   = $('<div>', { class: 'class-table-column-div col' }),
+        $sessionDiv  = $('<div>', { class: 'table-div' }),
+        $studentDiv  = $('<div>', { class: 'table-div' });
 
-    // Construct the title and course code, and make them in-line editable
-    // Wrap each in a div so that Editable can append an edit icon in-line on hover
-    var $titleCode = $('<h2>', { class: 'class-title-code', text: this.course.cCode })
-        .css('display', 'inline-block')
-        .appendTo($codeDiv);
-    var $titleName = $('<h3>', { class: 'class-title-name', text: this.course.cName })
-        .css('display', 'inline-block')
-        .appendTo($nameDiv);
+    this.$element
+        .append($topDiv
+            .append($titleDiv
+                .append($codeDiv
+                    .append($titleCode))
+                .append($nameDiv)
+                    .append($titleName))
+            .append($editDiv))
+        .append($attDiv
+            .append($attDivLeft)
+            .append($attDivRight))
+        .append($tableRow
+            .append($tableCol1
+                .append($sessionDiv))
+            .append($tableCol2
+                .append($studentDiv)));
 
+    // Wrap the title and course code in divs so that Editable can append an edit icon in-line on hover
     this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName');
     this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode');
-
-    $codeDiv.appendTo($titleDiv);
-    $nameDiv.appendTo($titleDiv);
-    $titleDiv.appendTo($topDiv);
 
     // Add the edit button
     $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
         .click(editAdministrators.bind(this))
         .appendTo($editDiv);
-    $editDiv.appendTo($topDiv);
 
-    // The attendance div and options
+    // Attendance section
     $('<label>', { text: 'Start an attendance session:', class: 'class-attendance-label' })
-    .appendTo($attDiv);
-
+        .prependTo($attDiv);
+    
+    // Start button
     $('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' })
         .click(function () { this.sessions.startSession(this.course); }.bind(this))
         .appendTo($attDivLeft);
 
+    // Duration selection
     $('<label>', { text: 'Check-in duration:', class: 'class-duration-label' })
         .appendTo($attDivRight);
-    $('<select>', { class: 'class-duration-select' }).appendTo($attDivRight);
-
-    $attDivLeft.appendTo($attDiv);
-    $attDivRight.appendTo($attDiv);
+    $('<select>', { class: 'class-duration-select' })
+        .appendTo($attDivRight);
 
     // The session table and export button
-    var $sessionDiv = $('<div>', { style: 'text-align: right; display: inline-block;' });
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
 
     $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
         .click(this.exporter.createExportModal.bind(this))
         .appendTo($sessionDiv);
 
-    $sessionDiv.appendTo($tableCol1);
-
     // The student table and associated buttons
     // TODO: add actual student table and stop setting width/height here
     // this.studentTable = new StudentTable(this.course.cID, $studentDiv);
-    var $studentDiv = $('<div>', { style: 'text-align: right; display: inline-block;' });
-    var $fakeTable = $('<div>')
-        .width(400)
-        .height(300)
+    var $fakeTable = $('<div>', { width: 400, height: 300 })
         .css({ background: 'white'})
         .appendTo($studentDiv);
 
@@ -113,17 +115,6 @@ function build () {
     $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
         .click(this.importer.createAddStudentModal)
         .appendTo($studentDiv);
-
-    $studentDiv.appendTo($tableCol2);
-
-    // Conatiner that puts the following tables in a row
-    // if the view is large enough, otherwise puts them one below the other
-    $tableRow.append($tableCol1)
-        .append($tableCol2);
-
-    this.$element.append($topDiv)
-        .append($attDiv)
-        .append($tableRow);
 }
 
 function editAdministrators() {

@@ -3,7 +3,7 @@ var ModalWindow = require('../modalwindow'),
 
 /**
  * Creates a session table that displays attendance sessions
- * @param {String} classID    The ID of the class the table will show sessions of
+ * @param {String} classID    The ID of the class whose sessions should be shown
  * @param {Object} $container jQuery object to which the table will be appended
  */
 var SessionTable = function(classID, $appendTarget) {
