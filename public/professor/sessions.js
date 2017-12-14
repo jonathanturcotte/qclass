@@ -185,8 +185,8 @@ function displaySessionEnded(session) {
     // Refresh the session table when the attendance modal is closed,
     // if the user is still on that classpage
     session.modal.$closeButton.click(function () {
-        if (session.course.cID === window.app.classPage.course.cID){
-            window.app.classPage.sessionTable.updateSessions();
+        if (session.course.cID === window.app.classPage.course.cID) {
+            window.app.classPage.sessionTable.updateContent();
         }
 
         // Always remove the session from the session manager

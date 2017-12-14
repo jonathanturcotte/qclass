@@ -1,5 +1,7 @@
 var SessionManager    = require('./sessions'),
+    Table             = require('../components/table'),
     SessionTable      = require('./sessionTable'),
+    StudentTable      = require('./studentTable'),
     Exporter          = require('./exporter'),
     Importer          = require('./importer'),
     Editable          = require('../components/editable'),
@@ -110,7 +112,6 @@ function build () {
     $startButton.click(function () { 
         this.sessions.startSession(this.course, this.$duration.val()); 
     }.bind(this));
-        
 
     // The session table and export button
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
@@ -120,11 +121,7 @@ function build () {
         .appendTo($sessionDiv);
 
     // The student table and associated buttons
-    // TODO: add actual student table and stop setting width/height here
-    // this.studentTable = new StudentTable(this.course.cID, $studentDiv);
-    var $fakeTable = $('<div>', { width: 400, height: 300 })
-        .css({ background: 'white'})
-        .appendTo($studentDiv);
+    this.studentTable = new StudentTable(this.course.cID, $studentDiv);
 
     $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
         .click(this.importer.createImportModal)
@@ -133,6 +130,18 @@ function build () {
     $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
         .click(this.importer.createAddStudentModal)
         .appendTo($studentDiv);
+
+    // Fetch the attendance data
+    $.get(Table.getContentURL(this.course.cID))
+    .done(function(data) {
+        // Update tables on success
+        this.sessionTable.updateContent(data);
+        this.studentTable.updateContent(data);
+    })
+    .fail(function(xhr, status, errorThrown) {
+        // TODO: Handle errors
+        alert('Error getting attendance data');
+    });
 }
 
 function editAdministrators() {

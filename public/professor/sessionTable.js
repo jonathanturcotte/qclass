@@ -7,8 +7,8 @@ var ModalWindow = require('../modalwindow'),
  * @param {Object} $container jQuery object to which the table will be appended
  */
 var SessionTable = function(classID, $appendTarget) {
-    this.classID  = classID;
-    this.table = new Table(
+    Table.call(this,
+        classID,
         ['session-table'], 
         300, 
         385, 
@@ -20,27 +20,21 @@ var SessionTable = function(classID, $appendTarget) {
         ], 
         $appendTarget
     );
-    this.updateSessions();
 };
-
-SessionTable.prototype.updateSessions = function () {
-    $.get('/professor/' + this.classID + '/attendanceSessions')
-        .done(updateTable.bind(this))
-        .fail(failTable.bind(this));
-};
+SessionTable.prototype = Object.create(Table.prototype);
+SessionTable.prototype.constructor = SessionTable;
 
 ///////////////////////
 // Private Functions //
 ///////////////////////
 
-function updateTable(data, status, xhr) {
+SessionTable.prototype.update = function (data, status, xhr) {
     var tableData = [];
-    this.data = data;
 
     // Add in reverse order to ensure that the latest sessions
     // are at the top of the table
-    for (var i = this.data.sessions.length - 1; i >= 0; i--) {
-        var session = this.data.sessions[i];
+    for (var i = data.sessions.length - 1; i >= 0; i--) {
+        var session = data.sessions[i];
 
         session.date               = new Date(session.sessDate);
         session.attendanceCount    = session.studentList.length;
@@ -66,9 +60,6 @@ function updateTable(data, status, xhr) {
             $button.prop('disabled', true);
         }
 
-        // Store session data for future use
-        this.data.sessions[i] = session;
-
         // Add new row to table
         tableData.push([
             $date, 
@@ -78,11 +69,7 @@ function updateTable(data, status, xhr) {
         ]);
     }
     // Fill table with formatted data
-    this.table.fill(tableData);
-}
-
-function failTable(xhr, status, errorThrown) {
-    this.table.error('Error getting attendance sessions: ' + status);
+    this.fill(tableData);
 }
 
 function openAttendanceModal(date, studentList) {

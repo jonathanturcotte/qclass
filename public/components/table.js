@@ -7,7 +7,7 @@
  * the text of the column header and the number denoting its fixed width in pixels
  * @param {*} $appendTarget
  */
-var Table = function (classList, height, width, columns, $appendTarget) {    
+var Table = function (classID, classList, height, width, columns, $appendTarget) {    
     // Format class attribute
     var classes = 'qtable table-bordered table-sm table-hover ';
     if (classList && classList.length > 0) {
@@ -15,10 +15,11 @@ var Table = function (classList, height, width, columns, $appendTarget) {
             classes += element + ' ';
         });
     }
-    
+
     // Store references
     this.$element = $('<div>', { class: 'table-container' });
-    this.columns = columns;
+    this.classID  = classID;
+    this.columns  = columns;
 
     // Set table as two separate tables to allow for fixed headers while scrolling
     this.$table1 = $('<table>', { 
@@ -51,6 +52,34 @@ var Table = function (classList, height, width, columns, $appendTarget) {
 
     this.$element.show();
     this.$tbody.spin();
+};
+
+/**
+ * Updates the table. If no response object is provided, the
+ * database will be queried for the information. When present, 
+ * response should be an object with the three parameters of
+ * a successful ajax request
+ * @param {*} response
+ * @param {*} response.data
+ * @param {*} response.status
+ * @param {*} response.jqXHR 
+ */
+Table.prototype.updateContent = function (response) {
+    if (response) 
+        this.update(response.data, response.status, response.jqXHR);
+    else {
+        $.get(Table.getContentURL(this.classID))
+            .done(this.update)
+            .fail(fail.bind(this));
+    }
+};
+
+/**
+ * Format the URL used in get requests associated with tables
+ * @param {string} classID 
+ */
+Table.getContentURL = function (classID) {
+    return '/professor/' + classID + '/attendanceSessions';
 };
 
 /**
@@ -90,6 +119,18 @@ Table.prototype.error = function (message) {
         .empty()
         .append($('<p>', { class: 'text-danger', text: message }));
 };
+
+Table.prototype.spin = function () {
+    this.$tbody.spin();
+};
+
+Table.prototype.update = function () {
+    console.log('Error - abstract update called - should have been overridden');
+}
+
+function fail(xhr, status, errorThrown) {
+    this.error('Error getting attendance sessions: ' + status);
+}
 
 function formatColumnWidth(width) {
     return 'max-width: ' + width + 'px; min-width: ' + width + 'px;'
