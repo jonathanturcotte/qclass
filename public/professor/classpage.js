@@ -2,7 +2,22 @@ var SessionManager    = require('./sessions'),
     SessionTable      = require('./sessionTable'),
     Exporter          = require('./exporter'),
     Importer          = require('./importer'),
-    Editable          = require('../components/editable');
+    Editable          = require('../components/editable'),
+    Duration          = require('../components/duration');
+
+const durationOptions = [ 
+    new Duration('30 sec', 30000), 
+    new Duration('45 sec', 45000), 
+    new Duration('1 min', 60000),
+    new Duration('1.5 min', 90000), 
+    new Duration('2 min', 120000),
+    new Duration('3 min', 180000), 
+    new Duration('5 min', 300000), 
+    new Duration('10 min', 600000), 
+    new Duration('30 min', 1800000), 
+    new Duration('1 hour', 3600000), 
+    new Duration('3 hours', 10800000)
+];
 
 /**
  * Creates a class page, responsible for the central window of the professor site
@@ -20,7 +35,7 @@ var ClassPage = function() {
  * @param {string} course.cID
  * @param {string} course.cName
  * @param {string} course.cCode
-*/
+ */
 ClassPage.prototype.displayCourse = function (course) {
     this.course = course;
 
@@ -47,6 +62,7 @@ function build () {
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
+        $startButton = $('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }),
         $tableRow    = $('<div>', { class: 'class-content row' }),
         $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
         $tableCol2   = $('<div>', { class: 'class-table-column-div col' }),
@@ -62,7 +78,8 @@ function build () {
                     .append($titleName))
             .append($editDiv))
         .append($attDiv
-            .append($attDivLeft)
+            .append($attDivLeft
+                .append($startButton))
             .append($attDivRight))
         .append($tableRow
             .append($tableCol1
@@ -82,17 +99,18 @@ function build () {
     // Attendance section
     $('<label>', { text: 'Start an attendance session:', class: 'class-attendance-label' })
         .prependTo($attDiv);
-    
-    // Start button
-    $('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' })
-        .click(function () { this.sessions.startSession(this.course); }.bind(this))
-        .appendTo($attDivLeft);
 
     // Duration selection
     $('<label>', { text: 'Check-in duration:', class: 'class-duration-label' })
         .appendTo($attDivRight);
-    $('<select>', { class: 'class-duration-select' })
+    this.$duration = getDurationSelect()
         .appendTo($attDivRight);
+
+    // Bind duration to start button press
+    $startButton.click(function () { 
+        this.sessions.startSession(this.course, this.$duration.val()); 
+    }.bind(this));
+        
 
     // The session table and export button
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
@@ -119,6 +137,21 @@ function build () {
 
 function editAdministrators() {
     //TODO: complete
+}
+
+/**
+ * Constructs and returns the jQuery object for the duration drop-down
+ * using the pre-defined durationOptions array
+ */
+function getDurationSelect() {
+    var $select = $('<select>', { class: 'class-duration-select' });
+    durationOptions.forEach(function (duration) {
+        $select.append($('<option>', { 
+            text: duration.text, 
+            value: duration.milliseconds 
+        }));
+    });
+    return $select;
 }
 
 module.exports = ClassPage;

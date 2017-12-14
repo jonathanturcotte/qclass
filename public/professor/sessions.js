@@ -4,9 +4,13 @@ var SessionManager = function () {
     this.sessions = [];
 };
 
-// Creates the attendance modal window, makes the call
-// to the server to start a session.
-SessionManager.prototype.startSession = function (course) {
+/**
+ * Creates the attendance modal window, makes the call
+ * to the server to start a session.
+ * @param {*} course 
+ * @param {number} duration 
+ */
+SessionManager.prototype.startSession = function (course, duration) {
     if (getSession(course, this.sessions)){
         // If this session already exists, just show it
         this.showSession(course);
@@ -19,7 +23,7 @@ SessionManager.prototype.startSession = function (course) {
 
         $.post({
             url: '/professor/class/start/' + course.cID,
-            data: { duration: 30000 },
+            data: { duration: duration },
             dataType: 'json'
         }).done(function(data, status, xhr) {
             // This is a valid session, so append it's information to the session
