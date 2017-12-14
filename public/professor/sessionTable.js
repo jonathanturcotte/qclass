@@ -24,22 +24,13 @@ var SessionTable = function(classID, $appendTarget) {
 SessionTable.prototype = Object.create(Table.prototype);
 SessionTable.prototype.constructor = SessionTable;
 
-///////////////////////
-// Private Functions //
-///////////////////////
-
-SessionTable.prototype.update = function (data, status, xhr) {
+SessionTable.prototype._update = function (data) {
     var tableData = [];
 
     // Add in reverse order to ensure that the latest sessions
     // are at the top of the table
     for (var i = data.sessions.length - 1; i >= 0; i--) {
         var session = data.sessions[i];
-
-        session.date               = new Date(session.sessDate);
-        session.attendanceCount    = session.studentList.length;
-        session.attendancePercent  = 0;
-        session.formattedDate      = formatDate(session.date);
 
         var isEmpty = session.attendanceCount < 1;
         if (!isEmpty)
@@ -70,7 +61,7 @@ SessionTable.prototype.update = function (data, status, xhr) {
     }
     // Fill table with formatted data
     this.fill(tableData);
-}
+};
 
 function openAttendanceModal(date, studentList) {
     var id = 'attendance-modal';
@@ -94,29 +85,6 @@ function openAttendanceModal(date, studentList) {
     }
     modal.$body.append($table.append($tbody));
     modal.show();
-}
-
-/**
- * Formats the date into DD/MM/YY hh:mm:ss
- * @param {Date} date 
- */
-function formatDate(date) {
-    var day    = formatDateEntry(date.getDate()),
-        month  = formatDateEntry(date.getMonth() + 1),
-        year   = date.getFullYear().toString().substr(-2),
-        hour   = formatDateEntry(date.getHours()),
-        minute = formatDateEntry(date.getMinutes()),
-        second = formatDateEntry(date.getSeconds());
-    return day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second;
-}
-
-/**
- * Converts a number to a string and prepends a 0 if the value is not already 2-digit
- * @param {number} num 
- */
-function formatDateEntry(num) {
-    if (num < 10) return '0' + num;
-    else return '' + num;
 }
 
 module.exports = SessionTable;

@@ -134,10 +134,16 @@ function build () {
     // Fetch the attendance data
     $.get(Table.getContentURL(this.course.cID))
     .done(function(data, status, xhr) {
-        // Update tables on success
-        var response = { data: data, status: status, xhr: xhr };
-        this.sessionTable.updateContent(response);
-        this.studentTable.updateContent(response);
+        // Perform calculations/formatting on sessions
+        for (var i = 0; i < data.sessions.length; i++) {
+            data.sessions[i].date              = new Date(data.sessions[i].sessDate);
+            data.sessions[i].attendanceCount   = data.sessions[i].studentList.length;
+            data.sessions[i].attendancePercent = 0;
+            data.sessions[i].formattedDate     = Table.formatDate(data.sessions[i].date);
+        }
+        // Update tables
+        this.sessionTable.updateContent(data);
+        this.studentTable.updateContent(data);
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         // TODO: Handle errors
