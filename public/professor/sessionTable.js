@@ -43,7 +43,7 @@ SessionTable.prototype.update = function (data, status, xhr) {
 
         var isEmpty = session.attendanceCount < 1;
         if (!isEmpty)
-            session.attendancePercent = session.attendanceCount / this.data.numEnrolled * 100;
+            session.attendancePercent = session.attendanceCount / data.numEnrolled * 100;
         else
             session.attendancePercent = 0;
         
@@ -63,7 +63,7 @@ SessionTable.prototype.update = function (data, status, xhr) {
         // Add new row to table
         tableData.push([
             $date, 
-            session.attendanceCount + '/' + this.data.numEnrolled, 
+            session.attendanceCount + '/' + data.numEnrolled, 
             session.attendancePercent.toFixed(1) + ' %', 
             $actions
         ]);

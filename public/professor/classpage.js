@@ -133,11 +133,12 @@ function build () {
 
     // Fetch the attendance data
     $.get(Table.getContentURL(this.course.cID))
-    .done(function(data) {
+    .done(function(data, status, xhr) {
         // Update tables on success
-        this.sessionTable.updateContent(data);
-        this.studentTable.updateContent(data);
-    })
+        var response = { data: data, status: status, xhr: xhr };
+        this.sessionTable.updateContent(response);
+        this.studentTable.updateContent(response);
+    }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         // TODO: Handle errors
         alert('Error getting attendance data');
