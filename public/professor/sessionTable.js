@@ -31,12 +31,6 @@ SessionTable.prototype._update = function (data) {
     // are at the top of the table
     for (var i = data.sessions.length - 1; i >= 0; i--) {
         var session = data.sessions[i];
-
-        var isEmpty = session.attendanceCount < 1;
-        if (!isEmpty)
-            session.attendancePercent = session.attendanceCount / data.numEnrolled * 100;
-        else
-            session.attendancePercent = 0;
         
         // Create main row 
         var $date = $('<td>', { title: session.date.toString() }).text(session.formattedDate),
@@ -45,37 +39,42 @@ SessionTable.prototype._update = function (data) {
                 .append($button); 
 
         // If there was attendance for this session, make it clickable
-        if (!isEmpty) {
+        if (session.attendanceCount !== 0)
             $button.click(openAttendanceModal.bind(this, session.formattedDate, session.studentList));
-        } else {
+        else 
             $button.prop('disabled', true);
-        }
 
         // Add new row to table
         tableData.push([
             $date, 
-            session.attendanceCount + '/' + data.numEnrolled, 
-            session.attendancePercent.toFixed(1) + ' %', 
+            session.attendanceCountFormatted, 
+            session.attendancePercentFormatted, 
             $actions
         ]);
     }
+
     // Fill table with formatted data
     this.fill(tableData);
 };
 
 function openAttendanceModal(date, studentList) {
-    var id = 'attendance-modal';
-    var modal = new ModalWindow({ id: id, title: 'Attendance Session' });
-    modal.$body.append($('<h5>', { text: date, class: 'attendance-modal-date' }));
-    modal.$body.addClass('attendance-modal-body');
+    var modal = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' });
+    
+    modal.$body.append($('<h5>', { 
+        text: date, 
+        class: 'attendance-modal-date table-modal-bodytitle' 
+    }));
+    modal.$body.addClass('table-modal-body');
+    
     var $table = $('<table>', { class: 'attendance-modal-table centered-table table-bordered' })
         .append($('<thead>')
-        .append($('<tr>')
-            .append($('<th>', { text: 'NetID' }))
-            .append($('<th>', { text: 'Student #' }))
-            .append($('<th>', { text: 'First Name' }))
-            .append($('<th>', { text: 'Last Name' }))));
-    var $tbody = $('<tbody>');
+            .append($('<tr>')
+                .append($('<th>', { text: 'NetID' }))
+                .append($('<th>', { text: 'Student #' }))
+                .append($('<th>', { text: 'First Name' }))
+                .append($('<th>', { text: 'Last Name' }))));
+    
+    var $tbody = $('<tbody>').appendTo($table);
     for (var i = 0; i < studentList.length; i++) {
         $tbody.append($('<tr>')
             .append($('<td>').text(studentList[i].NetID))
@@ -83,7 +82,8 @@ function openAttendanceModal(date, studentList) {
             .append($('<td>').text(studentList[i].fName))
             .append($('<td>').text(studentList[i].lName)));
     }
-    modal.$body.append($table.append($tbody));
+
+    modal.$body.append($table);
     modal.show();
 }
 

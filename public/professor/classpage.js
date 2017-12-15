@@ -134,13 +134,8 @@ function build () {
     // Fetch the attendance data
     $.get(Table.getContentURL(this.course.cID))
     .done(function(data, status, xhr) {
-        // Perform calculations/formatting on sessions
-        for (var i = 0; i < data.sessions.length; i++) {
-            data.sessions[i].date              = new Date(data.sessions[i].sessDate);
-            data.sessions[i].attendanceCount   = data.sessions[i].studentList.length;
-            data.sessions[i].attendancePercent = 0;
-            data.sessions[i].formattedDate     = Table.formatDate(data.sessions[i].date);
-        }
+        annotateTableData(data);
+
         // Update tables
         this.sessionTable.updateContent(data);
         this.studentTable.updateContent(data);
@@ -168,6 +163,22 @@ function getDurationSelect() {
         }));
     });
     return $select;
+}
+
+/**
+ * Add necessary calculations and formatting 
+ * to data in preparation for use with the tables 
+ * @param {*} data 
+ */
+function annotateTableData(data) {
+    for (var i = 0; i < data.sessions.length; i++) {
+        data.sessions[i].date                       = new Date(data.sessions[i].sessDate);
+        data.sessions[i].attendanceCount            = data.sessions[i].studentList.length;
+        data.sessions[i].attendanceCountFormatted   = data.sessions[i].attendanceCount + '/' + data.numEnrolled;
+        data.sessions[i].attendancePercent          = data.sessions[i].attendanceCount > 0 ? data.sessions[i].attendanceCount / data.numEnrolled * 100 : 0;
+        data.sessions[i].attendancePercentFormatted = (data.sessions[i].attendancePercent).toFixed(1) + ' %';
+        data.sessions[i].formattedDate              = Table.formatDate(data.sessions[i].date);
+    }
 }
 
 module.exports = ClassPage;
