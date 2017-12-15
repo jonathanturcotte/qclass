@@ -7,11 +7,11 @@ var StudentTable = function (classID, $appendTarget) {
         300, 
         485, 
         [
-            ['NetID', 140], 
-            ['Number', 96], 
-            ['First Name', 66], 
-            ['Last Name', 87],
-            ['Actions', 100]
+            ['NetID', 67], 
+            ['Number', 80], 
+            ['First Name', 115], 
+            ['Last Name', 140],
+            ['Actions', 95]
         ], 
         $appendTarget
     );
