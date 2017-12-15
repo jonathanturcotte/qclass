@@ -11,8 +11,8 @@ var SessionManager = function () {
  * @param {number} duration 
  */
 SessionManager.prototype.startSession = function (course, duration) {
+    // If this session already exists, just show it
     if (getSession(course, this.sessions)){
-        // If this session already exists, just show it
         this.showSession(course);
     } else {
         var session = createSession(course);
@@ -40,6 +40,9 @@ SessionManager.prototype.startSession = function (course, duration) {
         }).always(function(a, status, b) {
             session.modal.$body.spin(false);
         });
+
+        // Set a 30-day cookie to remember the professor's latest duration choice
+        Cookies.set('last-duration-' + course.cID, duration, { expires: 30 });
     }
 };
 

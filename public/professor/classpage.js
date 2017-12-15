@@ -103,7 +103,7 @@ function build () {
     // Duration selection
     $('<label>', { text: 'Check-in duration:', class: 'class-duration-label' })
         .appendTo($attDivRight);
-    this.$duration = getDurationSelect()
+    this.$duration = getDurationSelect(this.course.cID)
         .appendTo($attDivRight);
 
     // Bind duration to start button press
@@ -143,14 +143,31 @@ function editAdministrators() {
  * Constructs and returns the jQuery object for the duration drop-down
  * using the pre-defined durationOptions array
  */
-function getDurationSelect() {
-    var $select = $('<select>', { class: 'class-duration-select' });
+function getDurationSelect(classID) {
+    var $select = $('<select>', { class: 'class-duration-select' }),
+        prevChoiceCookie = Cookies.get('last-duration-' + classID),
+        prevChoice = null;
+
+    // Parse the previously selected value
+    if (prevChoiceCookie) {
+        prevChoice = Number.parseInt(prevChoiceCookie);
+        if (prevChoice === NaN) {
+            prevChoice = null;        
+        }
+    }
+
     durationOptions.forEach(function (duration) {
-        $select.append($('<option>', { 
+        var $option = $('<option>', { 
             text: duration.text, 
             value: duration.milliseconds 
-        }));
+        });
+
+        if (prevChoice && prevChoice === duration.milliseconds)
+            $option.prop('selected', true);
+        
+        $select.append($option);
     });
+
     return $select;
 }
 
