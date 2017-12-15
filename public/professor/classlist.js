@@ -113,8 +113,8 @@ function updateFail (jqXHR, textStatus, errorThrown) {
 
 function createAddClassModal () {
     var modal         = new ModalWindow({id: "addClassModal", title: "Add Class"}),
-        $cCodeInput   = $('<input>', {type: 'text', name: 'cCode', id: 'cCode' }),
-        $cNameInput   = $('<input>', {type: 'text', name: 'cName', id: 'cName' }),
+        $cCodeInput   = $('<input>', { type: 'text', name: 'cCode', id: 'cCode' }),
+        $cNameInput   = $('<input>', { type: 'text', name: 'cName', id: 'cName' }),
         $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' });
 
     modal.$body
@@ -136,7 +136,7 @@ function createAddClassModal () {
                 url: '/professor/class/add',
                 data: { code: $cCodeInput.val(), name: $cNameInput.val() },
                 dataType: 'json'
-            }).done(function(status, xhr) {
+            }).done(function(data, status, xhr) {
                 modal.success("Success", $cCodeInput.val() + ' successfully added!');
                 window.app.classList.updateClasses();
             }).fail(function(xhr, status, errorThrown) {

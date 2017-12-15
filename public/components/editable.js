@@ -1,15 +1,16 @@
-
 /**
  * Make an element editable
- * @param {Object} $el      jQuery element to make editable
- * @param {Object} ajaxCall The ajaxcall to run
+ * @param {*} $el jQuery element to make editable
+ * @param {string} cID 
+ * @param {string} field 
+ * @param {string} routeBase 
  */
 var Editable = function ($el, cID, field, route) {
-    this.$el        = $el;      // The element to make editable
-    this.cID        = cID;      // The course id that this field is associated with
-    this.field      = field;    // The name of the field that this element changes on the db side
-    this.route      = route;    // The route to call using ajax
-    this.resetValue = '';       // The last valid version of the text in this element
+    this.$el        = $el;   // The element to make editable
+    this.cID        = cID;   // The course id that this field is associated with
+    this.field      = field; // The name of the field that this element changes on the db side
+    this.route      = route; // The route to call using ajax
+    this.resetValue = '';    // The last valid version of the text in this element
 
     makeEditable.call(this);
 };
@@ -80,7 +81,7 @@ function submitChanges () {
     if (newVal !== this.resetValue){
         var args = {
             url: this.route,
-            data: { cID: this.cID }
+            data: { }
         };
         args.data[this.field] = newVal;
 

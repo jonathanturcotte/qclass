@@ -22,14 +22,14 @@ router.use(function(req, res, next) {
     });
 });
 
-router.param('classId', function(req, res, next, classId) {
-    if (!classId)
-        return routeHelper.sendError(res, null, 'Empty classId', 400);
+router.param('classID', function(req, res, next, classID) {
+    if (!classID)
+        return routeHelper.sendError(res, null, 'Empty classID', 400);
 
-    if (!routeHelper.regex.class.id.test(classId))
-        return routeHelper.sendError(res, null, 'Invalid classId', 400);
+    if (!routeHelper.regex.class.id.test(classID))
+        return routeHelper.sendError(res, null, 'Invalid classID', 400);
 
-    db.ownsClass(classId, req.user.netID, function(err, result) {
+    db.ownsClass(classID, req.user.netID, function(err, result) {
         if (err) return routeHelper.sendError(res, err, 'Error processing request');
         if (!result) return routeHelper.sendError(res, null, 'User does not own the requested class', 403);
         next();
@@ -63,91 +63,63 @@ router.post('/class/add', function(req, res, next) {
         }
         db.addClass(req.user.netID, code, name, function(err, id, results, fields) {
             if (err) return routeHelper.sendError(res, err, 'Error adding class');
-            res.status(201).json({ classId: id });
+            res.status(201).json({ classID: id });
         });
     });
 });
 
 // Edit an existing class name
-router.post('/class/editName', function(req, res, next) {
-    var name = req.body.name,
-        cID  = req.body.cID;
+router.post('/class/editName/:classID', function(req, res, next) {
+    var name = req.body.name;
 
     if (name.length < 3 || name.length > 100 || !routeHelper.regex.class.name.test(name))
         return routeHelper.sendError(res, null, 'Invalid class name', 400);
 
-    db.getTeachesClasses(req.user.netID, function(err, results, fields) {
-        var found = false;
-
+    db.editClassName(req.user.netID, req.params.classID, name, function(err) {
         if (err)
-            return routeHelper.sendError(res, err);
-        for (var i = 0; i < results.length; i++) {
-            if (results[i].cID === cID)
-                found = results[i];
-        }
-
-        if (!found)
-            return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
-        db.editClass(req.user.netID, cID, found.cCode, name, function(err) {
-            if (err)
-                return routeHelper.sendError(res, err, 'Error editing class name');
-            res.send('');
-        });
+            return routeHelper.sendError(res, err, 'Error editing class name');
+        res.status(204).send('');
     });
 });
 
 // Edit an existing class code
-router.post('/class/editCode', function(req, res, next) {
-    var code = req.body.code,
-        cID  = req.body.cID;
+router.post('/class/editCode/:classID', function(req, res, next) {
+    var code = req.body.code;
 
-    if (!routeHelper.regex.class.code.test(code))
+    if (!req.body.code || !routeHelper.regex.class.code.test(req.body.code))
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
 
-    db.getTeachesClasses(req.user.netID, function(err, results, fields) {
-        var found = false;
-
+    db.editClassCode(req.user.netID, req.params.classID, code, function(err) {
         if (err)
-            return routeHelper.sendError(res, err);
-        for (var i = 0; i < results.length; i++) {
-            if (results[i].cID === cID)
-                found = results[i];
-        }
-
-        if (!found)
-            return routeHelper.sendError(res, null, `Course not found ${cID}`, 400);
-        db.editClass(req.user.netID, cID, code, found.cName, function(err) {
-            if (err)
-                return routeHelper.sendError(res, err, 'Error editing class code');
-            res.send('');
-        });
+            return routeHelper.sendError(res, err, 'Error editing class code');
+        res.status(204).send('');
     });
 });
 
 // For enrolling an entire classlist
-router.post('/class/enrollClass/:classId', function(req, res, next) {
-    enroll(req.body, req.params.classId, res); // Reminder: note this function can throw error without stopping execution
+router.post('/class/enrollClass/:classID', function(req, res, next) {
+    enroll(req.body, req.params.classID, res); // Reminder: note this function can throw error without stopping execution
 });
 
 // For enrolling a single student
-router.post('/class/enrollStudent/:classId', function(req, res, next) {
+router.post('/class/enrollStudent/:classID', function(req, res, next) {
     var std = [{ 
         netID: req.body.netID,
         stdNum: req.body.stdNum, 
         firstName: req.body.firstName, 
         lastName: req.body.lastName
     }];
-    enroll(std, req.params.classId, res);
+    enroll(std, req.params.classID, res);
 });
 
 // Start an attendance session for a class, return the code to the professor
-router.post('/class/start/:classId', function(req, res, next) {
+router.post('/class/start/:classID', function(req, res, next) {
     var duration = req.body.duration;
 
     if (!isNaN(duration)) {
         duration = Number(duration);
         attendanceSessions.start({ 
-            classId:  req.params.classId,
+            classID:  req.params.classID,
             duration: duration,
             callback: function(err, code, endTime) {
                 if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
@@ -157,8 +129,8 @@ router.post('/class/start/:classId', function(req, res, next) {
     }
 });
 
-router.post('/class/stop/:classId', function(req, res, next) {
-    var result = attendanceSessions.stopClass(req.params.classId);
+router.post('/class/stop/:classID', function(req, res, next) {
+    var result = attendanceSessions.stopClass(req.params.classID);
     if (!result.success) return routeHelper.sendError(res, null, result.err.message, result.err.status);
     res.status(204).send();
 });
@@ -168,12 +140,12 @@ router.post('/class/stop/:classId', function(req, res, next) {
  * contains number of enrolled studnets for attendance calculations
  * Each entry in sessions has the session time and a list of students 
  */
-router.get('/:classId/attendanceSessions', function(req, res, next) {
-    db.getSessionAttInfo(req.params.classId, function(err, sessions, fields) {
+router.get('/:classID/attendanceSessions', function(req, res, next) {
+    db.getSessionAttInfo(req.params.classID, function(err, sessions, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance sessions for ' + req.user.netID);
         if (sessions.length === 0) res.json({ numEnrolled: 0, sessions: [] });
         else {
-            db.getEnrolledStudents(req.params.classId, function(err, enrolled, fields) {
+            db.getEnrolledStudents(req.params.classID, function(err, enrolled, fields) {
                 if (err) return routeHelper.sendError(res, err);
                 var attSessions = organizeAttendanceSession(sessions);
                 res.json({ numEnrolled: enrolled.length, sessions: attSessions });
@@ -187,15 +159,15 @@ router.get('/:classId/attendanceSessions', function(req, res, next) {
 // Aggregate Info: student | attendance (%)
 // Session Info: Total Number of students + Percent Attendance
 //               List of students in attendance: name, netID, std#
-router.get('/:classId/exportAttendance', function(req, res, next) {
-    var classId  = req.params.classId;
+router.get('/:classID/exportAttendance', function(req, res, next) {
+    var classID  = req.params.classID;
 
-    db.aggregateInfo(classId, function(err, attInfo, fields) {
-        if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance information for ' + classId);
+    db.aggregateInfo(classID, function(err, attInfo, fields) {
+        if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance information for ' + classID);
         if (attInfo.length === 0)
             return routeHelper.sendError(res, null, 'No Attendance Information for Course');
         
-        db.getNumSession(classId, function(err, numSessions, fields) {
+        db.getNumSession(classID, function(err, numSessions, fields) {
             if (err) return routeHelper.sendError(res, err, 'Error retrieving number of sessions');
             if (numSessions.length === 0) 
                 return routeHelper.sendError(res, null, 'No Attendance sessions for couse');
@@ -204,7 +176,7 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
             for(var i = 0; i < attInfo.length; i++)
                 attInfo[i].attPercent = (attInfo[i].attCount / numSessions.length)*100;
             
-            db.getSessionAttInfo(classId, function(err, sessInfo, fields) {
+            db.getSessionAttInfo(classID, function(err, sessInfo, fields) {
                 if (err) return routeHelper.sendError(res, err, 'Error retrieving session information');
                 if (sessInfo.length === 0) 
                     return routeHelper.sendError(res, null, 'No Session Information for course');
@@ -240,8 +212,7 @@ router.get('/:classId/exportAttendance', function(req, res, next) {
                 }
                 result[1] = sessionData;
                 
-                res.json(result);
-                               
+                res.json(result);    
             });
         });
     });
@@ -278,7 +249,7 @@ function organizeAttendanceSession(sessInfo) {
 
 // Runs the general enroll function that adds (if needed) and enrolls each student
 // reqStudents can contain a single student or an entire classList
-function enroll(reqStudents, classId, res) {
+function enroll(reqStudents, classID, res) {
     var students    = [],
         student;
 
@@ -295,7 +266,7 @@ function enroll(reqStudents, classId, res) {
         students.push(student);
     }
 
-    db.enroll(classId, students, function(err, results, fields) {
+    db.enroll(classID, students, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, `Error enrolling students. ${err.errorStudents ? `Students that caused errors: ${apiHelper.printArray(err.errorStudents)}` : ''}`);
         console.log(`Inserted ${results.affectedRows} students`);
         res.status(201).json({ 
