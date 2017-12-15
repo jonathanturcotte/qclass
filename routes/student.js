@@ -37,11 +37,11 @@ router.post('/sign-in/:code', function(req, res, next) {
     if (!session)
         return routeHelper.sendError(res, null, 'Class not found for provided code', 404);
 
-    db.isEnrolled(req.user.netID, session.classId, function(err, result) {
+    db.isEnrolled(req.user.netID, session.classID, function(err, result) {
         if (err) return routeHelper.sendError(res, err, '');
         if (!result) return routeHelper.sendError(res, null, 'User not a member of the requested class', 403);
 
-        db.recordAttendance(req.user.netID, session.classId, session.time, function(err, results, fields) {
+        db.recordAttendance(req.user.netID, session.classID, session.time, function(err, results, fields) {
             if (err) {
                 if (err.errno && err.errno === 1062)
                     return routeHelper.sendError(res, err, 'Already signed in', 409);

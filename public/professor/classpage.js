@@ -90,8 +90,8 @@ function build () {
                 .append($studentDiv)));
 
     // Wrap the title and course code in divs so that Editable can append an edit icon in-line on hover
-    this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName');
-    this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode');
+    this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName/' + this.course.cID);
+    this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode/' + this.course.cID);
 
     // Add the edit button
     $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
