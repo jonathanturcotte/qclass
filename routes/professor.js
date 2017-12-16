@@ -3,6 +3,7 @@ var express            = require('express'),
     routeHelper        = require('./helper'),
     apiHelper          = require('../api/helper'),
     db                 = require('../api/db'),
+    regex              = require('../api/regex'),
     attendanceSessions = require('../api/data/attendanceSessions'),
     EnrollStudent      = require('../models/EnrollStudent');
 
@@ -26,7 +27,7 @@ router.param('classId', function(req, res, next, classId) {
     if (!classId)
         return routeHelper.sendError(res, null, 'Empty classId', 400);
 
-    if (!routeHelper.regex.class.id.test(classId))
+    if (!regex.class.id.test(classId))
         return routeHelper.sendError(res, null, 'Invalid classId', 400);
 
     db.ownsClass(classId, req.user.netID, function(err, result) {
@@ -49,10 +50,10 @@ router.post('/class/add', function(req, res, next) {
     var code = req.body.code,
         name = req.body.name;
 
-    if (!routeHelper.regex.class.code.test(code)) 
+    if (!regex.class.code.test(code)) 
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
 
-    if (name.length < 3 || name.length > 100 || !routeHelper.regex.class.name.test(name)) 
+    if (name.length < 3 || name.length > 100 || !regex.class.name.test(name)) 
         return routeHelper.sendError(res, null, 'Invalid class name', 400);
 
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
@@ -73,7 +74,7 @@ router.post('/class/editName', function(req, res, next) {
     var name = req.body.name,
         cID  = req.body.cID;
 
-    if (name.length < 3 || name.length > 100 || !routeHelper.regex.class.name.test(name))
+    if (name.length < 3 || name.length > 100 || !regex.class.name.test(name))
         return routeHelper.sendError(res, null, 'Invalid class name', 400);
 
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
@@ -101,7 +102,7 @@ router.post('/class/editCode', function(req, res, next) {
     var code = req.body.code,
         cID  = req.body.cID;
 
-    if (!routeHelper.regex.class.code.test(code))
+    if (!regex.class.code.test(code))
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
 
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
@@ -138,6 +139,16 @@ router.post('/class/enrollStudent/:classId', function(req, res, next) {
         lastName: req.body.lastName
     }];
     enroll(std, req.params.classId, res);
+});
+
+// For deleting a student from a class
+router.delete('/class/:classID/remove/:netID', function (req, res, next) {
+    if (!req.params.netID)
+        return routeHelper.sendError(res, null, 'Empty netID', 400);
+    db.removeFromClass(req.params.netID, req.params.classID, function (err, results, fields) {
+        if (err) return routeHelper.sendError(res, err, 'Error removing student');
+        res.status(204).send('');
+    });
 });
 
 // Start an attendance session for a class, return the code to the professor

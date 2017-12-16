@@ -187,6 +187,11 @@ exports.getSessionAttInfo = function(classId, callback) {
     runQuery(query, [classId], callback);
 };
 
+exports.removeFromClass = function (netID, classID, callback) {
+    var query = 'DELETE FROM enrolled WHERE sNetID = ? AND cID = ?';
+    runQuery(query, [netID, classID], callback);
+};
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 
