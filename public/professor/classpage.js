@@ -131,7 +131,7 @@ function build () {
         .appendTo($studentDiv);
 
     $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
-        .click(this.importer.createAddStudentModal)
+        .click(this.importer.createAddStudentModal.bind(this))
         .appendTo($studentDiv);
 }
 
