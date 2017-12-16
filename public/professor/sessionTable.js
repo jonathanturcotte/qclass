@@ -6,9 +6,9 @@ var ModalWindow = require('../modalwindow'),
  * @param {String} classID    The ID of the class whose sessions should be shown
  * @param {Object} $container jQuery object to which the table will be appended
  */
-var SessionTable = function(classID, $appendTarget) {
+var SessionTable = function(course, $appendTarget) {
     Table.call(this,
-        classID,
+        course,
         ['session-table'], 
         300, 
         385, 

@@ -142,11 +142,16 @@ router.post('/class/enrollStudent/:classId', function(req, res, next) {
 });
 
 // For deleting a student from a class
-router.delete('/class/:classID/remove/:netID', function (req, res, next) {
+router.delete('/class/:classId/remove/:netID', function (req, res, next) {
     if (!req.params.netID)
         return routeHelper.sendError(res, null, 'Empty netID', 400);
-    db.removeFromClass(req.params.netID, req.params.classID, function (err, results, fields) {
+    db.removeFromClass(req.params.netID, req.params.classId, function (err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error removing student');
+
+        // Check if deletion actually occurred
+        if (affectedRows < 1)
+            return routeHelper.sendError(res, null, 'No deletion occurred - Student not enrolled', 404);
+            
         res.status(204).send('');
     });
 });

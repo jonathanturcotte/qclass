@@ -114,36 +114,35 @@ function build () {
     }.bind(this));
 
     // The session table and export button
-    this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
+    this.sessionTable = new SessionTable(this.course, $sessionDiv);
 
     $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
         .click(this.exporter.createExportModal.bind(this))
         .appendTo($sessionDiv);
 
     // The student table and associated buttons
-    this.studentTable = new StudentTable(this.course.cID, $studentDiv);
+    this.studentTable = new StudentTable(this.course, $studentDiv);
 
     $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
         .click(this.importer.createImportModal)
         .appendTo($studentDiv);
 
     $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
-        .click(this.importer.createAddStudentModal)
+        .click(this.importer.createAddStudentModal.bind(this))
         .appendTo($studentDiv);
 
     // Fetch the attendance data
     $.get(Table.getContentURL(this.course.cID))
     .done(function(data, status, xhr) {
-        annotateTableData(data);
-
-        // Update tables
+        Table.annotateTableData(data);
         this.sessionTable.updateContent(data);
         this.studentTable.updateContent(data);
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
-        // TODO: Handle errors
-        alert('Error getting attendance data');
-    });
+        toastr.error('Error getting attendance data', 'Loading Error');
+        this.sessionTable.error('Error');
+        this.studentTable.error('Error');
+    }.bind(this));
 }
 
 function editAdministrators() {
@@ -163,22 +162,6 @@ function getDurationSelect() {
         }));
     });
     return $select;
-}
-
-/**
- * Add necessary calculations and formatting 
- * to data in preparation for use with the tables 
- * @param {*} data 
- */
-function annotateTableData(data) {
-    for (var i = 0; i < data.sessions.length; i++) {
-        data.sessions[i].date                       = new Date(data.sessions[i].sessDate);
-        data.sessions[i].attendanceCount            = data.sessions[i].studentList.length;
-        data.sessions[i].attendanceCountFormatted   = data.sessions[i].attendanceCount + '/' + data.numEnrolled;
-        data.sessions[i].attendancePercent          = data.sessions[i].attendanceCount > 0 ? data.sessions[i].attendanceCount / data.numEnrolled * 100 : 0;
-        data.sessions[i].attendancePercentFormatted = (data.sessions[i].attendancePercent).toFixed(1) + ' %';
-        data.sessions[i].formattedDate              = Table.formatDate(data.sessions[i].date);
-    }
 }
 
 module.exports = ClassPage;

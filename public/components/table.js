@@ -1,5 +1,9 @@
 /**
  * Generic implementation for fixed size, scrollable tables
+ * @param {Object} course
+ * @param {string} course.cID
+ * @param {string} course.cCode
+ * @param {string} course.cName
  * @param {string[]=} classList 
  * @param {Number} height
  * @param {Number} width
@@ -7,7 +11,7 @@
  * the text of the column header and the number denoting its fixed width in pixels
  * @param {*} $appendTarget
  */
-var Table = function (classID, classList, height, width, columns, $appendTarget) {    
+var Table = function (course, classList, height, width, columns, $appendTarget) {    
     // Format class attribute
     var classes = 'qtable table-bordered table-sm table-hover ';
     if (classList && classList.length > 0) {
@@ -18,7 +22,7 @@ var Table = function (classID, classList, height, width, columns, $appendTarget)
 
     // Store references
     this.$element = $('<div>', { class: 'table-container' });
-    this.classID  = classID;
+    this.course  = course;
     this.columns  = columns;
 
     // Set table as two separate tables to allow for fixed headers while scrolling
@@ -69,7 +73,10 @@ Table.prototype.updateContent = function (data) {
         this._update(data);
     else {
         $.get(Table.getContentURL(this.classID))
-            .done(this._update)
+            .done(function(data) {
+                Table.annotateTableData(data);
+                this._update(data);
+            }.bind(this))
             .fail(fail.bind(this));
     }
 };
@@ -111,6 +118,22 @@ Table.prototype.fill = function (data) {
         this.$tbody.append($tr);
     }.bind(this));
 };
+
+/**
+ * Add necessary calculations and formatting 
+ * to data in preparation for use with the tables 
+ * @param {*} data 
+ */
+Table.annotateTableData = function (data) {
+    for (var i = 0; i < data.sessions.length; i++) {
+        data.sessions[i].date                       = new Date(data.sessions[i].sessDate);
+        data.sessions[i].attendanceCount            = data.sessions[i].studentList.length;
+        data.sessions[i].attendanceCountFormatted   = data.sessions[i].attendanceCount + '/' + data.numEnrolled;
+        data.sessions[i].attendancePercent          = data.sessions[i].attendanceCount > 0 ? data.sessions[i].attendanceCount / data.numEnrolled * 100 : 0;
+        data.sessions[i].attendancePercentFormatted = (data.sessions[i].attendancePercent).toFixed(1) + ' %';
+        data.sessions[i].formattedDate              = Table.formatDate(data.sessions[i].date);
+    }
+}
 
 Table.prototype.error = function (message) {
     this.$table1.addClass('table-danger');
