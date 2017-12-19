@@ -5,7 +5,7 @@ var SessionManager    = require('./sessions'),
     Editable          = require('../components/editable'),
     Duration          = require('../components/duration');
 
-const durationOptions = [ 
+var durationOptions = [
     new Duration('30 sec', 30000), 
     new Duration('45 sec', 45000), 
     new Duration('1 min', 60000),
@@ -116,7 +116,7 @@ function build () {
     this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
 
     $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
-        .click(this.exporter.createExportModal.bind(this))
+        .click(this.exporter.createExportModal.bind(this, this.course))
         .appendTo($sessionDiv);
 
     // The student table and associated buttons
@@ -127,11 +127,11 @@ function build () {
         .appendTo($studentDiv);
 
     $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
-        .click(this.importer.createImportModal)
+        .click(this.importer.createImportModal.bind(this, this.course))
         .appendTo($studentDiv);
 
     $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
-        .click(this.importer.createAddStudentModal.bind(this))
+        .click(this.importer.createAddStudentModal.bind(this, this.course))
         .appendTo($studentDiv);
 }
 

@@ -3,7 +3,7 @@ var XLSX         = require('xlsx'),
 
 var Exporter = function () {};
 
-Exporter.prototype.createExportModal = function () {
+Exporter.prototype.createExportModal = function (course) {
     var modal         = new ModalWindow({ id: 'exportModal', title: 'Export Attendance Information'}),
         $fileName     = $('<input>', {type: 'text', id: 'fileName', name: 'fileName', style: 'margin-bottom: 20px'}),
         $fileType     = $('<select>', {class: 'btn btn-secondary dropdown-toggle dropdown-toggle-split', id: 'fileType', name: 'fileType'} ),
@@ -11,7 +11,7 @@ Exporter.prototype.createExportModal = function () {
         $indivCheck   = $('<input>', {type: 'checkbox', id: 'session', name: 'session'}),
         $checkDiv     = $('<div>', {style: 'display: none'});
 
-    this.$exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
+    $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
     modal.$body
         .append($('<p>', {text: 'Specify output file name and type:'}))
         .append($fileName)
@@ -33,7 +33,7 @@ Exporter.prototype.createExportModal = function () {
         */
         
     modal.$footer
-        .prepend(this.$exportButton);
+        .prepend($exportButton);
     
     /*
     $fileType.change(function () {
@@ -44,8 +44,7 @@ Exporter.prototype.createExportModal = function () {
     });
     */
 
-    this.$exportButton
-        .click(exportClick.bind(this, modal, $fileName, $fileType));
+    $exportButton.click(exportClick.bind(this, course, modal, $exportButton, $fileName, $fileType));
     modal.show();
 };
 
@@ -53,22 +52,21 @@ Exporter.prototype.createExportModal = function () {
 // Private Functions //
 ///////////////////////
 
-function exportClick(modal, $fileName, $fileType) {
-    var cID = this.course.cID;
-    this.$exportButton.remove();
+function exportClick(course, modal, $exportButton, $fileName, $fileType) {
+    $exportButton.remove();
     modal.$body.empty();
     modal.$body
         .spin()
         .addClass('spin-min-height');
     $.get({
-        url: '/professor/' + cID + '/exportAttendance',
+        url: '/professor/' + course.cID + '/exportAttendance',
         data: {fileName: $fileName.val(), fileType: $fileType.val()}
         }).done(function (data, status, xhr) {
-            exportSuccess.call(this, data, status, xhr, $fileType, $fileName, modal);
+            exportSuccess(data, status, xhr, $fileType, $fileName, modal);
         }).fail(function(xhr, status, errorThrown) {
-        modal.error("Error", xhr.responseText);
+            modal.error("Error", xhr.responseText);
         }).always(function(a, status, b) {
-        modal.$body.spin(false);
+            modal.$body.spin(false);
         });   
 }
 
@@ -164,56 +162,6 @@ function s2ab(s) {
     var view = new Uint8Array(buf);
     for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
     return buf;
-}
-
-function checkFileExtension(file) {
-    var splitArr  = file.name.split('.'),
-        length = splitArr.length,
-        extension = splitArr[length-1];
-    return "xlsx" === extension;
-}
-
-function checkFormat(sheet) {
-    var result        = { error: false , sheet: [] },
-        processedStds = [],
-        name          = [],
-        email         = [],
-        netID,
-        stdNum,
-        firstName,
-        lastName,
-        check;
-    // Check correct number of rows/headers    
-    for(var i = 0; i < sheet.length; i++) {    
-        check = (sheet[i].hasOwnProperty('stdNum') && sheet[i].hasOwnProperty('name') &&
-                    sheet[i].hasOwnProperty('email') &&  sheet[i].hasOwnProperty('dept') &&
-                    sheet[i].hasOwnProperty('year'));
-        if(!check) {
-            result.error = "File is incorrectly formatted at row " + i;
-            return result;
-        }
-        // Parse and check email
-        email = sheet[i].email.split('@');
-        if (email.length != 2 || email[1] !== "queensu.ca" ) {
-            result.error = 'Improper email format at row ' + i;
-            return result;             
-        }
-        netID = email[0];
-        // Get student Number
-        stdNum = sheet[i].stdNum;
-        // Check for valid Name
-        name = sheet[i].name.split(',');
-        if (name.length != 2) {
-            result.error = 'Improper name format at row ' + i;
-            return result;
-        }
-        firstName = name[1];
-        lastName = name[0];
-        // Set entry in valid student list
-        processedStds[i] = {netID: netID, stdNum: stdNum, firstName: firstName, lastName: lastName}; 
-    }
-    result.sheet = processedStds;
-    return result;
 }
 
 module.exports = Exporter;

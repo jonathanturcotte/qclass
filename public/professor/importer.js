@@ -1,4 +1,5 @@
 var XLSX         = require('xlsx'),
+    IO           = require('./io'),
     ModalWindow  = require('../modalwindow');
 
 var Importer = function () {};
@@ -18,7 +19,7 @@ Importer.prototype.createImportModal = function (course) {
     modal.show();
 };
 
-Importer.prototype.createAddStudentModal = function () {
+Importer.prototype.createAddStudentModal = function (course) {
     // TODO: Needs to be broken up
 
     var modal   = new ModalWindow({ id: 'addStdModal', title: 'Add Student'}),
@@ -122,7 +123,7 @@ Importer.prototype.createAddStudentModal = function () {
                 .spin()
                 .addClass('spin-min-height');
             $.post({
-                url: '/professor/class/enrollStudent/' + this.course.cID,
+                url: '/professor/class/enrollStudent/' + course.cID,
                 data: { netID: netID, stdNum: stdNum, firstName: fName, lastName: lName },
                 dataType: 'json'
             }).done(function(data, status, xhr) {
@@ -132,7 +133,7 @@ Importer.prototype.createAddStudentModal = function () {
             }).always(function(a, status, b) {
                 modal.$body.spin(false);
             });
-        }.bind(this));
+        });
 
     modal.show();
 };
@@ -155,7 +156,7 @@ function importXLSX(course, modal, $file) {
     if (!file){
         modal.error('Error', 'No file submitted');
         return;
-    } else if (!checkFileExtension(file)) {
+    } else if (!IO.checkExtensionXLSX(file)) {
         modal.error('Error', 'Incorrect file type submitted');
         return;
     } else {            
@@ -175,7 +176,7 @@ function importXLSX(course, modal, $file) {
                 result         = {},
                 formattedSheet = [];
            
-            result = checkFormat(jsonSheet);
+            result = IO.checkClasslistFormat(jsonSheet);
             //check if any errors caught in the file's format
             if(result.error) { 
                 modal.error('Error', result.error);
@@ -230,13 +231,6 @@ function findErrors (netID, stdNum, fName, lName) {
             result[3] = "Last Name Too Long";
     }
     return result;        
-}
-
-function checkFileExtension(file) {
-    var splitArr  = file.name.split('.'),
-        length = splitArr.length,
-        extension = splitArr[length-1];
-    return "xlsx" === extension;
 }
 
 module.exports = Importer;
