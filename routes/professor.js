@@ -154,22 +154,53 @@ router.post('/class/stop/:classID', function(req, res, next) {
     res.status(204).send();
 });
 
-/** GET all attendance sessions for a certain class
- * used to fill session table on professor page
- * contains number of enrolled studnets for attendance calculations
- * Each entry in sessions has the session time and a list of students 
+/** 
+ * GET session data for a class
+ * Used to fill session and student tables on a classpage
  */
-router.get('/:classID/attendanceSessions', function(req, res, next) {
-    db.getSessionAttInfo(req.params.classID, function(err, sessions, fields) {
+router.get('/:classID/session-data', function(req, res, next) {
+    db.getSessionAttInfo(req.params.classID, function(err, sessionEntries, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance sessions for ' + req.user.netID);
-        if (sessions.length === 0) res.json({ numEnrolled: 0, sessions: [] });
-        else {
-            db.getEnrolledStudents(req.params.classID, function(err, enrolled, fields) {
-                if (err) return routeHelper.sendError(res, err);
-                var attSessions = organizeAttendanceSession(sessions);
-                res.json({ numEnrolled: enrolled.length, sessions: attSessions });
-            });
-        }
+        if (sessionEntries.length === 0) 
+            return res.json({ numEnrolled: 0, sessions: {}, students: {} });
+        
+        db.getEnrolledStudents(req.params.classID, function(err, enrolled, fields) {
+            if (err) return routeHelper.sendError(res, err);
+            var sessions = {},
+                students = {};
+
+            // Fill out dictionary of students first, necessary to ensure all enrolled students are present
+            for (var i in enrolled) {
+                var student = enrolled[i];
+                students[student.sNetID] = { 
+                    netID: student.sNetID,  
+                    stdNum: student.stdNum,
+                    fName: student.fName,
+                    lName: student.lName,
+                    sessions: []
+                };
+            }
+
+            // Iterate sessionEntries to fill out the sessions object and add links between sessions and students
+            for (var i in sessionEntries) {
+                var entry = sessionEntries[i];
+
+                // Add new session if this one hasn't been created yet
+                if (!sessions[entry.attTime]) {
+                    sessions[entry.attTime] = { 
+                        attTime: entry.attTime,
+                        duration: entry.attDuration,
+                        netIDs: [] 
+                    };
+                }
+            
+                // Update the students and sessions so that this entry's session<->student link is known on the client side
+                sessions[entry.attTime].netIDs.push(entry.sNetID);
+                students[entry.sNetID].sessions.push(entry.attTime);
+            }
+
+            res.json({ sessions: sessions, students: students });
+        });
     });
 });
 
@@ -236,35 +267,6 @@ router.get('/:classID/exportAttendance', function(req, res, next) {
         });
     });
 });
-
-// Pass in ordered session results from db
-// Returns json with each entry containing session date + list of students in attendance
-function organizeAttendanceSession(sessInfo) {
-    var j = 0,
-        i = 0,
-        k = 0,
-        date = sessInfo[0].attTime,
-        session = [],
-        toReturn = [];
-    while (j < sessInfo.length) {
-        if (date === sessInfo[j].attTime) {
-            if (sessInfo[j].sNetID)
-                session[i++] = { NetID: sessInfo[j].sNetID, stdNum: sessInfo[j].stdNum, fName: sessInfo[j].fName, lName: sessInfo[j].lName };
-            else 
-                // set session to empty if session entry has no student - this indicates a session with no attendances
-                session = [];
-            j++;
-        } else {
-            toReturn[k++] = { sessDate: date, studentList: session };
-            session = [];
-            date = sessInfo[j].attTime;
-            i = 0;
-        }
-    }
-    //Add last session
-    toReturn[k] = { sessDate: date, studentList: session };
-    return toReturn;
-}
 
 // Runs the general enroll function that adds (if needed) and enrolls each student
 // reqStudents can contain a single student or an entire classList
