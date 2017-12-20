@@ -5,7 +5,7 @@ var TableUpdater = function (classID, sessionTable, studentTable) {
 };
 
 TableUpdater.prototype.updateTables = function () {
-    this.studentTable.spin();
+    this.sessionTable.spin();
     this.studentTable.spin();
     $.get('/professor/' + this.classID + '/session-data')
     .done(function(data, status, xhr) {
