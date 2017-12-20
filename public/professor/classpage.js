@@ -1,11 +1,12 @@
-var SessionManager    = require('./sessions'),
-    Table             = require('../components/table'),
-    SessionTable      = require('./sessionTable'),
-    StudentTable      = require('./studentTable'),
-    Exporter          = require('./exporter'),
-    Importer          = require('./importer'),
-    Editable          = require('../components/editable'),
-    Duration          = require('../components/duration');
+var SessionManager = require('./sessions'),
+    Table          = require('../components/table'),
+    SessionTable   = require('./sessionTable'),
+    StudentTable   = require('./studentTable'),
+    Exporter       = require('./exporter'),
+    Importer       = require('./importer'),
+    Editable       = require('../components/editable'),
+    Duration       = require('../components/duration'),
+    TableUpdater   = require('./tableUpdater');
 
 const durationOptions = [ 
     new Duration('30 sec', 30000), 
@@ -41,10 +42,14 @@ var ClassPage = function() {
 ClassPage.prototype.displayCourse = function (course) {
     this.course = course;
 
-    // Clear the old page
+    // Clear the old page and build the new one
     this.$element.empty();
     build.call(this);
 };
+
+ClassPage.prototype.refreshTables = function () {
+    this.tableUpdater.updateTables();
+}
 
 ///////////////////////
 // Private Functions //
@@ -131,18 +136,9 @@ function build () {
         .click(this.importer.createAddStudentModal.bind(this))
         .appendTo($studentDiv);
 
-    // Fetch the attendance data
-    $.get(Table.getContentURL(this.course.cID))
-    .done(function(data, status, xhr) {
-        Table.annotateTableData(data);
-        this.sessionTable.updateContent(data);
-        this.studentTable.updateContent(data);
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        toastr.error('Error getting attendance data', 'Loading Error');
-        this.sessionTable.error('Error');
-        this.studentTable.error('Error');
-    }.bind(this));
+    // Initialize the tableUpdater and fill the tables
+    this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
+    this.tableUpdater.updateTables();
 }
 
 function editAdministrators() {

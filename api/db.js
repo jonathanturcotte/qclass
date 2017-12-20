@@ -127,6 +127,15 @@ exports.getEnrolledStudents = function(classID, callback) {
     runQuery('SELECT sNetID FROM enrolled WHERE enrolled.cID = ?', [classID], callback);
 };
 
+exports.getEnrolledStudentsWithInfo = function(classID, callback) {
+    var query =
+        `SELECT s.sNetID, s.stdNum, s.fName, s.lName
+         FROM enrolled e
+            NATURAL JOIN student s
+         WHERE e.cID = ?`;
+    runQuery(query, [classID], callback);
+};
+
 exports.startAttendance = function(classID, duration, time, callback) {
     var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
     runQuery(query, [[[classID, time, duration]]], callback);

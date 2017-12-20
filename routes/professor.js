@@ -27,7 +27,7 @@ router.param('classID', function(req, res, next, classID) {
     if (!classID)
         return routeHelper.sendError(res, null, 'Empty classID', 400);
 
-    if (!regex.class.id.test(classId))
+    if (!regex.class.id.test(classID))
         return routeHelper.sendError(res, null, 'Invalid classID', 400);
 
     db.ownsClass(classID, req.user.netID, function(err, result) {
@@ -117,14 +117,14 @@ router.post('/class/enrollStudent/:classID', function(req, res, next) {
 });
 
 // For deleting a student from a class
-router.delete('/class/:classId/remove/:netID', function (req, res, next) {
+router.delete('/class/:classID/remove/:netID', function (req, res, next) {
     if (!req.params.netID)
         return routeHelper.sendError(res, null, 'Empty netID', 400);
-    db.removeFromClass(req.params.netID, req.params.classId, function (err, results, fields) {
+    db.removeFromClass(req.params.netID, req.params.classID, function (err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error removing student');
 
         // Check if deletion actually occurred
-        if (affectedRows < 1)
+        if (results.affectedRows < 1)
             return routeHelper.sendError(res, null, 'No deletion occurred - Student not enrolled', 404);
             
         res.status(204).send('');
@@ -164,10 +164,11 @@ router.get('/:classID/session-data', function(req, res, next) {
         if (sessionEntries.length === 0) 
             return res.json({ numEnrolled: 0, sessions: {}, students: {} });
         
-        db.getEnrolledStudents(req.params.classID, function(err, enrolled, fields) {
+        db.getEnrolledStudentsWithInfo(req.params.classID, function(err, enrolled, fields) {
             if (err) return routeHelper.sendError(res, err);
             var sessions = {},
-                students = {};
+                students = {},
+                sessionCount = 0;
 
             // Fill out dictionary of students first, necessary to ensure all enrolled students are present
             for (var i in enrolled) {
@@ -188,18 +189,26 @@ router.get('/:classID/session-data', function(req, res, next) {
                 // Add new session if this one hasn't been created yet
                 if (!sessions[entry.attTime]) {
                     sessions[entry.attTime] = { 
-                        attTime: entry.attTime,
+                        sessDate: entry.attTime,
                         duration: entry.attDuration,
-                        netIDs: [] 
+                        netIDs: []
                     };
+                    sessionCount++;
                 }
             
                 // Update the students and sessions so that this entry's session<->student link is known on the client side
-                sessions[entry.attTime].netIDs.push(entry.sNetID);
-                students[entry.sNetID].sessions.push(entry.attTime);
+                if (entry.sNetID) {
+                    sessions[entry.attTime].netIDs.push(entry.sNetID);
+                    students[entry.sNetID].sessions.push(entry.attTime);
+                }
             }
 
-            res.json({ sessions: sessions, students: students });
+            res.json({ 
+                numEnrolled: enrolled.length,
+                sessionCount: sessionCount,
+                sessions: sessions, 
+                students: students 
+            });
         });
     });
 });

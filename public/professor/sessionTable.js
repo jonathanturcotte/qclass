@@ -24,12 +24,15 @@ var SessionTable = function(course, $appendTarget) {
 SessionTable.prototype = Object.create(Table.prototype);
 SessionTable.prototype.constructor = SessionTable;
 
-SessionTable.prototype._update = function (data) {
+SessionTable.prototype.update = function (data) {
     var tableData = [];
+
+    // Persist/update the data
+    this.data = data;
 
     // Add in reverse order to ensure that the latest sessions
     // are at the top of the table
-    for (var i = data.sessions.length - 1; i >= 0; i--) {
+    for (var i in data.sessions) {
         var session = data.sessions[i];
         
         // Create main row 
@@ -40,7 +43,7 @@ SessionTable.prototype._update = function (data) {
 
         // If there was attendance for this session, make it clickable
         if (session.attendanceCount !== 0)
-            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.studentList));
+            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.netIDs));
         else 
             $button.prop('disabled', true);
 
@@ -57,8 +60,9 @@ SessionTable.prototype._update = function (data) {
     this.fill(tableData);
 };
 
-function openAttendanceModal(date, studentList) {
-    var modal = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' });
+function openAttendanceModal(date, netIDs) {
+    var modal    = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' }),
+        students = this.data.students;
     
     modal.$body.append($('<h5>', { 
         text: date, 
@@ -75,12 +79,13 @@ function openAttendanceModal(date, studentList) {
                 .append($('<th>', { text: 'Last Name' }))));
     
     var $tbody = $('<tbody>').appendTo($table);
-    for (var i = 0; i < studentList.length; i++) {
+    for (var i in netIDs) {
+        var student = students[netIDs[i]];
         $tbody.append($('<tr>')
-            .append($('<td>').text(studentList[i].NetID))
-            .append($('<td>').text(studentList[i].stdNum))
-            .append($('<td>').text(studentList[i].fName))
-            .append($('<td>').text(studentList[i].lName)));
+            .append($('<td>').text(student.netID))
+            .append($('<td>').text(student.stdNum))
+            .append($('<td>').text(student.fName))
+            .append($('<td>').text(student.lName)));
     }
 
     modal.$body.append($table);

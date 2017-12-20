@@ -20,16 +20,12 @@ var StudentTable = function (course, $appendTarget) {
 StudentTable.prototype = Object.create(Table.prototype);
 StudentTable.prototype.constructor = StudentTable;
 
-StudentTable.prototype._update = function (data) {
-    var students  = getStudentList(data),
-        tableData = this.formatTableData(students);
+StudentTable.prototype.update = function (data) {
+    var tableData = [],
+        students = data.students;
 
-    this.fill(tableData);
-};
-
-// Format rows for each student
-StudentTable.prototype.formatTableData = function(students) {
-    var tableData = [];
+    // Persist/update the data
+    this.data = data;
 
     for (var i in students) {
         var $expandButton = $('<button>', { text: 'Exp' })
@@ -41,37 +37,15 @@ StudentTable.prototype.formatTableData = function(students) {
                 .append($deleteButton);
 
         tableData.push([
-            students[i].NetID,
+            students[i].netID,
             students[i].stdNum,
             students[i].fName,
             students[i].lName,
             $actions
         ]);
     }
-    return tableData;
-}
 
-// Flip the data object by associating courses with an array of students
-function getStudentList(data) {
-    var students = {};
-
-    for (var i = 0; i < data.sessions.length; i++) {
-        var session = data.sessions[i],
-            studentList = session.studentList;
-
-        for (var j = 0; j < session.studentList.length; j++) {
-            var student = studentList[j];
-
-            if (!students[student.NetID]) {
-                students[student.NetID] = student;
-                students[student.NetID].sessions = [];
-            }
-
-            students[student.NetID].sessions.push(session);
-        }
-    }
-
-    return students;
+    this.fill(tableData);
 };
 
 function tryRemoveStudent($deleteButton, netID) {
@@ -81,13 +55,13 @@ function tryRemoveStudent($deleteButton, netID) {
 }
 
 function removeStudent($deleteButton, netID) {
-    var a = netID;
     $.ajax({
         url: 'professor/class/' + this.course.cID + '/remove/' + netID,
         type: 'DELETE'
-    }).done(function(data, status, xhr) {
+    })
+    .done(function(data, status, xhr) {
         toastr.success(netID + ' was removed from ' + this.course.cCode, 'Student Removed');
-        this.updateContent();
+        window.app.classpage.refreshTables();
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         var errMsg = xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID + ' from ' + this.course.cCode;
@@ -99,14 +73,27 @@ function removeStudent($deleteButton, netID) {
 }
 
 function expandStudent(student) {
-    var modal = new ModalWindow({ id: 'student-modal', title: 'Student Summary' });
+    var modal    = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
+        sessions = this.data.sessions;
 
-    modal.$body.append($('<h5>', {
-        text: student.fName + ' ' + student.lName + ' (' + student.stdNum + ', ' + student.NetID + ')', 
-        class: 'table-modal-bodytitle' 
-    }));
     modal.$body.addClass('table-modal-body');
 
+    // Title
+    modal.$body.append($('<h5>', {
+        text: student.fName + ' ' + student.lName + ' (' + student.stdNum + ', ' + student.netID + ')', 
+        class: 'table-modal-bodytitle' 
+    }));
+
+    // Total percent attendance
+    var percentAttendance = 0;
+    if (this.data.sessionCount !== 0)
+        percentAttendance = student.sessions.length / this.data.sessionCount * 100;
+    modal.$body.append($('<p>', { 
+        style: 'text-align: center;',
+        text: 'Total attendance: ' + student.sessions.length + '/' + this.data.sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
+    }))
+
+    // Table
     var $table = $('<table>', { class: 'student-modal-table centered-table table-bordered' })
         .append($('<thead>')
             .append($('<tr>')
@@ -115,11 +102,11 @@ function expandStudent(student) {
                 .append($('<th>', { text: 'Rate' }))));
 
     var $tbody = $('<tbody>').appendTo($table);
-    for (var i = 0; i < student.sessions.length; i++) {
+    for (var i in student.sessions) {
         $tbody.append($('<tr>')
-            .append($('<td>').text(student.sessions[i].formattedDate))
-            .append($('<td>').text(student.sessions[i].attendanceCountFormatted))
-            .append($('<td>').text(student.sessions[i].attendancePercentFormatted)));
+            .append($('<td>').text(sessions[student.sessions[i]].formattedDate))
+            .append($('<td>').text(sessions[student.sessions[i]].attendanceCountFormatted))
+            .append($('<td>').text(sessions[student.sessions[i]].attendancePercentFormatted)));
     }
 
     modal.$body.append($table);

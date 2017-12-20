@@ -55,38 +55,6 @@ var Table = function (course, classList, height, width, columns, $appendTarget) 
     $appendTarget.append(this.$element);
 
     this.$element.show();
-    this.$tbody.spin();
-};
-
-/**
- * Updates the table. If no response object is provided, the
- * database will be queried for the information. When present, 
- * response should be an object with the three parameters of
- * a successful ajax request
- * @param {*} response
- * @param {*} response.data
- * @param {*} response.status
- * @param {*} response.jqXHR 
- */
-Table.prototype.updateContent = function (data) {
-    if (data) 
-        this._update(data);
-    else {
-        $.get(Table.getContentURL(this.classID))
-            .done(function(data) {
-                Table.annotateTableData(data);
-                this._update(data);
-            }.bind(this))
-            .fail(fail.bind(this));
-    }
-};
-
-/**
- * Format the URL used in get requests associated with tables
- * @param {string} classID 
- */
-Table.getContentURL = function (classID) {
-    return '/professor/' + classID + '/attendanceSessions';
 };
 
 /**
@@ -119,22 +87,6 @@ Table.prototype.fill = function (data) {
     }.bind(this));
 };
 
-/**
- * Add necessary calculations and formatting 
- * to data in preparation for use with the tables 
- * @param {*} data 
- */
-Table.annotateTableData = function (data) {
-    for (var i = 0; i < data.sessions.length; i++) {
-        data.sessions[i].date                       = new Date(data.sessions[i].sessDate);
-        data.sessions[i].attendanceCount            = data.sessions[i].studentList.length;
-        data.sessions[i].attendanceCountFormatted   = data.sessions[i].attendanceCount + '/' + data.numEnrolled;
-        data.sessions[i].attendancePercent          = data.sessions[i].attendanceCount > 0 ? data.sessions[i].attendanceCount / data.numEnrolled * 100 : 0;
-        data.sessions[i].attendancePercentFormatted = (data.sessions[i].attendancePercent).toFixed(1) + ' %';
-        data.sessions[i].formattedDate              = Table.formatDate(data.sessions[i].date);
-    }
-}
-
 Table.prototype.error = function (message) {
     this.$table1.addClass('table-danger');
     this.$table2.addClass('table-danger');
@@ -146,37 +98,6 @@ Table.prototype.error = function (message) {
 Table.prototype.spin = function () {
     this.$tbody.spin();
 };
-
-Table.prototype._update = function (data) {
-    console.log('Error - abstract update called - should have been overridden');
-}
-
-/**
- * Formats the date into DD/MM/YY hh:mm:ss
- * @param {Date} date 
- */
-Table.formatDate = function (date) {
-    var day    = formatDateEntry(date.getDate()),
-        month  = formatDateEntry(date.getMonth() + 1),
-        year   = date.getFullYear().toString().substr(-2),
-        hour   = formatDateEntry(date.getHours()),
-        minute = formatDateEntry(date.getMinutes()),
-        second = formatDateEntry(date.getSeconds());
-    return day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second;
-}
-
-/**
- * Converts a number to a string and prepends a 0 if the value is not already 2-digit
- * @param {number} num 
- */
-function formatDateEntry(num) {
-    if (num < 10) return '0' + num;
-    else return '' + num;
-}
-
-function fail(xhr, status, errorThrown) {
-    this.error('Error getting attendance sessions: ' + status);
-}
 
 function formatColumnWidth(width) {
     return 'max-width: ' + width + 'px; min-width: ' + width + 'px;'
