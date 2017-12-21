@@ -88,6 +88,7 @@ Table.prototype.fill = function (data) {
 };
 
 Table.prototype.error = function (message) {
+    if (!message) message = 'Error';
     this.$table1.addClass('table-danger');
     this.$table2.addClass('table-danger');
     this.$tbody

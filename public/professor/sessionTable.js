@@ -42,15 +42,15 @@ SessionTable.prototype.update = function (data) {
                 .append($button); 
 
         // If there was attendance for this session, make it clickable
-        if (session.attendanceCount !== 0)
-            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.netIDs));
+        if (session.attendance !== 0)
+            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.students));
         else 
             $button.prop('disabled', true);
 
         // Add new row to table
         tableData.push([
             $date, 
-            session.attendanceCountFormatted, 
+            session.attendanceFormatted, 
             session.attendancePercentFormatted, 
             $actions
         ]);
@@ -60,9 +60,8 @@ SessionTable.prototype.update = function (data) {
     this.fill(tableData);
 };
 
-function openAttendanceModal(date, netIDs) {
-    var modal    = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' }),
-        students = this.data.students;
+function openAttendanceModal(date, sessionStudents) {
+    var modal    = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' });
     
     modal.$body.append($('<h5>', { 
         text: date, 
@@ -76,16 +75,22 @@ function openAttendanceModal(date, netIDs) {
                 .append($('<th>', { text: 'NetID' }))
                 .append($('<th>', { text: 'Student #' }))
                 .append($('<th>', { text: 'First Name' }))
-                .append($('<th>', { text: 'Last Name' }))));
+                .append($('<th>', { text: 'Last Name' }))
+                .append($('<th>', { text: 'Attended' }))));
     
+    // Create and fill the tbody with the students who attended
     var $tbody = $('<tbody>').appendTo($table);
-    for (var i in netIDs) {
-        var student = students[netIDs[i]];
-        $tbody.append($('<tr>')
-            .append($('<td>').text(student.netID))
-            .append($('<td>').text(student.stdNum))
-            .append($('<td>').text(student.fName))
-            .append($('<td>').text(student.lName)));
+    for (var i in sessionStudents) {
+        var student      = this.data.students[sessionStudents[i].netID],
+            attendedText = sessionStudents[i].attended ? '\u2714' : '\u2716',
+            $tr          = $('<tr>')
+                .append($('<td>', { text: student.netID }))
+                .append($('<td>', { text: student.stdNum }))
+                .append($('<td>', { text: student.fName }))
+                .append($('<td>', { text: student.lName }))
+                .append($('<td>', { text: attendedText }));
+
+        $tbody.append($tr);
     }
 
     modal.$body.append($table);

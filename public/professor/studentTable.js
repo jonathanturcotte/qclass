@@ -22,25 +22,28 @@ StudentTable.prototype.constructor = StudentTable;
 
 StudentTable.prototype.update = function (data) {
     var tableData = [],
-        students = data.students;
+        students  = data.students,
+        enrolledIDs  = data.enrolledIDs;
 
     // Persist/update the data
     this.data = data;
 
-    for (var i in students) {
-        var $expandButton = $('<button>', { text: 'Exp' })
-                .click(expandStudent.bind(this, students[i])),      
+    // Add a student row for each enrolled student
+    for (var i in enrolledIDs) {
+        var student       = students[enrolledIDs[i]],
+            $expandButton = $('<button>', { text: 'Exp' })
+                .click(expandStudent.bind(this, student)),      
             $deleteButton = $('<button>', { text: 'Del' })
-                .click(tryRemoveStudent.bind(this, $deleteButton, students[i].netID)),
-            $actions = $('<td>')
+                .click(tryRemoveStudent.bind(this, $deleteButton, student.netID)),
+            $actions      = $('<td>')
                 .append($expandButton)
                 .append($deleteButton);
 
         tableData.push([
-            students[i].netID,
-            students[i].stdNum,
-            students[i].fName,
-            students[i].lName,
+            student.netID,
+            student.stdNum,
+            student.fName,
+            student.lName,
             $actions
         ]);
     }
@@ -74,7 +77,8 @@ function removeStudent($deleteButton, netID) {
 
 function expandStudent(student) {
     var modal    = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
-        sessions = this.data.sessions;
+        sessions = this.data.sessions,
+        sessionCount = this.data.sessionCount;
 
     modal.$body.addClass('table-modal-body');
 
@@ -84,13 +88,13 @@ function expandStudent(student) {
         class: 'table-modal-bodytitle' 
     }));
 
-    // Total percent attendance
+    // Total percent attendance of the student
     var percentAttendance = 0;
-    if (this.data.sessionCount !== 0)
-        percentAttendance = student.sessions.length / this.data.sessionCount * 100;
+    if (sessionCount !== 0)
+        percentAttendance = student.sessions.length / sessionCount * 100;
     modal.$body.append($('<p>', { 
         style: 'text-align: center;',
-        text: 'Total attendance: ' + student.sessions.length + '/' + this.data.sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
+        text: 'Total attendance: ' + student.sessions.length + '/' + sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
     }))
 
     // Table
@@ -105,7 +109,7 @@ function expandStudent(student) {
     for (var i in student.sessions) {
         $tbody.append($('<tr>')
             .append($('<td>').text(sessions[student.sessions[i]].formattedDate))
-            .append($('<td>').text(sessions[student.sessions[i]].attendanceCountFormatted))
+            .append($('<td>').text(sessions[student.sessions[i]].attendanceFormatted))
             .append($('<td>').text(sessions[student.sessions[i]].attendancePercentFormatted)));
     }
 

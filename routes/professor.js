@@ -165,6 +165,9 @@ router.get('/:classID/session-data', function(req, res, next) {
         db.getEnrolledStudents(req.params.classID, function(err, enrolled, fields) {
             if (err) return routeHelper.sendError(res, err);
 
+            for (var i in enrolled)
+                enrolled[i] = enrolled[i].sNetID;
+
             res.json({ 
                 entries: sessionEntries,
                 enrolledIDs: enrolled 
