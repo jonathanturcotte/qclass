@@ -72,10 +72,10 @@ function processData(data) {
                 students[entry.sNetID].totalAttendance++;
 
             // Relate sessions and students
-            sessions[entry.attTime].students.push({ 
+            sessions[entry.attTime].students[entry.sNetID] = { 
                 netID: entry.sNetID, 
                 attended: attended
-            });
+            };
             students[entry.sNetID].sessions.push(entry.attTime);
         }
     }

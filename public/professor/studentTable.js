@@ -107,10 +107,13 @@ function expandStudent(student) {
 
     var $tbody = $('<tbody>').appendTo($table);
     for (var i in student.sessions) {
-        $tbody.append($('<tr>')
-            .append($('<td>').text(sessions[student.sessions[i]].formattedDate))
-            .append($('<td>').text(sessions[student.sessions[i]].attendanceFormatted))
-            .append($('<td>').text(sessions[student.sessions[i]].attendancePercentFormatted)));
+        var session = sessions[student.sessions[i]];
+        if (session.students[student.netID].attended) {
+            $tbody.append($('<tr>')
+                .append($('<td>').text(sessions[student.sessions[i]].formattedDate))
+                .append($('<td>').text(sessions[student.sessions[i]].attendanceFormatted))
+                .append($('<td>').text(sessions[student.sessions[i]].attendancePercentFormatted)));
+        }
     }
 
     modal.$body.append($table);
