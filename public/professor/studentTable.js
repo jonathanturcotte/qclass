@@ -64,7 +64,7 @@ function removeStudent($deleteButton, netID) {
     })
     .done(function(data, status, xhr) {
         toastr.success(netID + ' was removed from ' + this.course.cCode, 'Student Removed');
-        window.app.classpage.refreshTables();
+        window.app.classPage.refreshTables();
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         var errMsg = xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID + ' from ' + this.course.cCode;
