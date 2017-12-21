@@ -68,7 +68,8 @@ function processData(data) {
 
             // Update student attendance counter
             var attended = entry.attended === 1;
-            students[entry.sNetID].totalAttendance++;
+            if (attended)
+                students[entry.sNetID].totalAttendance++;
 
             // Relate sessions and students
             sessions[entry.attTime].students.push({ 

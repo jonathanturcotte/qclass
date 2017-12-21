@@ -91,10 +91,10 @@ function expandStudent(student) {
     // Total percent attendance of the student
     var percentAttendance = 0;
     if (sessionCount !== 0)
-        percentAttendance = student.sessions.length / sessionCount * 100;
+        percentAttendance = student.totalAttendance / sessionCount * 100;
     modal.$body.append($('<p>', { 
         style: 'text-align: center;',
-        text: 'Total attendance: ' + student.sessions.length + '/' + sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
+        text: 'Total attendance: ' + student.totalAttendance + '/' + sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
     }))
 
     // Table
