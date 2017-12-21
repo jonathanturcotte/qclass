@@ -36,8 +36,10 @@ SessionTable.prototype.update = function (data) {
         var session = data.sessions[i];
         
         // Create main row 
-        var $date = $('<td>', { title: session.date.toString() }).text(session.formattedDate),
-            $button = $('<button>', { class: 'btn btn-default', text: 'Expand' }),
+        var $date = $('<td>', { title: session.date.toString(), text: session.formattedDate }),
+            $button = $('<button>', { class: 'btn btn-default btn-sm', title: 'Expand' })
+                .append($('<i>', { class: 'fas fa-external-link-alt' })
+                    .attr('aria-hidden', 'true')),
             $actions = $('<td>')
                 .append($button); 
 

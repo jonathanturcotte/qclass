@@ -31,9 +31,16 @@ StudentTable.prototype.update = function (data) {
     // Add a student row for each enrolled student
     for (var i in enrolledIDs) {
         var student       = students[enrolledIDs[i]],
-            $expandButton = $('<button>', { text: 'Exp' })
+            $expandButton = $('<button>', { 
+                title: 'Expand', 
+                class: 'btn btn-default btn-sm',
+                style: 'margin-right: 3px;'
+            }).append($('<i>', { class: 'fas fa-external-link-alt' })
+                    .attr('aria-hidden', 'true'))
                 .click(expandStudent.bind(this, student)),      
-            $deleteButton = $('<button>', { text: 'Del' })
+            $deleteButton = $('<button>', { title: 'Delete', class: 'btn btn-default btn-sm' })
+                .append($('<i>', { class: 'fas fa-times' })
+                        .attr('aria-hidden', 'true'))
                 .click(tryRemoveStudent.bind(this, $deleteButton, student.netID)),
             $actions      = $('<td>')
                 .append($expandButton)
