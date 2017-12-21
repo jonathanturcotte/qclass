@@ -8,7 +8,7 @@ var SessionManager = require('./sessions'),
     Duration       = require('../components/duration'),
     TableUpdater   = require('./tableUpdater');
 
-const durationOptions = [ 
+var durationOptions = [ 
     new Duration('30 sec', 30000), 
     new Duration('45 sec', 45000), 
     new Duration('1 min', 60000),
@@ -49,7 +49,7 @@ ClassPage.prototype.displayCourse = function (course) {
 
 ClassPage.prototype.refreshTables = function () {
     this.tableUpdater.updateTables();
-}
+};
 
 ///////////////////////
 // Private Functions //

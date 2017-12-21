@@ -82,7 +82,7 @@ Table.prototype.fill = function (data) {
                     style: formatColumnWidth(this.columns[i][1]) 
                 }));
             }
-        };
+        }
         this.$tbody.append($tr);
     }.bind(this));
 };
@@ -101,7 +101,7 @@ Table.prototype.spin = function () {
 };
 
 function formatColumnWidth(width) {
-    return 'max-width: ' + width + 'px; min-width: ' + width + 'px;'
+    return 'max-width: ' + width + 'px; min-width: ' + width + 'px;';
 }
 
 module.exports = Table;

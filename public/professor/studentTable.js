@@ -29,7 +29,7 @@ StudentTable.prototype.update = function (data) {
     this.data = data;
 
     // Add a student row for each enrolled student
-    for (var i in enrolledIDs) {
+    for (var i = 0; i < enrolledIDs.length; i++) {
         var student       = students[enrolledIDs[i]],
             $expandButton = $('<button>', { 
                 title: 'Expand', 
@@ -102,7 +102,7 @@ function expandStudent(student) {
     modal.$body.append($('<p>', { 
         style: 'text-align: center;',
         text: 'Total attendance: ' + student.totalAttendance + '/' + sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
-    }))
+    }));
 
     // Table
     var $table = $('<table>', { class: 'student-modal-table centered-table table-bordered' })

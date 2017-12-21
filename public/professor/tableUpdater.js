@@ -19,7 +19,7 @@ TableUpdater.prototype.updateTables = function () {
         this.sessionTable.error();
         this.studentTable.error();
     }.bind(this));
-}
+};
 
 /**
  * Process the data object to aggregate the provided entries into a list of 

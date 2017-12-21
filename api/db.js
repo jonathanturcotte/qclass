@@ -141,7 +141,7 @@ exports.startAttendance = function(classID, duration, time, enrolledIDs, callbac
                 var bulkAttendanceInsert = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES ?',
                     entries = [];
 
-                for (var i in enrolled)
+                for (var i = 0; i < enrolled.length; i++)
                     entries[i] = [classID, time, enrolled[i].sNetID, 0];
                 
                 runQuery(bulkAttendanceInsert, [entries], callback);

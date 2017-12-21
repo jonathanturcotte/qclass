@@ -50,7 +50,7 @@ SessionTable.prototype.update = function (data) {
             $button.prop('disabled', true);
 
         // Add new row to table
-        tableData.push([
+        tableData.unshift([
             $date, 
             session.attendanceFormatted, 
             session.attendancePercentFormatted, 
