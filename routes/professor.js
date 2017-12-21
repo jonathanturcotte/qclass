@@ -125,7 +125,7 @@ router.delete('/class/:classID/remove/:netID', function (req, res, next) {
 
         // Check if deletion actually occurred
         if (results.affectedRows < 1)
-            return routeHelper.sendError(res, null, 'No deletion occurred - Student not enrolled', 404);
+            return routeHelper.sendError(res, null, 'No removal occured - student not enrolled', 404);
             
         res.status(204).send('');
     });
@@ -161,53 +161,13 @@ router.post('/class/stop/:classID', function(req, res, next) {
 router.get('/:classID/session-data', function(req, res, next) {
     db.getSessionAttInfo(req.params.classID, function(err, sessionEntries, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance sessions for ' + req.user.netID);
-        if (sessionEntries.length === 0) 
-            return res.json({ numEnrolled: 0, sessions: {}, students: {} });
         
-        db.getEnrolledStudentsWithInfo(req.params.classID, function(err, enrolled, fields) {
+        db.getEnrolledStudents(req.params.classID, function(err, enrolled, fields) {
             if (err) return routeHelper.sendError(res, err);
-            var sessions = {},
-                students = {},
-                sessionCount = 0;
-
-            // Fill out dictionary of students first, necessary to ensure all enrolled students are present
-            for (var i in enrolled) {
-                var student = enrolled[i];
-                students[student.sNetID] = { 
-                    netID: student.sNetID,  
-                    stdNum: student.stdNum,
-                    fName: student.fName,
-                    lName: student.lName,
-                    sessions: []
-                };
-            }
-
-            // Iterate sessionEntries to fill out the sessions object and add links between sessions and students
-            for (var i in sessionEntries) {
-                var entry = sessionEntries[i];
-
-                // Add new session if this one hasn't been created yet
-                if (!sessions[entry.attTime]) {
-                    sessions[entry.attTime] = { 
-                        sessDate: entry.attTime,
-                        duration: entry.attDuration,
-                        netIDs: []
-                    };
-                    sessionCount++;
-                }
-            
-                // Update the students and sessions so that this entry's session<->student link is known on the client side
-                if (entry.sNetID) {
-                    sessions[entry.attTime].netIDs.push(entry.sNetID);
-                    students[entry.sNetID].sessions.push(entry.attTime);
-                }
-            }
 
             res.json({ 
-                numEnrolled: enrolled.length,
-                sessionCount: sessionCount,
-                sessions: sessions, 
-                students: students 
+                entries: sessionEntries,
+                enrolledIDs: enrolled 
             });
         });
     });
@@ -261,7 +221,13 @@ router.get('/:classID/exportAttendance', function(req, res, next) {
                     date = 0;
                 while (j < sessInfo.length) {
                     if (date === sessInfo[j].attTime) {
-                        sessionData[k++] = { "NetID": sessInfo[j].sNetID, "Student #": sessInfo[j].stdNum, "First Name": sessInfo[j].fName, "Last Name": sessInfo[j].lName };
+                        sessionData[k++] = { 
+                            "NetID": sessInfo[j].sNetID, 
+                            "Student #": sessInfo[j].stdNum, 
+                            "First Name": sessInfo[j].fName, 
+                            "Last Name": sessInfo[j].lName,
+                            "Attended": sessInfo[j].attended 
+                        };
                         j++;
                     } else {
                         date = sessInfo[j].attTime;
