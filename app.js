@@ -34,8 +34,22 @@ var express      = require('express'),
     http         = http.createServer(app).listen(80),
     https        = https.createServer(sslOptions, app).listen(443);
 
-// Use Helmet to help cover any common security vulnerabilities
-app.use(helmet());
+// Use Helmet to help cover some common header security issues
+app.use(helmet({
+    referrerPolicy: { policy: 'no-referrer' },
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'",
+                'https://code.jquery.com',              // jQuery
+                'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr
+                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
+                'https://cdnjs.cloudflare.com'],        // Underscore
+            styleSrc: ["'self'",
+                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
+                'https://cdnjs.cloudflare.com']         // Toastr
+        }
+    }
+}));
 
 // Initialize the socketIO
 app.io = io.initialize();
