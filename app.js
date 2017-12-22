@@ -42,7 +42,8 @@ app.use(helmet({
             defaultSrc: ["'self'",
                 'https://code.jquery.com',              // jQuery
                 'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
-                'https://maxcdn.bootstrapcdn.com'],     // Bootstrap
+                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
+                'https://use.fontawesome.com'],         // Font Awesome
             styleSrc: ["'self'",
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
                 'https://cdnjs.cloudflare.com']         // Toastr
