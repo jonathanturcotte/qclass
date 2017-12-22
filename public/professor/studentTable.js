@@ -43,7 +43,7 @@ StudentTable.prototype.update = function (data) {
             $deleteButton = $('<button>', { title: 'Delete', class: 'btn btn-default btn-sm' })
                 .append($('<i>', { class: 'fas fa-times' })
                         .attr('aria-hidden', 'true'))
-                .click(tryRemoveStudent.bind(this, $deleteButton, student.netID)),
+                .click(openDeleteModal.bind(this, student)),
             $actions      = $('<td>')
                 .append($expandButton)
                 .append($deleteButton);
@@ -60,27 +60,44 @@ StudentTable.prototype.update = function (data) {
     this.fill(tableData);
 };
 
-function tryRemoveStudent($deleteButton, netID) {
-    // TODO: get spinning button working
-    $deleteButton.prop('disabled', true);
-    removeStudent.call(this, $deleteButton, netID);
+function openDeleteModal(student) {
+    var modal         = new ModalWindow({ title: 'Remove ' + student.fName + '?' }),
+        $deleteButton = $('<button>', { text: 'Delete', class: 'btn btn-danger' });
+            
+    $deleteButton.click(tryRemoveStudent.bind(this, $deleteButton, modal, student));
+
+    modal.$body.append($('<p>', { text: 'Are you sure you want to remove ' + student.fName + ' ' + student.lName 
+        + ' (' + student.stdNum + ', ' + student.netID + ')?' }));
+    modal.$footer.prepend($deleteButton);
+    modal.$closeButton.text('Cancel');
 }
 
-function removeStudent($deleteButton, netID) {
+function tryRemoveStudent($deleteButton, modal, student) {
+    // TODO: get spinning button working
+    $deleteButton.prop('disabled', true);
+    modal.$body.empty().spin();
+    removeStudent.call(this, $deleteButton, modal, student);
+}
+
+function removeStudent($deleteButton, modal, student) {
     $.ajax({
-        url: 'professor/class/' + this.course.cID + '/remove/' + netID,
+        url: 'professor/class/' + this.course.cID + '/remove/' + student.netID,
         type: 'DELETE'
     })
     .done(function(data, status, xhr) {
-        toastr.success(netID + ' was removed from ' + this.course.cCode, 'Student Removed');
+        modal.$title.text('Student Removed');
+        modal.$header.addClass('modal-header-success');
+        modal.$body.empty().append($('<p>', { text: student.fName + ' was removed!' }));
         window.app.classPage.refreshTables();
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
-        var errMsg = xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID + ' from ' + this.course.cCode;
-        toastr.fail(errMsg, 'Remove Student Failed');
+        modal.$title.text('Remove Student Failed');
+        modal.$header.addClass('modal-header-danger');
+        modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID }));
     }.bind(this))
     .always(function(a, status, b) {
-        $deleteButton.prop('disabled', false);
+        $deleteButton.remove();
+        modal.$closeButton.text('Close');
     });
 }
 
