@@ -41,9 +41,8 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'",
                 'https://code.jquery.com',              // jQuery
-                'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr
-                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
-                'https://cdnjs.cloudflare.com'],        // Underscore
+                'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
+                'https://maxcdn.bootstrapcdn.com'],     // Bootstrap
             styleSrc: ["'self'",
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
                 'https://cdnjs.cloudflare.com']         // Toastr
