@@ -132,6 +132,11 @@ exports.startAttendance = function(classID, duration, time, callback) {
     runQuery(query, [[[classID, time, duration]]], callback);
 };
 
+exports.stopAttendance = function(classID, callback) {
+    var query = 'UPDATE attendanceSession SET completed=1 WHERE cID=?';
+    runQuery(query, [[[classID]]], callback);
+};
+
 exports.recordAttendance = function(netID, classID, time, callback) {
     var query = 'INSERT INTO attendance (cID, attTime, sNetID) VALUES ?';
     runQuery(query, [[[classID, time, netID]]], callback);
@@ -149,7 +154,8 @@ exports.getAttendanceSessions = function(classID, callback) {
     var query =
         `SELECT cID, attTime, attDuration, COUNT(sNetID) AS numInAttendance
          FROM attendanceSession NATURAL JOIN attendance
-         WHERE cID = ? 
+         WHERE cID = ?
+         AND attendanceSession.completed = 1
          GROUP BY attTime`;
     runQuery(query, [classID], callback);
 };
@@ -174,14 +180,15 @@ exports.getNumSession = function(classID, callback) {
     var query = 
         `SELECT *
          FROM attendanceSession
-         WHERE cID = ?`;
+         WHERE cID = ?
+         AND completed = 1`;
     runQuery(query, [classID], callback);
 };
 
 exports.getSessionAttInfo = function(classID, callback) {
     var query =
         `SELECT sess.attTime, sess.attDuration, a.sNetID, s.fName, s.lName, s.stdNum
-            FROM (SELECT * FROM attendanceSession WHERE cID = ?) sess 
+            FROM (SELECT * FROM attendanceSession WHERE cID = ? AND completed = 1) sess
                 LEFT JOIN attendance a 
                     ON sess.cID = a.cID 
                     AND sess.attTime = a.attTime

@@ -110,6 +110,15 @@ var _stopClass = function(classID, manual) {
 
     // Remove the found session from the array
     sessions.splice(index, 1);
+
+    // Set the completed flag for the session in the database
+    db.stopAttendance(classID, function (err, results, fields){
+        if (err) {
+            console.warn('attendanceSessions._stopClass(): unable to set the completed flag for class ' + classID);
+            return { success: false, err: { status: 500, message: 'Could not stop the session' } };
+        }
+    });
+
     console.log('Stopped attendance session for ' + classID);
     return { success: true };
 };

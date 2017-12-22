@@ -36,6 +36,7 @@ create table attendanceSession (
 	cID			char(36) not null,
 	attTime 	bigint not null,
 	attDuration	int not null,
+	completed	bool not null default 0,
 	primary key (cID, attTime)
 );
 
@@ -125,8 +126,8 @@ insert into enrolled values
 	('11jlt10', 'boo49eb2-0630-4382-98b5-moofd40627b8');
 
 insert into attendanceSession values 
-	('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398271000', '60000'),
-    ('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398272000', '60000');
+	('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398271000', '60000', '1'),
+    ('abc49eb2-0630-4382-98b5-abcfd40627b8', '1509398272000', '60000', '1');
     
 
 insert into attendance values 
