@@ -4,26 +4,30 @@
  * @param {string} course.cID
  * @param {string} course.cCode
  * @param {string} course.cName
- * @param {string[]=} classList 
- * @param {Number} height
- * @param {Number} width
- * @param {*[]} columns Should be an array of string-number pairs, with the string specifying 
+ * @param {Object} options
+ * @param {string[]=} options.classList 
+ * @param {Number=} options.height
+ * @param {Number=} options.width
+ * @param {*[]=} options.columns Should be an array of string-number pairs, with the string specifying 
  * the text of the column header and the number denoting its fixed width in pixels
- * @param {*} $appendTarget
+ * @param {Object=} options.$appendTarget
  */
-var Table = function (course, classList, height, width, columns, $appendTarget) {    
+var Table = function (course, options) {   
+    var classes,
+        width = options.width || 300;
+
     // Format class attribute
-    var classes = 'qtable table-bordered table-sm table-hover ';
-    if (classList && classList.length > 0) {
-        classList.forEach(function (element) {
+    classes = 'qtable table-bordered table-sm table-hover ';
+    if (options.classList && options.classList.length > 0) {
+        options.classList.forEach(function (element) {
             classes += element + ' ';
         });
     }
 
     // Store references
     this.$element = $('<div>', { class: 'table-container' });
-    this.course  = course;
-    this.columns  = columns;
+    this.course   = course;
+    this.columns  = options.columns;
 
     // Set table as two separate tables to allow for fixed headers while scrolling
     this.$table1 = $('<table>', { 
@@ -48,11 +52,12 @@ var Table = function (course, classList, height, width, columns, $appendTarget) 
         .appendTo(this.$table1);
 
     // Basic body structure
-    this.$tbody = $('<tbody>', { height: height - 36.5  })
+    this.$tbody = $('<tbody>', { height: (options.height || 300) - 36.5  })
         .appendTo(this.$table2);
 
     // Append to DOM early
-    $appendTarget.append(this.$element);
+    if (options.$appendTarget)
+        options.$appendTarget.append(this.$element);
 
     this.$element.show();
 };

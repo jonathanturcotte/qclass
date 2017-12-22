@@ -4,25 +4,27 @@ var Table = require('../components/table'),
 var StudentTable = function (course, $appendTarget) {
     Table.call(this,
         course,
-        ['student-table'], 
-        300, 
-        485, 
-        [
-            ['NetID', 67], 
-            ['Number', 80], 
-            ['First Name', 115], 
-            ['Last Name', 140],
-            ['Actions', 95]
-        ], 
-        $appendTarget
+        {
+            classList: ['student-table'], 
+            height: 300, 
+            width: 485, 
+            columns: [
+                ['NetID', 67], 
+                ['Number', 80], 
+                ['First Name', 115], 
+                ['Last Name', 140],
+                ['Actions', 95]
+            ], 
+            $appendTarget: $appendTarget
+        }
     );
 };
 StudentTable.prototype = Object.create(Table.prototype);
 StudentTable.prototype.constructor = StudentTable;
 
 StudentTable.prototype.update = function (data) {
-    var tableData = [],
-        students  = data.students,
+    var tableData    = [],
+        students     = data.students,
         enrolledIDs  = data.enrolledIDs;
 
     // Persist/update the data

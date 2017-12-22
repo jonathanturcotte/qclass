@@ -9,16 +9,18 @@ var ModalWindow = require('../modalwindow'),
 var SessionTable = function(course, $appendTarget) {
     Table.call(this,
         course,
-        ['session-table'], 
-        300, 
-        385, 
-        [
-            ['Date', 140], 
-            ['Attendance', 96], 
-            ['Rate', 66], 
-            ['Actions', 87]
-        ], 
-        $appendTarget
+        {
+            classList: ['session-table'], 
+            height: 300, 
+            width: 385, 
+            columns: [
+                ['Date', 140], 
+                ['Attendance', 96], 
+                ['Rate', 66], 
+                ['Actions', 87]
+            ], 
+            $appendTarget: $appendTarget
+        }
     );
 };
 SessionTable.prototype = Object.create(Table.prototype);
