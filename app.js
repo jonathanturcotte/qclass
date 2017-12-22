@@ -18,8 +18,8 @@ var express      = require('express'),
     // before falling back to our unsigned ones. This is so that
     // we can continue developing locally without having to change anything.
     sslOptions = {
-        key:  fs.existsSync(keyPath)  ? fs.readFileSync(keyPath)  : fs.readFileSync('app.key'),
-        cert: fs.existsSync(certPath) ? fs.readFileSync(certPath) : fs.readFileSync('app.cert')
+        key:  fs.readFileSync(fs.existsSync(keyPath)  ? keyPath  : 'app.key'),
+        cert: fs.readFileSync(fs.existsSync(certPath) ? certPath : 'app.cert')
     },
 
     // Require our routes and APIs
