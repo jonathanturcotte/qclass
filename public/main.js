@@ -46,8 +46,6 @@ SignInApp.prototype.buildProfDOM = function () {
     this.navbar.buildProfNavbar();
 
     this.classList = new ClassList();
-    this.classList.updateClasses();
-
     this.classPage = new ClassPage();
 };
 

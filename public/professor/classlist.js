@@ -4,7 +4,7 @@ var ClassPage   = require('./classpage'),
 
 var ClassList = function () {
     this.$element = $('.classlist');
-    this.classes   = [];
+    this.classes  = [];
     this.updateClasses();
 };
 
