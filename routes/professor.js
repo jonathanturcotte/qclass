@@ -229,7 +229,7 @@ router.get('/:classID/exportAttendance', function(req, res, next) {
                             "Student #": sessInfo[j].stdNum, 
                             "First Name": sessInfo[j].fName, 
                             "Last Name": sessInfo[j].lName,
-                            "Attended": sessInfo[j].attended 
+                            "Attended": sessInfo[j].attended === 0 ? 'No' : 'Yes'
                         };
                         j++;
                     } else {
