@@ -154,7 +154,6 @@ body {
     padding-top: 15px;
 }
 
-
 .hidden {
     display: none;
 }
@@ -294,12 +293,12 @@ body {
     margin: auto;
 }
 
-.attendance-modal-body {
+.table-modal-body {
     overflow-y: auto;
     max-height: 550px;
 }
 
-.attendance-modal-date {
+.table-modal-bodytitle {
     text-align: center;
     margin-bottom: 20px;
 }

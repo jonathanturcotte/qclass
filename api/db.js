@@ -128,13 +128,31 @@ exports.getEnrolledStudents = function(classID, callback) {
 };
 
 exports.startAttendance = function(classID, duration, time, callback) {
-    var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-    runQuery(query, [[[classID, time, duration]]], callback);
+    var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
+    runQuery(newSessionQuery, [[[classID, time, duration]]], function(err, results, fields) {
+        if (err) return callback(err);
+
+        // Get current enrollment list
+        exports.getEnrolledStudents(classID, function(err, enrolled, fields) {
+            if (err) return callback(err);
+
+            // Create rows for all enrolled students with no recorded attendance to give a snapshot of enrollment at this time
+            if (enrolled.length > 0) {
+                var bulkAttendanceInsert = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES ?',
+                    entries = [];
+
+                for (var i = 0; i < enrolled.length; i++)
+                    entries[i] = [classID, time, enrolled[i].sNetID, 0];
+                
+                runQuery(bulkAttendanceInsert, [entries], callback);
+            } else callback(null, [], []);
+        });
+    });
 };
 
 exports.recordAttendance = function(netID, classID, time, callback) {
-    var query = 'INSERT INTO attendance (cID, attTime, sNetID) VALUES ?';
-    runQuery(query, [[[classID, time, netID]]], callback);
+    var query = 'UPDATE attendance SET attended = 1 WHERE sNetID = ? AND cID = ? AND attTime = ?';
+    runQuery(query, [netID, classID, time], callback);
 };
 
 exports.getTeachesClasses = function(profID, callback) {
@@ -147,9 +165,9 @@ exports.getTeachesClasses = function(profID, callback) {
 
 exports.getAttendanceSessions = function(classID, callback) {
     var query =
-        `SELECT cID, attTime, attDuration, COUNT(sNetID) AS numInAttendance
+        `SELECT cID, attTime, attDuration, COUNT(sNetID) numInAttendance
          FROM attendanceSession NATURAL JOIN attendance
-         WHERE cID = ? 
+         WHERE cID = ? AND attendance.attended = 1
          GROUP BY attTime`;
     runQuery(query, [classID], callback);
 };
@@ -161,8 +179,8 @@ exports.aggregateInfo = function(classID, callback) {
                FROM enrolled
                WHERE enrolled.cID = ?) AS T1
             LEFT JOIN (SELECT * 
-                       FROM attendance 
-                           NATURAL JOIN attendanceSession) AS T2
+                       FROM attendance NATURAL JOIN attendanceSession
+                       WHERE attendance.attended = 1) AS T2
                 ON T1.sNetID = T2.sNetID
             LEFT JOIN student s
                 ON s.sNetID = T1.sNetID
@@ -180,7 +198,7 @@ exports.getNumSession = function(classID, callback) {
 
 exports.getSessionAttInfo = function(classID, callback) {
     var query =
-        `SELECT sess.attTime, sess.attDuration, a.sNetID, s.fName, s.lName, s.stdNum
+        `SELECT sess.attTime, sess.attDuration, a.sNetID, a.attended, s.fName, s.lName, s.stdNum
             FROM (SELECT * FROM attendanceSession WHERE cID = ?) sess 
                 LEFT JOIN attendance a 
                     ON sess.cID = a.cID 
@@ -189,6 +207,11 @@ exports.getSessionAttInfo = function(classID, callback) {
                     ON a.sNetID = s.sNetID
         ORDER BY sess.attTime`;
     runQuery(query, [classID], callback);
+};
+
+exports.removeFromClass = function (netID, classID, callback) {
+    var query = 'DELETE FROM enrolled WHERE sNetID = ? AND cID = ?';
+    runQuery(query, [netID, classID], callback);
 };
 
 /**

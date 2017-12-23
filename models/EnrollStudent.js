@@ -1,3 +1,5 @@
+var regex = require('../api/regex');
+
 /**
  * Valid student request entry for enrollment purposes
  */
@@ -11,7 +13,7 @@ module.exports = class EnrollStudent {
         this.lastName  = student.lastName;
 
         // Ensure that these are valid student parameters
-        if (!this.netID || typeof(this.netID) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(this.netID)))
+        if (!this.netID || typeof(this.netID) !== 'string' || !(regex.user.netID.test(this.netID)))
             throw new Error();
         if (!this.stdNum || typeof(this.stdNum) !== 'string' || this.stdNum.length != 8)
             throw new Error();
