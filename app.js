@@ -45,6 +45,7 @@ app.use(helmet({
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
                 'https://use.fontawesome.com'],         // Font Awesome
             styleSrc: ["'self'",
+                "'unsafe-inline'",
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
                 'https://cdnjs.cloudflare.com']         // Toastr
         }
