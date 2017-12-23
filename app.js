@@ -47,7 +47,8 @@ app.use(helmet({
             styleSrc: ["'self'",
                 "'unsafe-inline'",
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
-                'https://cdnjs.cloudflare.com']         // Toastr
+                'https://cdnjs.cloudflare.com'],        // Toastr
+            imgSrc: ["'self'", 'data:']
         }
     }
 }));

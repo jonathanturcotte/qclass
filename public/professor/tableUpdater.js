@@ -15,7 +15,7 @@ TableUpdater.prototype.updateTables = function () {
         this.studentTable.update(data);
     }.bind(this))
     .fail(function (xhr, status, errorThrown) {
-        toastr.fail('Error getting attendance sessions: ' + status);
+        toastr.error(status, 'Error getting attendance sessions: ');
         this.sessionTable.error();
         this.studentTable.error();
     }.bind(this));
