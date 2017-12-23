@@ -70,7 +70,7 @@ router.post('/class/add', function(req, res, next) {
 });
 
 // Edit an existing class name
-router.post('/class/editName/:classID', function(req, res, next) {
+router.put('/class/editName/:classID', function(req, res, next) {
     var name = req.body.name;
 
     if (name.length < 3 || name.length > 100 || !regex.class.name.test(name))
@@ -84,7 +84,7 @@ router.post('/class/editName/:classID', function(req, res, next) {
 });
 
 // Edit an existing class code
-router.post('/class/editCode/:classID', function(req, res, next) {
+router.put('/class/editCode/:classID', function(req, res, next) {
     var code = req.body.code;
 
     if (!code)
