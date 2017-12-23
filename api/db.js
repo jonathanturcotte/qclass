@@ -127,14 +127,14 @@ exports.getEnrolledStudents = function(classID, callback) {
     runQuery('SELECT sNetID FROM enrolled WHERE enrolled.cID = ?', [classID], callback);
 };
 
-exports.startAttendance = function(classID, duration, time, enrolledIDs, callback) {
+exports.startAttendance = function(classID, duration, time, callback) {
     var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
     runQuery(newSessionQuery, [[[classID, time, duration]]], function(err, results, fields) {
-        if (err) callback(err);
+        if (err) return callback(err);
 
         // Get current enrollment list
         exports.getEnrolledStudents(classID, function(err, enrolled, fields) {
-            if (err) callback(err);
+            if (err) return callback(err);
 
             // Create rows for all enrolled students with no recorded attendance to give a snapshot of enrollment at this time
             if (enrolled.length > 0) {
@@ -145,7 +145,7 @@ exports.startAttendance = function(classID, duration, time, enrolledIDs, callbac
                     entries[i] = [classID, time, enrolled[i].sNetID, 0];
                 
                 runQuery(bulkAttendanceInsert, [entries], callback);
-            }
+            } else callback(null, [], []);
         });
     });
 };

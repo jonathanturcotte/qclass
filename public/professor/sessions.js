@@ -186,7 +186,7 @@ function displaySessionEnded(session) {
     // if the user is still on that classpage
     session.modal.$closeButton.click(function () {
         if (session.course.cID === window.app.classPage.course.cID) {
-            window.app.classPage.sessionTable.updateContent();
+            window.app.classPage.refreshTables();
         }
 
         // Always remove the session from the session manager
