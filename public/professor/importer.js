@@ -127,7 +127,10 @@ Importer.prototype.createAddStudentModal = function (course) {
                 data: { netID: netID, stdNum: stdNum, firstName: fName, lastName: lName },
                 dataType: 'json'
             }).done(function(data, status, xhr) {
-                modal.success('Success', 'Student successfully added!');        
+                modal.success('Success', 'Student successfully added!'); 
+                modal.$window.on('hidden.bs.modal', function (e) {
+                    window.app.classPage.refreshTables();
+                });     
             }).fail(function(xhr, status, errorThrown) {
                 var msg, hasStatus, title = 'Failed';
 
