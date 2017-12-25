@@ -15,7 +15,7 @@ var sessions = [];
  * @param {Object} params
  * @param {string} params.classID uuid
  * @param {number} [params.duration=60000] Session duration in ms, must be >= 30000
- * @param {Function} params.callback (err, code, endTime) err may contain customStatus, eg. 409 Conflict if class already exists
+ * @param {Function} params.callback (err, code, endTime) err may contain httpStatus, eg. 409 Conflict if class already exists
  */
 exports.start = function(params) {
     params.duration = params.duration || DEFAULT_DURATION;
@@ -28,9 +28,9 @@ exports.start = function(params) {
 
     // Check that this class is valid
     if (!params.classID) 
-        params.callback({ customStatus: 500, message: 'Internal Server Error' });
+        params.callback({ httpStatus: 500 });
     else if (isClassRunning(params.classID)) 
-        params.callback({ customStatus: 409, message: 'Class is already running' });
+        params.callback({ httpStatus: 409 });
     else {
         var code = generateUniqueCode(),
             time = Date.now();

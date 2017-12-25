@@ -14,10 +14,10 @@ exports.sendError = function(res, err, body = 'Internal Server Error', status = 
         status = 500;
         console.warn('routes/helper.sendError() status cannot be a 2xx code, changed to 500');
     } 
-    if (err && err.customStatus) {
+    if (err && err.httpStatus) {
         // handle custom error object from one of our internal API calls
-        body = err.message;
-        status = err.customStatus;
+        body = err.body;
+        status = err.httpStatus;
         err = null;
     }
     var isBodyString = typeof(body) === 'string'; 

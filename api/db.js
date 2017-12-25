@@ -41,39 +41,40 @@ exports.enroll = function(classID, students, callback) {
         var newStudents = [];
         var errorStudents = [];
         async.forEachOf(students, function(student, i, innerCallback) {
-            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netID], function(err, results, fields) {
+            con.query('SELECT 1 FROM student WHERE sNetID = ? AND stdNum = ? AND fName = ? AND lName = ?', [student.netID, student.stdNum, student.firstName, student.lastName], function(err, results, fields) {
                 if (err) {
                     errorStudents.push(student);
                     innerCallback(err);
                 } else {
-                    if (!Array.isArray(results)) { 
-                        errorStudents.push(student);
-                        innerCallback(new Error('Select query did not return an array'));
-                    } else if (results.length > 1) {
-                        errorStudents.push(student);
-                        innerCallback(new Error('Selct query returned more than 1 row'));
-                    } else {
-                        if (results.length === 0) { // student does not exist, insert student
-                            newStudents.push(student);
-                            toEnroll.push(student);
-                            innerCallback();
-                        } else { // student exists, need to check current enrollment to avoid attempting duplicates
-                            alreadyEnrolledQuery = 'SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?';
-                            runExistenceQuery(alreadyEnrolledQuery, [student.netID, classID], function(err, result) {
-                                if (err) innerCallback(err);
-                                else {
-                                    if (!result) toEnroll.push(student);
+                    if (results.length === 0) {
+                        con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netID], function (err, results, fields) {
+                            if (err) innerCallback(err);
+                            else {
+                                if (results.length > 0) {
+                                    // netID already exists in student but didn't match
+                                    errorStudents.push(student);
+                                    innerCallback({ httpStatus: 409, body: { customStatus: 2, message: 'Student with that NetID already exists' } });
+                                } else {
+                                    newStudents.push(student);
+                                    toEnroll.push(student);
                                     innerCallback();
                                 }
-                            });
-                        }
+                            }
+                        })
+                    } else { // student exists, need to check current enrollment to avoid attempting duplicates
+                        con.query('SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?', [student.netID, classID], function(err, results, fields) {
+                            if (err) innerCallback(err);
+                            else {
+                                if (!results.length > 0) toEnroll.push(student);
+                                innerCallback();
+                            }
+                        });
                     }
                 }
             });
         }, function (err) { 
             if (err) {
                 err.errorStudents = errorStudents;
-                if (con) con.release();
                 callback(err);
             } else {
                 if (newStudents.length > 0) {
@@ -90,7 +91,7 @@ exports.enroll = function(classID, students, callback) {
 };
 
 function _runEnrollQuery(con, classID, toEnroll, callback) {
-    if (toEnroll.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
+    if (toEnroll.length < 1) callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } });
     else {
         for (var i = 0; i < toEnroll.length; i++)
             toEnroll[i] = [toEnroll[i].netID, classID];
