@@ -162,15 +162,12 @@ router.get('/:classID/session-data', function(req, res, next) {
     db.getSessionAttInfo(req.params.classID, function(err, sessionEntries, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance sessions for ' + req.user.netID);
         
-        db.getEnrolledStudents(req.params.classID, function(err, enrolled, fields) {
+        db.getEnrolledStudentsWithInfo(req.params.classID, function(err, enrolled, fields) {
             if (err) return routeHelper.sendError(res, err);
-
-            for (var i = 0; i < enrolled.length; i++)
-                enrolled[i] = enrolled[i].sNetID;
 
             res.json({ 
                 entries: sessionEntries,
-                enrolledIDs: enrolled 
+                enrolled: enrolled 
             });
         });
     });

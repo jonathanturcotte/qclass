@@ -34,6 +34,21 @@ function processData(data) {
         sessionCount = 0,
         studentCount = 0;
 
+    // Add every enrolled student to students
+    for (var i = 0; i < data.enrolled.length; i++) {
+        var student = data.enrolled[i];
+        students[student.sNetID] = {
+            netID: student.sNetID,
+            stdNum: student.stdNum,
+            fName: student.fName,
+            lName: student.lName,
+            totalAttendance: 0,
+            sessions:        []
+        };
+        studentCount++;
+    }
+
+    // Iterate session entries to fill sessions and create session-student links 
     for (var i in data.entries) {
         var entry = data.entries[i];
         if (!sessions[entry.attTime]) {

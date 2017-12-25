@@ -25,14 +25,14 @@ StudentTable.prototype.constructor = StudentTable;
 StudentTable.prototype.update = function (data) {
     var tableData    = [],
         students     = data.students,
-        enrolledIDs  = data.enrolledIDs;
+        enrolled  = data.enrolled;
 
     // Persist/update the data
     this.data = data;
 
     // Add a student row for each enrolled student
-    for (var i = 0; i < enrolledIDs.length; i++) {
-        var student       = students[enrolledIDs[i]],
+    for (var i = 0; i < enrolled.length; i++) {
+        var student       = students[enrolled[i].sNetID],
             $expandButton = $('<button>', { 
                 title: 'Expand', 
                 class: 'btn btn-default btn-sm',
