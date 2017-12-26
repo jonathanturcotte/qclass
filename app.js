@@ -9,7 +9,10 @@ var express      = require('express'),
     bodyParser   = require('body-parser'),
     helmet       = require('helmet'),
     csv          = require('express-csv'),
+    session      = require('express-session'),
     auth         = require('./api/auth'),
+    passport     = require('passport'),
+    SamlStrategy = require('passport-saml').Strategy,
 
     keyPath      = '/etc/letsencrypt/live/qclass.ca/privkey.pem',
     certPath     = '/etc/letsencrypt/live/qclass.ca/fullchain.pem',
@@ -71,8 +74,26 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({
+    secret: 'Whocansaywherethewindblows', 
+    resave: true,
+    saveUninitialized: true
+ }));
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.use(auth.authenticate); // Run authentication first when any route is called
+passport.use(new SamlStrategy({
+        path: '/login/callback',
+        entryPoint: '', // location of IDP
+        issuer: '', // needs to be the entity ID the IDP has for this app
+        protocol: 'https://'
+        // TODO: provide certificate
+    }, function (profile, done) {
+        // Might replace this with the auth.autnenticate
+    }
+));
+
+//app.use(auth.authenticate); // Run authentication first when any route is called
 app.use('/', general);
 app.use('/student', student);
 app.use('/professor', professor);

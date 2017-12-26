@@ -1,7 +1,15 @@
 var express     = require('express'),
     router      = express.Router(),
     routeHelper = require('./helper'),
-    db          = require('../api/db');
+    db          = require('../api/db'),
+    passport    = require('passport');
+
+router.post('/login/callback', 
+    passport.authenticate('saml', { failureRedirect: '' }), // Set failure redirect to something that makes sense
+    function (req, res, next) {
+        console.log('Login callback');
+    }
+);
 
 // GET user info
 router.get('/user-info', function(req, res, next) {
