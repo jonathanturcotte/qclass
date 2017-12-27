@@ -18,8 +18,8 @@ var express      = require('express'),
     // before falling back to our unsigned ones. This is so that
     // we can continue developing locally without having to change anything.
     sslOptions = {
-        key:  fs.existsSync(keyPath)  ? fs.readFileSync(keyPath)  : fs.readFileSync('app.key'),
-        cert: fs.existsSync(certPath) ? fs.readFileSync(certPath) : fs.readFileSync('app.cert')
+        key:  fs.readFileSync(fs.existsSync(keyPath)  ? keyPath  : 'app.key'),
+        cert: fs.readFileSync(fs.existsSync(certPath) ? certPath : 'app.cert')
     },
 
     // Require our routes and APIs
@@ -34,8 +34,25 @@ var express      = require('express'),
     http         = http.createServer(app).listen(80),
     https        = https.createServer(sslOptions, app).listen(443);
 
-// Use Helmet to help cover any common security vulnerabilities
-app.use(helmet());
+// Use Helmet to help cover some common header security issues
+app.use(helmet({
+    referrerPolicy: { policy: 'no-referrer' },
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'",
+                'data:',
+                'https://code.jquery.com',              // jQuery
+                'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
+                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
+                'https://use.fontawesome.com'],         // Font Awesome
+            styleSrc: ["'self'",
+                "'unsafe-inline'",
+                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
+                'https://cdnjs.cloudflare.com'],        // Toastr
+            imgSrc: ["'self'", 'data:']
+        }
+    }
+}));
 
 // Initialize the socketIO
 app.io = io.initialize();

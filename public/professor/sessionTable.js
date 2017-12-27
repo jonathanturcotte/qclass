@@ -6,130 +6,99 @@ var ModalWindow = require('../modalwindow'),
  * @param {String} classID    The ID of the class whose sessions should be shown
  * @param {Object} $container jQuery object to which the table will be appended
  */
-var SessionTable = function(classID, $appendTarget) {
-    this.classID  = classID;
-    this.table = new Table(
-        ['session-table'], 
-        300, 
-        385, 
-        [
-            ['Date', 140], 
-            ['Attendance', 96], 
-            ['Rate', 66], 
-            ['Actions', 87]
-        ], 
-        $appendTarget
+var SessionTable = function(course, $appendTarget) {
+    Table.call(this,
+        course,
+        {
+            classList: ['session-table'], 
+            height: 300, 
+            width: 385, 
+            columns: [
+                ['Date', 140], 
+                ['Attendance', 96], 
+                ['Rate', 66], 
+                ['Actions', 87]
+            ], 
+            $appendTarget: $appendTarget
+        }
     );
-    this.updateSessions();
 };
+SessionTable.prototype = Object.create(Table.prototype);
+SessionTable.prototype.constructor = SessionTable;
 
-SessionTable.prototype.updateSessions = function () {
-    $.get('/professor/' + this.classID + '/attendanceSessions')
-        .done(updateTable.bind(this))
-        .fail(failTable.bind(this));
-};
-
-///////////////////////
-// Private Functions //
-///////////////////////
-
-function updateTable(data, status, xhr) {
+SessionTable.prototype.update = function (data) {
     var tableData = [];
+
+    // Persist/update the data
     this.data = data;
 
     // Add in reverse order to ensure that the latest sessions
     // are at the top of the table
-    for (var i = this.data.sessions.length - 1; i >= 0; i--) {
-        var session = this.data.sessions[i];
-
-        session.date               = new Date(session.sessDate);
-        session.attendanceCount    = session.studentList.length;
-        session.attendancePercent  = 0;
-        session.formattedDate      = formatDate(session.date);
-
-        var isEmpty = session.attendanceCount < 1;
-        if (!isEmpty)
-            session.attendancePercent = session.attendanceCount / this.data.numEnrolled * 100;
-        else
-            session.attendancePercent = 0;
+    for (var i in data.sessions) {
+        var session = data.sessions[i];
         
         // Create main row 
-        var $date = $('<td>', { title: session.date.toString() }).text(session.formattedDate),
-            $button = $('<button>', { class: 'btn btn-default', text: 'Expand' }),
+        var $date = $('<td>', { title: session.date.toString(), text: session.formattedDate }),
+            $button = $('<button>', { class: 'btn btn-default btn-sm', title: 'Expand' })
+                .append($('<i>', { class: 'fas fa-external-link-alt' })
+                    .attr('aria-hidden', 'true')),
             $actions = $('<td>')
                 .append($button); 
 
         // If there was attendance for this session, make it clickable
-        if (!isEmpty) {
-            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.studentList));
-        } else {
+        if (session.attendance !== 0)
+            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.students));
+        else 
             $button.prop('disabled', true);
-        }
-
-        // Store session data for future use
-        this.data.sessions[i] = session;
 
         // Add new row to table
-        tableData.push([
+        tableData.unshift([
             $date, 
-            session.attendanceCount + '/' + this.data.numEnrolled, 
-            session.attendancePercent.toFixed(1) + ' %', 
+            session.attendanceFormatted, 
+            session.attendancePercentFormatted, 
             $actions
         ]);
     }
+
     // Fill table with formatted data
-    this.table.fill(tableData);
-}
+    this.fill(tableData);
+};
 
-function failTable(xhr, status, errorThrown) {
-    this.table.error('Error getting attendance sessions: ' + status);
-}
-
-function openAttendanceModal(date, studentList) {
-    var id = 'attendance-modal';
-    var modal = new ModalWindow({ id: id, title: 'Attendance Session' });
-    modal.$body.append($('<h5>', { text: date, class: 'attendance-modal-date' }));
-    modal.$body.addClass('attendance-modal-body');
+function openAttendanceModal(date, sessionStudents) {
+    var modal    = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' });
+    
+    modal.$body.append($('<h5>', { 
+        text: date, 
+        class: 'attendance-modal-date table-modal-bodytitle' 
+    }));
+    modal.$body.addClass('table-modal-body');
+    
     var $table = $('<table>', { class: 'attendance-modal-table centered-table table-bordered' })
         .append($('<thead>')
-        .append($('<tr>')
-            .append($('<th>', { text: 'NetID' }))
-            .append($('<th>', { text: 'Student #' }))
-            .append($('<th>', { text: 'First Name' }))
-            .append($('<th>', { text: 'Last Name' }))));
-    var $tbody = $('<tbody>');
-    for (var i = 0; i < studentList.length; i++) {
-        $tbody.append($('<tr>')
-            .append($('<td>').text(studentList[i].NetID))
-            .append($('<td>').text(studentList[i].stdNum))
-            .append($('<td>').text(studentList[i].fName))
-            .append($('<td>').text(studentList[i].lName)));
+            .append($('<tr>')
+                .append($('<th>', { text: 'NetID' }))
+                .append($('<th>', { text: 'Student #' }))
+                .append($('<th>', { text: 'First Name' }))
+                .append($('<th>', { text: 'Last Name' }))
+                .append($('<th>', { text: 'Attended' }))));
+    
+    // Create and fill the tbody with the students who attended
+    var $tbody = $('<tbody>').appendTo($table);
+    for (var i in sessionStudents) {
+        var student      = this.data.students[sessionStudents[i].netID],
+            attendedText = sessionStudents[i].attended ? '\u2714' : '\u2716',
+            $tr          = $('<tr>')
+                .append($('<td>', { text: student.netID }))
+                .append($('<td>', { text: student.stdNum }))
+                .append($('<td>', { text: student.fName }))
+                .append($('<td>', { text: student.lName }))
+                .append($('<td>', { text: attendedText }));
+
+        $tbody.append($tr);
     }
-    modal.$body.append($table.append($tbody));
+
+    modal.$body.append($table);
     modal.show();
-}
-
-/**
- * Formats the date into DD/MM/YY hh:mm:ss
- * @param {Date} date 
- */
-function formatDate(date) {
-    var day    = formatDateEntry(date.getDate()),
-        month  = formatDateEntry(date.getMonth() + 1),
-        year   = date.getFullYear().toString().substr(-2),
-        hour   = formatDateEntry(date.getHours()),
-        minute = formatDateEntry(date.getMinutes()),
-        second = formatDateEntry(date.getSeconds());
-    return day + '/' + month + '/' + year + ' ' + hour + ':' + minute + ':' + second;
-}
-
-/**
- * Converts a number to a string and prepends a 0 if the value is not already 2-digit
- * @param {number} num 
- */
-function formatDateEntry(num) {
-    if (num < 10) return '0' + num;
-    else return '' + num;
 }
 
 module.exports = SessionTable;

@@ -127,9 +127,25 @@ Importer.prototype.createAddStudentModal = function (course) {
                 data: { netID: netID, stdNum: stdNum, firstName: fName, lastName: lName },
                 dataType: 'json'
             }).done(function(data, status, xhr) {
-                modal.success('Success', 'Student successfully added!');        
+                modal.success('Success', 'Student successfully added!'); 
+                modal.$window.on('hidden.bs.modal', function (e) {
+                    window.app.classPage.refreshTables();
+                });     
             }).fail(function(xhr, status, errorThrown) {
-                modal.error("Error", 'Error adding student');
+                var msg, hasStatus, title = 'Failed';
+
+                if (xhr.status === 409)
+                    title += ' - Conflict';
+
+                hasStatus = xhr.responseJSON && xhr.responseJSON.customStatus;
+                if (hasStatus && xhr.responseJSON.customStatus === 1) 
+                    msg = 'Student is already enrolled';
+                else if (hasStatus && xhr.responseJSON.customStatus === 2)
+                    msg = 'The provided NetID is already registered to a different student';
+                else 
+                    msg = 'Something went wrong - student was not added';
+
+                modal.error(title, msg);
             }).always(function(a, status, b) {
                 modal.$body.spin(false);
             });

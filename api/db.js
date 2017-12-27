@@ -41,39 +41,40 @@ exports.enroll = function(classID, students, callback) {
         var newStudents = [];
         var errorStudents = [];
         async.forEachOf(students, function(student, i, innerCallback) {
-            con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netID], function(err, results, fields) {
+            con.query('SELECT 1 FROM student WHERE sNetID = ? AND stdNum = ? AND fName = ? AND lName = ?', [student.netID, student.stdNum, student.firstName, student.lastName], function(err, results, fields) {
                 if (err) {
                     errorStudents.push(student);
                     innerCallback(err);
                 } else {
-                    if (!Array.isArray(results)) { 
-                        errorStudents.push(student);
-                        innerCallback(new Error('Select query did not return an array'));
-                    } else if (results.length > 1) {
-                        errorStudents.push(student);
-                        innerCallback(new Error('Selct query returned more than 1 row'));
-                    } else {
-                        if (results.length === 0) { // student does not exist, insert student
-                            newStudents.push(student);
-                            toEnroll.push(student);
-                            innerCallback();
-                        } else { // student exists, need to check current enrollment to avoid attempting duplicates
-                            alreadyEnrolledQuery = 'SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?';
-                            runExistenceQuery(alreadyEnrolledQuery, [student.netID, classID], function(err, result) {
-                                if (err) innerCallback(err);
-                                else {
-                                    if (!result) toEnroll.push(student);
+                    if (results.length === 0) {
+                        con.query('SELECT 1 FROM student WHERE sNetID = ?', [student.netID], function (err, results, fields) {
+                            if (err) innerCallback(err);
+                            else {
+                                if (results.length > 0) {
+                                    // netID already exists in student but didn't match
+                                    errorStudents.push(student);
+                                    innerCallback({ httpStatus: 409, body: { customStatus: 2, message: 'Student with that NetID already exists' } });
+                                } else {
+                                    newStudents.push(student);
+                                    toEnroll.push(student);
                                     innerCallback();
                                 }
-                            });
-                        }
+                            }
+                        })
+                    } else { // student exists, need to check current enrollment to avoid attempting duplicates
+                        con.query('SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?', [student.netID, classID], function(err, results, fields) {
+                            if (err) innerCallback(err);
+                            else {
+                                if (!results.length > 0) toEnroll.push(student);
+                                innerCallback();
+                            }
+                        });
                     }
                 }
             });
         }, function (err) { 
             if (err) {
                 err.errorStudents = errorStudents;
-                if (con) con.release();
                 callback(err);
             } else {
                 if (newStudents.length > 0) {
@@ -90,7 +91,7 @@ exports.enroll = function(classID, students, callback) {
 };
 
 function _runEnrollQuery(con, classID, toEnroll, callback) {
-    if (toEnroll.length < 1) callback({ customStatus: 409, message: 'All students already enrolled' });
+    if (toEnroll.length < 1) callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } });
     else {
         for (var i = 0; i < toEnroll.length; i++)
             toEnroll[i] = [toEnroll[i].netID, classID];
@@ -127,9 +128,35 @@ exports.getEnrolledStudents = function(classID, callback) {
     runQuery('SELECT sNetID FROM enrolled WHERE enrolled.cID = ?', [classID], callback);
 };
 
+exports.getEnrolledStudentsWithInfo = function(classID, callback) {
+    var query =
+        `SELECT s.sNetID, s.stdNum, s.fName, s.lName
+         FROM enrolled e NATURAL JOIN student s
+         WHERE e.cID = ?`;
+    runQuery(query, [classID], callback);
+};
+
 exports.startAttendance = function(classID, duration, time, callback) {
-    var query = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-    runQuery(query, [[[classID, time, duration]]], callback);
+    var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
+    runQuery(newSessionQuery, [[[classID, time, duration]]], function(err, results, fields) {
+        if (err) return callback(err);
+
+        // Get current enrollment list
+        exports.getEnrolledStudents(classID, function(err, enrolled, fields) {
+            if (err) return callback(err);
+
+            // Create rows for all enrolled students with no recorded attendance to give a snapshot of enrollment at this time
+            if (enrolled.length > 0) {
+                var bulkAttendanceInsert = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES ?',
+                    entries = [];
+
+                for (var i = 0; i < enrolled.length; i++)
+                    entries[i] = [classID, time, enrolled[i].sNetID, 0];
+                
+                runQuery(bulkAttendanceInsert, [entries], callback);
+            } else callback(null, [], []);
+        });
+    });
 };
 
 exports.stopAttendance = function(classID, callback) {
@@ -138,8 +165,8 @@ exports.stopAttendance = function(classID, callback) {
 };
 
 exports.recordAttendance = function(netID, classID, time, callback) {
-    var query = 'INSERT INTO attendance (cID, attTime, sNetID) VALUES ?';
-    runQuery(query, [[[classID, time, netID]]], callback);
+    var query = 'UPDATE attendance SET attended = 1 WHERE sNetID = ? AND cID = ? AND attTime = ?';
+    runQuery(query, [netID, classID, time], callback);
 };
 
 exports.getTeachesClasses = function(profID, callback) {
@@ -152,10 +179,9 @@ exports.getTeachesClasses = function(profID, callback) {
 
 exports.getAttendanceSessions = function(classID, callback) {
     var query =
-        `SELECT cID, attTime, attDuration, COUNT(sNetID) AS numInAttendance
+        `SELECT cID, attTime, attDuration, COUNT(sNetID) numInAttendance
          FROM attendanceSession NATURAL JOIN attendance
-         WHERE cID = ?
-         AND attendanceSession.completed = 1
+         WHERE cID = ? AND attendance.attended = 1
          GROUP BY attTime`;
     runQuery(query, [classID], callback);
 };
@@ -167,8 +193,8 @@ exports.aggregateInfo = function(classID, callback) {
                FROM enrolled
                WHERE enrolled.cID = ?) AS T1
             LEFT JOIN (SELECT * 
-                       FROM attendance 
-                           NATURAL JOIN attendanceSession) AS T2
+                       FROM attendance NATURAL JOIN attendanceSession
+                       WHERE attendance.attended = 1) AS T2
                 ON T1.sNetID = T2.sNetID
             LEFT JOIN student s
                 ON s.sNetID = T1.sNetID
@@ -187,8 +213,8 @@ exports.getNumSession = function(classID, callback) {
 
 exports.getSessionAttInfo = function(classID, callback) {
     var query =
-        `SELECT sess.attTime, sess.attDuration, a.sNetID, s.fName, s.lName, s.stdNum
-            FROM (SELECT * FROM attendanceSession WHERE cID = ? AND completed = 1) sess
+        `SELECT sess.attTime, sess.attDuration, a.sNetID, a.attended, s.fName, s.lName, s.stdNum
+            FROM (SELECT * FROM attendanceSession WHERE cID = ? AND completed = 1) sess 
                 LEFT JOIN attendance a 
                     ON sess.cID = a.cID 
                     AND sess.attTime = a.attTime
@@ -196,6 +222,11 @@ exports.getSessionAttInfo = function(classID, callback) {
                     ON a.sNetID = s.sNetID
         ORDER BY sess.attTime`;
     runQuery(query, [classID], callback);
+};
+
+exports.removeFromClass = function (netID, classID, callback) {
+    var query = 'DELETE FROM enrolled WHERE sNetID = ? AND cID = ?';
+    runQuery(query, [netID, classID], callback);
 };
 
 /**

@@ -1,24 +1,33 @@
 /**
  * Generic implementation for fixed size, scrollable tables
- * @param {string[]=} classList 
- * @param {Number} height
- * @param {Number} width
- * @param {*[]} columns Should be an array of string-number pairs, with the string specifying 
+ * @param {Object} course
+ * @param {string} course.cID
+ * @param {string} course.cCode
+ * @param {string} course.cName
+ * @param {Object} options
+ * @param {string[]=} options.classList 
+ * @param {Number=} options.height
+ * @param {Number=} options.width
+ * @param {*[]=} options.columns Should be an array of string-number pairs, with the string specifying 
  * the text of the column header and the number denoting its fixed width in pixels
- * @param {*} $appendTarget
+ * @param {Object=} options.$appendTarget
  */
-var Table = function (classList, height, width, columns, $appendTarget) {    
+var Table = function (course, options) {   
+    var classes,
+        width = options.width || 300;
+
     // Format class attribute
-    var classes = 'qtable table-bordered table-sm table-hover ';
-    if (classList && classList.length > 0) {
-        classList.forEach(function (element) {
+    classes = 'qtable table-bordered table-sm table-hover ';
+    if (options.classList && options.classList.length > 0) {
+        options.classList.forEach(function (element) {
             classes += element + ' ';
         });
     }
-    
+
     // Store references
     this.$element = $('<div>', { class: 'table-container' });
-    this.columns = columns;
+    this.course   = course;
+    this.columns  = options.columns;
 
     // Set table as two separate tables to allow for fixed headers while scrolling
     this.$table1 = $('<table>', { 
@@ -43,14 +52,14 @@ var Table = function (classList, height, width, columns, $appendTarget) {
         .appendTo(this.$table1);
 
     // Basic body structure
-    this.$tbody = $('<tbody>', { height: height - 36.5  })
+    this.$tbody = $('<tbody>', { height: (options.height || 300) - 36.5  })
         .appendTo(this.$table2);
 
     // Append to DOM early
-    $appendTarget.append(this.$element);
+    if (options.$appendTarget)
+        options.$appendTarget.append(this.$element);
 
     this.$element.show();
-    this.$tbody.spin();
 };
 
 /**
@@ -78,12 +87,13 @@ Table.prototype.fill = function (data) {
                     style: formatColumnWidth(this.columns[i][1]) 
                 }));
             }
-        };
+        }
         this.$tbody.append($tr);
     }.bind(this));
 };
 
 Table.prototype.error = function (message) {
+    if (!message) message = 'Error';
     this.$table1.addClass('table-danger');
     this.$table2.addClass('table-danger');
     this.$tbody
@@ -91,8 +101,12 @@ Table.prototype.error = function (message) {
         .append($('<p>', { class: 'text-danger', text: message }));
 };
 
+Table.prototype.spin = function () {
+    this.$tbody.spin();
+};
+
 function formatColumnWidth(width) {
-    return 'max-width: ' + width + 'px; min-width: ' + width + 'px;'
+    return 'max-width: ' + width + 'px; min-width: ' + width + 'px;';
 }
 
 module.exports = Table;

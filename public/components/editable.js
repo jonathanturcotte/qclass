@@ -81,11 +81,12 @@ function submitChanges () {
     if (newVal !== this.resetValue){
         var args = {
             url: this.route,
-            data: { }
+            method: 'PUT',
+            data: {}
         };
         args.data[this.field] = newVal;
 
-        $.post(args).done(function(status, xhr) {
+        $.ajax(args).done(function(status, xhr) {
             this.resetValue = newVal;
             toastr.success('Successfully updated class ' + this.field, 'Saved successfully');
 

@@ -1,11 +1,14 @@
-var SessionManager    = require('./sessions'),
-    SessionTable      = require('./sessionTable'),
-    Exporter          = require('./exporter'),
-    Importer          = require('./importer'),
-    Editable          = require('../components/editable'),
-    Duration          = require('../components/duration');
+var SessionManager = require('./sessions'),
+    Table          = require('../components/table'),
+    SessionTable   = require('./sessionTable'),
+    StudentTable   = require('./studentTable'),
+    Exporter       = require('./exporter'),
+    Importer       = require('./importer'),
+    Editable       = require('../components/editable'),
+    Duration       = require('../components/duration'),
+    TableUpdater   = require('./tableUpdater');
 
-var durationOptions = [
+var durationOptions = [ 
     new Duration('30 sec', 30000), 
     new Duration('45 sec', 45000), 
     new Duration('1 min', 60000),
@@ -39,9 +42,13 @@ var ClassPage = function() {
 ClassPage.prototype.displayCourse = function (course) {
     this.course = course;
 
-    // Clear the old page
+    // Clear the old page and build the new one
     this.$element.empty();
     build.call(this);
+};
+
+ClassPage.prototype.refreshTables = function () {
+    this.tableUpdater.updateTables();
 };
 
 ///////////////////////
@@ -110,21 +117,16 @@ function build () {
     $startButton.click(function () { 
         this.sessions.startSession(this.course, this.$duration.val()); 
     }.bind(this));
-        
 
     // The session table and export button
-    this.sessionTable = new SessionTable(this.course.cID, $sessionDiv);
+    this.sessionTable = new SessionTable(this.course, $sessionDiv);
 
     $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
         .click(this.exporter.createExportModal.bind(this, this.course))
         .appendTo($sessionDiv);
 
     // The student table and associated buttons
-    // TODO: add actual student table and stop setting width/height here
-    // this.studentTable = new StudentTable(this.course.cID, $studentDiv);
-    var $fakeTable = $('<div>', { width: 400, height: 300 })
-        .css({ background: 'white'})
-        .appendTo($studentDiv);
+    this.studentTable = new StudentTable(this.course, $studentDiv);
 
     $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
         .click(this.importer.createImportModal.bind(this, this.course))
@@ -133,6 +135,10 @@ function build () {
     $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
         .click(this.importer.createAddStudentModal.bind(this, this.course))
         .appendTo($studentDiv);
+
+    // Initialize the tableUpdater and fill the tables
+    this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
+    this.tableUpdater.updateTables();
 }
 
 function editAdministrators() {

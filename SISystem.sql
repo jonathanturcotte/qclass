@@ -44,6 +44,7 @@ create table attendance (
 	attTime 	bigint not null,
 	cID			char(36) not null,
 	sNetID 		varchar(10) not null,
+    attended	bool not null default 0,
 	primary key (cID, attTime, sNetID)
 );
 
@@ -131,9 +132,11 @@ insert into attendanceSession values
     
 
 insert into attendance values 
-	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12ozs'),
-	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2'),
-    ('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2');
+	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12ozs', 1),
+	('1509398271000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2', 1),
+	('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '11jlt10', 0),
+	('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12ozs', 0),
+    ('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2', 1);
 
 
 /*
