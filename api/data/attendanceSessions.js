@@ -39,9 +39,12 @@ exports.start = function(params) {
             if (err)
                 params.callback(err);
             else {
-                var timeout = setTimeout(_stopClass, params.duration, params.classID, false);
+                var timeout = setTimeout(_stopClass, params.duration, params.classID, time, false, function(result) {
+                    if (!result.success)
+                        console.error('Error timing out session: ' + result.err.message);
+                });
                 sessions.push({ classID: params.classID, code: code, time: time, timeout: timeout });
-                params.callback(null, code, time + params.duration);
+                params.callback(null, code, time, time + params.duration);
             }
         });
     }
@@ -69,8 +72,8 @@ exports.getEntryByCode = function(code) {
  * err contains status {number} and message {string}
  * @param {string} classID
  */
-exports.stopClass = function(classID) {
-    return _stopClass(classID, true);
+exports.stopClass = function(classID, time, callback) {
+    return _stopClass(classID, time, true, callback);
 };
 
 ///////////////////////
@@ -97,13 +100,11 @@ var isClassRunning = function(classID) {
  * @param {string} classID 
  * @param {boolean} manual
  */
-var _stopClass = function(classID, manual) {
+var _stopClass = function(classID, time, manual, callback) {
     var index = sessions.findIndex(function(e) { return e.classID === classID; });
 
-    if (index === -1) {
-        console.warn('attendanceSessions._stopClass(): no entry found for classID ' + classID);
-        return { success: false, err: { status: 404, message: 'Class not running' } };
-    }
+    if (index === -1)
+        callback({ success: false, err: { status: 404, message: 'Session for class ' + classID + ' not running' }});
 
     if (manual)
         clearTimeout(sessions[index].timeout);
@@ -112,15 +113,12 @@ var _stopClass = function(classID, manual) {
     sessions.splice(index, 1);
 
     // Set the completed flag for the session in the database
-    db.stopAttendance(classID, function (err, results, fields){
-        if (err) {
-            console.error('attendanceSessions._stopClass(): unable to set the completed flag for class ' + classID + ', error: ' + err);
-            return { success: false, err: { status: 500, message: 'Could not stop the session' } };
-        }
+    db.stopAttendance(classID, time, function (err, results, fields){
+        if (err)
+            callback({ success: false, err: { status: 500, message: 'Could not stop the session for class ' + classID + ': ' + err } });
+        else
+            callback({ success: true });
     });
-
-    console.log('Stopped attendance session for ' + classID);
-    return { success: true };
 };
 
 var generateUniqueCode = function () {

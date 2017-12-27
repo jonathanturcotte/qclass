@@ -159,9 +159,9 @@ exports.startAttendance = function(classID, duration, time, callback) {
     });
 };
 
-exports.stopAttendance = function(classID, callback) {
-    var query = 'UPDATE attendanceSession SET completed=1 WHERE cID=?';
-    runQuery(query, [classID], callback);
+exports.stopAttendance = function(classID, time, callback) {
+    var query = 'UPDATE attendanceSession SET completed=1 WHERE cID=? AND attTime=?';
+    runQuery(query, [classID, time], callback);
 };
 
 exports.recordAttendance = function(netID, classID, time, callback) {

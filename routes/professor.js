@@ -140,18 +140,21 @@ router.post('/class/start/:classID', function(req, res, next) {
         attendanceSessions.start({ 
             classID:  req.params.classID,
             duration: duration,
-            callback: function(err, code, endTime) {
+            callback: function(err, code, startTime, endTime) {
                 if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
-                res.json({ code: code, endTime: endTime });        
+                res.json({ code: code, startTime: startTime, endTime: endTime });
             }
         });
     }
 });
 
-router.post('/class/stop/:classID', function(req, res, next) {
-    var result = attendanceSessions.stopClass(req.params.classID);
-    if (!result.success) return routeHelper.sendError(res, null, result.err.message, result.err.status);
-    res.status(204).send();
+router.post('/class/stop/:classID/:time', function(req, res, next) {
+    attendanceSessions.stopClass(req.params.classID, req.params.time, function (result) {
+        if (!result.success)
+            return routeHelper.sendError(res, null, result.err.message, result.err.status);
+
+        res.status(204).send();
+    });
 });
 
 /** 
