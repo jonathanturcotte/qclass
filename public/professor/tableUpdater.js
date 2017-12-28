@@ -53,6 +53,7 @@ function processData(data) {
         var entry = data.entries[i];
         if (!sessions[entry.attTime]) {
             sessions[entry.attTime] = {
+                time:          entry.attTime,
                 date:          new Date(entry.attTime),
                 duration:      entry.attDuration,
                 totalEnrolled: 0,

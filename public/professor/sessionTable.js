@@ -12,12 +12,12 @@ var SessionTable = function(course, $appendTarget) {
         {
             classList: ['session-table'], 
             height: 300, 
-            width: 385, 
+            width: 397,
             columns: [
                 ['Date', 140], 
                 ['Attendance', 96], 
                 ['Rate', 66], 
-                ['Actions', 87]
+                ['Actions', 95]
             ], 
             $appendTarget: $appendTarget
         }
@@ -39,17 +39,22 @@ SessionTable.prototype.update = function (data) {
         
         // Create main row 
         var $date = $('<td>', { title: session.date.toString(), text: session.formattedDate }),
-            $button = $('<button>', { class: 'btn btn-default btn-sm', title: 'Expand' })
+            $expandButton = $('<button>', { class: 'btn btn-default btn-sm', style: 'margin-right: 3px;', title: 'Expand' })
                 .append($('<i>', { class: 'fas fa-external-link-alt' })
                     .attr('aria-hidden', 'true')),
+            $deleteButton = $('<button>', { class: 'btn btn-default btn-sm', title: 'Delete' })
+                .append($('<i>', { class: 'fas fa-times' })
+                        .attr('aria-hidden', 'true'))
+                .click(openDeleteModal.bind(this, session)),
             $actions = $('<td>')
-                .append($button); 
+                .append($expandButton)
+                .append($deleteButton);
 
-        // If there was attendance for this session, make it clickable
+        // Make the expand button only clickable if there actually was attendance
         if (session.attendance !== 0)
-            $button.click(openAttendanceModal.bind(this, session.formattedDate, session.students));
+            $expandButton.click(openAttendanceModal.bind(this, session.formattedDate, session.students));
         else 
-            $button.prop('disabled', true);
+            $expandButton.prop('disabled', true);
 
         // Add new row to table
         tableData.unshift([
@@ -63,6 +68,47 @@ SessionTable.prototype.update = function (data) {
     // Fill table with formatted data
     this.fill(tableData);
 };
+
+function openDeleteModal(session) {
+    var modal         = new ModalWindow({ title: 'Remove Session?' }),
+        $deleteButton = $('<button>', { text: 'Delete', class: 'btn btn-danger' });
+
+    $deleteButton.click(tryRemoveSession.bind(this, $deleteButton, modal, session));
+
+    modal.$body.append($('<p>', { text: 'Are you sure you want to remove the session run on ' + session.date +
+        ' with ' + session.attendanceFormatted + ' students in attendance?' }));
+    modal.$footer.prepend($deleteButton);
+    modal.$closeButton.text('Cancel');
+}
+
+function tryRemoveSession($deleteButton, modal, session) {
+    // TODO: get spinning button working
+    $deleteButton.prop('disabled', true);
+    modal.$body.empty().spin();
+    removeSession.call(this, $deleteButton, modal, session);
+}
+
+function removeSession($deleteButton, modal, session) {
+    $.ajax({
+        url: 'professor/class/' + this.course.cID + '/remove-session/' + session.time,
+        type: 'DELETE'
+    })
+    .done(function(data, status, xhr) {
+        modal.$title.text('Session Removed');
+        modal.$header.addClass('modal-header-success');
+        modal.$body.empty().append($('<p>', { text: 'Session run on ' + session.date + ' was removed!' }));
+        window.app.classPage.refreshTables();
+    }.bind(this))
+    .fail(function(xhr, status, errorThrown) {
+        modal.$title.text('Remove Session Failed');
+        modal.$header.addClass('modal-header-danger');
+        modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing the session' }));
+    }.bind(this))
+    .always(function(a, status, b) {
+        $deleteButton.remove();
+        modal.$closeButton.text('Close');
+    });
+}
 
 function openAttendanceModal(date, sessionStudents) {
     var modal    = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' });

@@ -229,6 +229,18 @@ exports.removeFromClass = function (netID, classID, callback) {
     runQuery(query, [netID, classID], callback);
 };
 
+exports.removeSession = function (classID, time, callback) {
+    var removeSession = 'DELETE FROM attendanceSession WHERE cID=? AND attTime=?';
+    runQuery(removeSession, [classID, time], function (err, results, fields) {
+        if (err)
+            callback(err);
+        else {
+            var removeAttHist = 'DELETE FROM attendance WHERE cID=? AND attTime=?';
+            runQuery(removeAttHist, [classID, time], callback);
+        }
+    });
+};
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 
