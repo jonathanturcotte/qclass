@@ -67,7 +67,7 @@ SessionManager.prototype.endSession = function(course){
         session.modal.$body.spin();
         
         $.post({
-            url: 'professor/class/stop/' + session.course.cID
+            url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime
         }).done(function(data, status, xhr) {
             // On success, show completion
             displaySessionEnded.call(this, session);
@@ -214,10 +214,11 @@ function removeToastNotification(id) {
 // Create a new session for a given course and return it
 function createSession(course) {
     return {
-    course  : course,
-    modal   : new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false }),
-    code    : '',
-    endTime : 0
+    course    : course,
+    modal     : new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false }),
+    code      : '',
+    startTime : 0,
+    endTime   : 0
     };
 }
 
