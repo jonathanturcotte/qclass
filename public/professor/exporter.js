@@ -9,15 +9,20 @@ Exporter.prototype.createExportModal = function (course) {
         $fileType     = $('<select>', {class: 'btn btn-secondary dropdown-toggle dropdown-toggle-split', id: 'fileType', name: 'fileType'} ),
         $overallCheck = $('<input>', {type: 'checkbox', id: 'overall', name: 'overall'}),
         $indivCheck   = $('<input>', {type: 'checkbox', id: 'session', name: 'session'}),
-        $checkDiv     = $('<div>', {style: 'display: none'});
+        $checkDiv     = $('<div>', {style: 'display: none'}),
+        $xlsxMessageDiv  = $('<div>', {class: 'alert alert-info', text: 'Output is seperated into two excel sheets'});
 
     $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
     modal.$body
         .append($('<p>', {text: 'Specify output file name and type:'}))
         .append($fileName)
         .append($fileType
-            .append($('<option>', { text: 'csv', value: 'csv'}))
-            .append($('<option>', { text: 'xslx', value: 'xlsx'})));
+            .append($('<option>', { text: 'xlsx', value: 'xlsx'}))
+            .append($('<option>', { text: 'csv', value: 'csv'})))
+        // Message specific to xlsx
+        .append($xlsxMessageDiv
+            .prepend($('<strong>', {text: 'Note: '})));
+         
         
         // TODO: Finish adding the include checkboxes for exporting only the
         // overall information, the individual information, or both
@@ -43,6 +48,13 @@ Exporter.prototype.createExportModal = function (course) {
             $checkDiv.hide();
     });
     */
+
+    $fileType.change(function () {
+        if ($fileType.val() === 'xlsx')
+            $xlsxMessageDiv.show();
+        else
+            $xlsxMessageDiv.hide();
+    });
 
     $exportButton.click(exportClick.bind(this, course, modal, $exportButton, $fileName, $fileType));
     modal.show();
