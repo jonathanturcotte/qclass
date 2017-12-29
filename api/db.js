@@ -229,6 +229,14 @@ exports.removeFromClass = function (netID, classID, callback) {
     runQuery(query, [netID, classID], callback);
 };
 
+exports.addAdmin = function (classID, netID, callback) {
+    runQuery('INSERT INTO administrators (cID, pNetID) VALUES (?, ?)', [classID, netID], callback);
+};
+
+exports.removeAdmin = function (classID, netID, callback) {
+    runQuery('DELETE FROM administrators WHERE cID = ? AND netID = ?', [classID, netID], callback);
+};
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 

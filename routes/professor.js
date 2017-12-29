@@ -100,6 +100,34 @@ router.put('/class/editCode/:classID', function(req, res, next) {
     });
 });
 
+router.post('/class/:classID/admins/add/:netID', function (req, res, next) {
+    var netID = req.params.netID;
+
+    // Validate netID parameter
+    if (!netID) return routeHelper.sendError(res, null, 'No netID provided', 400);
+    if (!regex.user.netID.test(netID))
+        return routeHelper.sendError(res, null, 'Invalid netID syntax', 400);
+
+    // Add new admin
+    db.addAdmin(req.params.classID, netID, function (err, results, fields) {
+        if (err) return routeHelper.sendError(res, err, 'Error adding administrator');
+        res.status(201).send('');
+    });
+});
+
+router.delete('/class/:classID/admins/remove/:netID', function (req, res, next) {
+    if (!req.params.netID) return routeHelper.sendError(res, null, 'No netID provided', 400);
+
+    db.removeAdmin(req.params.classID, req.params.netID, function (err, results, fields) {
+        if (err) return routeHelper.sendError(res, err, 'Error removing admin');
+
+        if (results.affectedRows < 1)
+            return routeHelper.sendError(res, null, 'Admin not found', 404);
+            
+        res.status(204).send('');
+    });
+});
+
 // For enrolling an entire classlist
 router.post('/class/enrollClass/:classID', function(req, res, next) {
     enroll(req.body, req.params.classID, res); // Reminder: note this function can throw error without stopping execution
