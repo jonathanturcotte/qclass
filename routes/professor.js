@@ -39,9 +39,13 @@ router.param('classID', function(req, res, next, classID) {
 
 // GET all classes associated with a specific professor 
 router.get('/classes', function(req, res, next) {
-    db.getTeachesClasses(req.user.netID, function(err, results, fields) {
+    db.getTeachesClasses(req.user.netID, function(err, classes, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error getting classes');
-        res.json(results);
+        
+        db.getAdministeredClasses(req.user.netID, function (err, adminClasses, fields) {
+            if (err) return routeHelper.sendError(res, err, 'Error getting administered classes');
+            res.json({ classes: classes, adminClasses: adminClasses });
+        })
     }); 
 });
 
@@ -123,7 +127,7 @@ router.delete('/class/:classID/admins/remove/:netID', function (req, res, next) 
 
         if (results.affectedRows < 1)
             return routeHelper.sendError(res, null, 'Admin not found', 404);
-            
+
         res.status(204).send('');
     });
 });

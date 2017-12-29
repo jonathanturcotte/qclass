@@ -237,6 +237,13 @@ exports.removeAdmin = function (classID, netID, callback) {
     runQuery('DELETE FROM administrators WHERE cID = ? AND netID = ?', [classID, netID], callback);
 };
 
+exports.getAdministeredClasses = function (netID, callback) {
+    var query = `SELECT c.cID, c.cName, c.cCod
+                 FROM course c NATURAL JOIN administrators a
+                 WHERE a.netID = ?`;
+    runQuery(query, [netID], callback);
+};
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 
