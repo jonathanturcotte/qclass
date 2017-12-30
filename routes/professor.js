@@ -117,7 +117,7 @@ router.post('/class/enrollStudent/:classID', function(req, res, next) {
 });
 
 // For deleting a student from a class
-router.delete('/class/:classID/remove/:netID', function (req, res, next) {
+router.delete('/class/:classID/remove-student/:netID', function (req, res, next) {
     if (!req.params.netID)
         return routeHelper.sendError(res, null, 'Empty netID', 400);
     db.removeFromClass(req.params.netID, req.params.classID, function (err, results, fields) {
@@ -127,6 +127,14 @@ router.delete('/class/:classID/remove/:netID', function (req, res, next) {
         if (results.affectedRows < 1)
             return routeHelper.sendError(res, null, 'No removal occured - student not enrolled', 404);
             
+        res.status(204).send('');
+    });
+});
+
+// For deleting a session
+router.delete('/class/:classID/remove-session/:time', function (req, res, next) {
+    db.removeSession(req.params.classID, req.params.time, function (err, results, fields) {
+        if (err) return routeHelper.sendError(res, err, 'Error removing session');
         res.status(204).send('');
     });
 });
@@ -148,6 +156,7 @@ router.post('/class/start/:classID', function(req, res, next) {
     }
 });
 
+// Stop a running attendance session
 router.post('/class/stop/:classID/:time', function(req, res, next) {
     attendanceSessions.stopClass(req.params.classID, req.params.time, function (result) {
         if (!result.success)

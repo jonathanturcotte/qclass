@@ -23,8 +23,8 @@ StudentTable.prototype = Object.create(Table.prototype);
 StudentTable.prototype.constructor = StudentTable;
 
 StudentTable.prototype.update = function (data) {
-    var tableData    = [],
-        students     = data.students,
+    var tableData = [],
+        students  = data.students,
         enrolled  = data.enrolled;
 
     // Persist/update the data
@@ -81,7 +81,7 @@ function tryRemoveStudent($deleteButton, modal, student) {
 
 function removeStudent($deleteButton, modal, student) {
     $.ajax({
-        url: 'professor/class/' + this.course.cID + '/remove/' + student.netID,
+        url: 'professor/class/' + this.course.cID + '/remove-student/' + student.netID,
         type: 'DELETE'
     })
     .done(function(data, status, xhr) {
