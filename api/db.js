@@ -244,6 +244,13 @@ exports.getAdministeredClasses = function (netID, callback) {
     runQuery(query, [netID], callback);
 };
 
+exports.getAdminsByClass = function (classID, callback) {
+    var query = `SELECT a.pNetID, p.fName, p.lName
+                 FROM administrators a LEFT JOIN professor p ON p.pNetID = a.pNetID
+                 WHERE a.cID = ?`;
+    runQuery(query, [classID], callback);
+};
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 

@@ -104,21 +104,25 @@ router.put('/class/editCode/:classID', function(req, res, next) {
     });
 });
 
+// Add a new administrator
 router.post('/class/:classID/admins/add/:netID', function (req, res, next) {
-    var netID = req.params.netID;
+    var adminID = req.params.netID;
 
     // Validate netID parameter
-    if (!netID) return routeHelper.sendError(res, null, 'No netID provided', 400);
-    if (!regex.user.netID.test(netID))
+    if (!adminID) return routeHelper.sendError(res, null, 'No netID provided', 400);
+    if (!regex.user.netID.test(adminID))
         return routeHelper.sendError(res, null, 'Invalid netID syntax', 400);
+    if (adminID === req.user.netID)
+        return routeHelper.sendError(res, null, 'Owner cannot be added as an administrator', 409);
 
     // Add new admin
-    db.addAdmin(req.params.classID, netID, function (err, results, fields) {
+    db.addAdmin(req.params.classID, adminID, function (err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error adding administrator');
         res.status(201).send('');
     });
 });
 
+// Remove an existing administrator
 router.delete('/class/:classID/admins/remove/:netID', function (req, res, next) {
     if (!req.params.netID) return routeHelper.sendError(res, null, 'No netID provided', 400);
 
@@ -129,6 +133,14 @@ router.delete('/class/:classID/admins/remove/:netID', function (req, res, next) 
             return routeHelper.sendError(res, null, 'Admin not found', 404);
 
         res.status(204).send('');
+    });
+});
+
+// Get all admins for a class
+router.get('/class/:classID/admins', function (res, req, next) {
+    db.getAdminsByClass(req.params.classID, function (err, results, fields) {
+        if (err) routeHelper.sendError(res, err, 'Error getting admins for ' + classID);
+        res.json(results);
     });
 });
 
