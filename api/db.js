@@ -238,9 +238,9 @@ exports.removeAdmin = function (classID, netID, callback) {
 };
 
 exports.getAdministeredClasses = function (netID, callback) {
-    var query = `SELECT c.cID, c.cName, c.cCod
+    var query = `SELECT c.cID, c.cName, c.cCode
                  FROM course c NATURAL JOIN administrators a
-                 WHERE a.netID = ?`;
+                 WHERE a.pNetID = ?`;
     runQuery(query, [netID], callback);
 };
 
