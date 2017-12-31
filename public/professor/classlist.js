@@ -99,7 +99,20 @@ function selectClass (course) {
 }
 
 function updateSuccess (data, textStatus, jqXHR) {
-    this.classes = _.sortBy(data, 'cCode');
+    var classes = [];
+
+    // Add indicators on the courses beore merging the lists to be able to identify if a professor owns a course or is just administering it
+    for (var i = 0; i < data.classes.length; i++) {
+        data.classes[i].isAdmin = false;
+        classes.push(data.classes[i]);
+    }
+
+    for (var i = 0; i < data.adminClasses.length; i++) {
+        data.adminClasses[i].isAdmin = true;
+        classes.push(data.adminClasses[i]);
+    }
+    
+    this.classes = _.sortBy(classes, 'cCode');
     buildList.call(this);
     this.selectFirstClass();
 }
