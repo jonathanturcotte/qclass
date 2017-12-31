@@ -145,6 +145,12 @@ function createAddClassModal () {
                 modal.$body.spin(false);
             });
         });
+
+    // Remove the hidden modal from the DOM when we're done
+    modal.$window.on('hidden.bs.modal', function (e) {
+        modal.remove();
+    });
+
     modal.show();
 }
 

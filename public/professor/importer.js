@@ -19,10 +19,14 @@ Importer.prototype.createImportModal = function (course) {
         .append($errorDiv
             .prepend($('<strong>', {text: 'Error: '}))
             .append($errorMsg));
-    modal.$footer
-        .prepend(modal.$importButton);
-    modal.$importButton
-       .click(importXLSX.bind(this, course, modal, $file, $errorDiv, $inputDiv, $errorMsg));
+    modal.$footer.prepend(modal.$importButton);
+    modal.$importButton.click(importXLSX.bind(this, course, modal, $file, $errorDiv, $inputDiv, $errorMsg));
+
+    // Remove the hidden modal from the DOM when we're done
+    modal.$window.on('hidden.bs.modal', function (e) {
+        modal.remove();
+    });
+
     modal.show();
 };
 
@@ -157,6 +161,11 @@ Importer.prototype.createAddStudentModal = function (course) {
                 modal.$body.spin(false);
             });
         });
+
+    // Remove the hidden modal from the DOM when we're done
+    modal.$window.on('hidden.bs.modal', function (e) {
+        modal.remove();
+    });
 
     modal.show();
 };
