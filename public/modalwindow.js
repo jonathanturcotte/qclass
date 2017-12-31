@@ -29,6 +29,10 @@ var ModalWindow = function(options) {
 
     // Append close button to header and footer
     if (this.closeable){
+        this.$window.modal({
+            backdrop: true,
+            keyboard: true
+        });
         this.makeCloseable();
     } else {
         // Otherwise, stop other closing methods
@@ -101,10 +105,10 @@ ModalWindow.prototype.makeCloseable = function () {
     this.$header.append(this.$headerEx);
     this.$footer.append(this.$closeButton);
 
-    this.$window.removeData('bs.modal').modal({
-        backdrop: true,
-        keyboard: true
-    });
+    // Make it so that clicking the backdrop closes the modal
+    // Note that this doesn't seem to work properly for the keyboard value
+    // probably because it's a value only checked when adding the event handler.
+    this.$window.data('bs.modal')._config.backdrop = true;
 
     this.closeable = true;
 };
