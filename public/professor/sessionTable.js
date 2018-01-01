@@ -79,11 +79,6 @@ function openDeleteModal(session) {
         ' with ' + session.attendanceFormatted + ' students in attendance?' }));
     modal.$footer.prepend($deleteButton);
     modal.$closeButton.text('Cancel');
-
-    // Remove the hidden modal from the DOM when we're done
-    modal.$window.on('hidden.bs.modal', function (e) {
-        modal.remove();
-    });
 }
 
 function tryRemoveSession($deleteButton, modal, session) {
@@ -147,11 +142,6 @@ function openAttendanceModal(date, sessionStudents) {
 
         $tbody.append($tr);
     }
-
-    // Remove the hidden modal from the DOM when we're done
-    modal.$window.on('hidden.bs.modal', function (e) {
-        modal.remove();
-    });
 
     modal.$body.append($table);
     modal.show();

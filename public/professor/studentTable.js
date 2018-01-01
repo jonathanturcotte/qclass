@@ -70,11 +70,6 @@ function openDeleteModal(student) {
         + ' (' + student.stdNum + ', ' + student.netID + ')?' }));
     modal.$footer.prepend($deleteButton);
     modal.$closeButton.text('Cancel');
-
-    // Remove the hidden modal from the DOM when we're done
-    modal.$window.on('hidden.bs.modal', function (e) {
-        modal.remove();
-    });
 }
 
 function tryRemoveStudent($deleteButton, modal, student) {
@@ -146,11 +141,6 @@ function expandStudent(student) {
                 .append($('<td>').text(sessions[student.sessions[i]].attendancePercentFormatted)));
         }
     }
-
-    // Remove the hidden modal from the DOM when we're done
-    modal.$window.on('hidden.bs.modal', function (e) {
-        modal.remove();
-    });
 
     modal.$body.append($table);
     modal.show();
