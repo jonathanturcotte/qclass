@@ -192,9 +192,8 @@ function displaySessionEnded(session) {
             window.app.classPage.refreshTables();
         }
 
-        // Always remove the session from the session manager
-        // and remove the modal from the DOM (instead of just
-        // hiding it)  when the hide animation is over
+        // Manually set the modal to be removed when closed now that
+        // the session is over
         session.modal.$window.on('hidden.bs.modal', function (e) {
             session.modal.remove();
         });
@@ -215,7 +214,7 @@ function removeToastNotification(id) {
 function createSession(course) {
     return {
     course    : course,
-    modal     : new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false }),
+    modal     : new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false, minimize: true }),
     code      : '',
     startTime : 0,
     endTime   : 0

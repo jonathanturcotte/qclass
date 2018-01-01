@@ -4,12 +4,14 @@
  * @param {string=}  options.id
  * @param {string=}  options.title
  * @param {boolean=} options.closeable
+ * @param {boolean=} options.minimize
  */ 
 var ModalWindow = function(options) {
     // Initialization with defaults
     this.id         = options.id        || 'modal-window';
     this.title      = options.title     || '';
-    this.closeable  = options.closeable === undefined ? true : options.closeable;
+    this.closeable  = options.closeable === undefined ? true  : options.closeable;
+    this.minimize   = options.minimize  === undefined ? false : options.minimize;
 
     // Construction of the elements
     $('#' + this.id).remove();
@@ -39,6 +41,15 @@ var ModalWindow = function(options) {
         this.$window.modal({
             backdrop: 'static',
             keyboard: false
+        });
+    }
+
+    // If the minimize option is set to false, make it so that
+    // when the modal is closed it is removed from the DOM instead
+    // of just being hidden
+    if (!this.minimize) {
+        this.$window.on('hidden.bs.modal', function (e) {
+            this.remove();
         });
     }
 };
