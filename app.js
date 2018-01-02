@@ -76,23 +76,30 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-    secret: 'Whocansaywherethewindblows', 
+    secret: 'Whocansaywherethewindblows',
     resave: true,
     saveUninitialized: true
  }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new SamlStrategy({
-        path: '/login/callback',
-        entryPoint: '', // location of IDP
-        issuer: '', // needs to be the entity ID the IDP has for this app
-        protocol: 'https://'
-        // TODO: provide certificate
+// TODO: Somehow skip this for localhost testing
+var passportStrat = new SamlStrategy({
+        callbackUrl: 'https://qclass.ca/login/callback',
+        entryPoint: 'https://idptest.queensu.ca/idp/shibboleth', // location of IDP
+        issuer: 'qclass', // The identifier for our SP
+        cert: fs.readFileSync('sso/idp.crt'), // X509 cert for the idp, needs to be all on one line
+        privateCert: fs.readFileSync(keyPath) // Our private key that matches the HTTPS public cert
     }, function (profile, done) {
         // Might replace this with the auth.autnenticate
     }
-));
+);
+
+console.log("\nGenerating test SAML XML\n");
+var res = passportStrat.generateServiceProviderMetadata();
+fs.writeFileSync('sso/sp-metadata.xml', res);
+
+passport.use(passportStrat);
 
 //app.use(auth.authenticate); // Run authentication first when any route is called
 app.use('/', general);
