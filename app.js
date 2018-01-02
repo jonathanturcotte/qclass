@@ -22,7 +22,7 @@ var express      = require('express'),
     // we can continue developing locally without having to change anything.
     sslOptions = {
         key:  fs.readFileSync(fs.existsSync(keyPath)  ? keyPath  : 'app.key'),
-        cert: fs.readFileSync(fs.existsSync(certPath) ? certPath : 'app.cert')
+        cert: fs.readFileSync(fs.existsSync(certPath) ? certPath : 'app.crt')
     },
 
     // Require our routes and APIs
