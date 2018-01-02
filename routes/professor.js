@@ -109,11 +109,11 @@ router.post('/class/:classID/admins/add/:netID', function (req, res, next) {
     var adminID = req.params.netID;
 
     // Validate netID parameter
-    if (!adminID) return routeHelper.sendError(res, null, 'No netID provided', 400);
+    if (!adminID) return routeHelper.sendError(res, null, { errorCode: 1, message: 'No netID provided' }, 400);
     if (!regex.user.netID.test(adminID))
-        return routeHelper.sendError(res, null, 'Invalid netID syntax', 400);
+        return routeHelper.sendError(res, null, { errorCode: 2, message: 'Invalid netID syntax' }, 400);
     if (adminID === req.user.netID)
-        return routeHelper.sendError(res, null, 'Owner cannot be added as an administrator', 409);
+        return routeHelper.sendError(res, null, { errorCode: 3, message: 'Owner cannot be added as an administrator' }, 409);
 
     // Add new admin
     db.addAdmin(req.params.classID, adminID, function (err, results, fields) {
@@ -137,7 +137,7 @@ router.delete('/class/:classID/admins/remove/:netID', function (req, res, next) 
 });
 
 // Get all admins for a class
-router.get('/class/:classID/admins', function (res, req, next) {
+router.get('/class/:classID/admins', function (req, res, next) {
     db.getAdminsByClass(req.params.classID, function (err, results, fields) {
         if (err) routeHelper.sendError(res, err, 'Error getting admins for ' + classID);
         res.json(results);

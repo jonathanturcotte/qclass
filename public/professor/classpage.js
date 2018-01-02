@@ -1,4 +1,5 @@
 var SessionManager = require('./sessions'),
+    AdminManager   = require('./adminManager'),
     Table          = require('../components/table'),
     SessionTable   = require('./sessionTable'),
     StudentTable   = require('./studentTable'),
@@ -142,7 +143,8 @@ function build () {
 }
 
 function editAdministrators() {
-    //TODO: complete
+    this.adminManager = new AdminManager(this.course);
+    this.adminManager.buildModal();
 }
 
 /**

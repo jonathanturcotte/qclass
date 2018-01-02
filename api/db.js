@@ -234,7 +234,7 @@ exports.addAdmin = function (classID, netID, callback) {
 };
 
 exports.removeAdmin = function (classID, netID, callback) {
-    runQuery('DELETE FROM administrators WHERE cID = ? AND netID = ?', [classID, netID], callback);
+    runQuery('DELETE FROM administrators WHERE cID = ? AND pNetID = ?', [classID, netID], callback);
 };
 
 exports.getAdministeredClasses = function (netID, callback) {
