@@ -4,12 +4,14 @@
  * @param {string=}  options.id
  * @param {string=}  options.title
  * @param {boolean=} options.closeable
+ * @param {boolean=} options.minimize
  */ 
 var ModalWindow = function(options) {
     // Initialization with defaults
     this.id         = options.id        || 'modal-window';
     this.title      = options.title     || '';
-    this.closeable  = options.closeable === undefined ? true : options.closeable;
+    this.closeable  = options.closeable === undefined ? true  : options.closeable;
+    this.minimize   = options.minimize  === undefined ? false : options.minimize;
 
     // Construction of the elements
     $('#' + this.id).remove();
@@ -29,12 +31,25 @@ var ModalWindow = function(options) {
 
     // Append close button to header and footer
     if (this.closeable){
+        this.$window.modal({
+            backdrop: true,
+            keyboard: true
+        });
         this.makeCloseable();
     } else {
         // Otherwise, stop other closing methods
         this.$window.modal({
             backdrop: 'static',
             keyboard: false
+        });
+    }
+
+    // If the minimize option is set to false, make it so that
+    // when the modal is closed it is removed from the DOM instead
+    // of just being hidden
+    if (!this.minimize) {
+        this.$window.on('hidden.bs.modal', function (e) {
+            this.remove();
         });
     }
 };
@@ -101,10 +116,10 @@ ModalWindow.prototype.makeCloseable = function () {
     this.$header.append(this.$headerEx);
     this.$footer.append(this.$closeButton);
 
-    this.$window.removeData('bs.modal').modal({
-        backdrop: true,
-        keyboard: true
-    });
+    // Make it so that clicking the backdrop closes the modal
+    // Note that this doesn't seem to work properly for the keyboard value
+    // probably because it's a value only checked when adding the event handler.
+    this.$window.data('bs.modal')._config.backdrop = true;
 
     this.closeable = true;
 };

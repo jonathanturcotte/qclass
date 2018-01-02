@@ -159,6 +159,11 @@ exports.startAttendance = function(classID, duration, time, callback) {
     });
 };
 
+exports.stopAttendance = function(classID, time, callback) {
+    var query = 'UPDATE attendanceSession SET completed=1 WHERE cID=? AND attTime=?';
+    runQuery(query, [classID, time], callback);
+};
+
 exports.recordAttendance = function(netID, classID, time, callback) {
     var query = 'UPDATE attendance SET attended = 1 WHERE sNetID = ? AND cID = ? AND attTime = ?';
     runQuery(query, [netID, classID, time], callback);
@@ -201,14 +206,15 @@ exports.getNumSession = function(classID, callback) {
     var query = 
         `SELECT *
          FROM attendanceSession
-         WHERE cID = ?`;
+         WHERE cID = ?
+         AND completed = 1`;
     runQuery(query, [classID], callback);
 };
 
 exports.getSessionAttInfo = function(classID, callback) {
     var query =
         `SELECT sess.attTime, sess.attDuration, a.sNetID, a.attended, s.fName, s.lName, s.stdNum
-            FROM (SELECT * FROM attendanceSession WHERE cID = ?) sess 
+            FROM (SELECT * FROM attendanceSession WHERE cID = ? AND completed = 1) sess 
                 LEFT JOIN attendance a 
                     ON sess.cID = a.cID 
                     AND sess.attTime = a.attTime
@@ -221,6 +227,18 @@ exports.getSessionAttInfo = function(classID, callback) {
 exports.removeFromClass = function (netID, classID, callback) {
     var query = 'DELETE FROM enrolled WHERE sNetID = ? AND cID = ?';
     runQuery(query, [netID, classID], callback);
+};
+
+exports.removeSession = function (classID, time, callback) {
+    var removeSession = 'DELETE FROM attendanceSession WHERE cID=? AND attTime=?';
+    runQuery(removeSession, [classID, time], function (err, results, fields) {
+        if (err)
+            callback(err);
+        else {
+            var removeAttHist = 'DELETE FROM attendance WHERE cID=? AND attTime=?';
+            runQuery(removeAttHist, [classID, time], callback);
+        }
+    });
 };
 
 /**

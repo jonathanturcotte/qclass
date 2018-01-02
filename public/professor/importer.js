@@ -6,16 +6,23 @@ var Importer = function () {};
 
 Importer.prototype.createImportModal = function (course) {
     var modal         = new ModalWindow({ id: 'importModal', title: 'Import Classlist'}),
-        $file         = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' });
+        $file         = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' }),
+        $errorDiv     = $('<div>', { class: 'alert alert-danger', style: 'display: none; margin-top: 20px;' }),
+        $inputDiv     = $('<div>'),
+        $errorMsg     = $('<span>');
 
     modal.$importButton = $('<button>', { type: 'submit', class: 'btn btn-primary', text: 'Import', id: 'importButton' });
     modal.$body
-        .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
-        .append($file);
+        .append($inputDiv
+            .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
+            .append($file))
+        .append($errorDiv
+            .prepend($('<strong>', {text: 'Error: '}))
+            .append($errorMsg));
     modal.$footer
         .prepend(modal.$importButton);
     modal.$importButton
-       .click(importXLSX.bind(this, course, modal, $file));
+       .click(importXLSX.bind(this, course, modal, $file, $errorDiv, $inputDiv, $errorMsg));
     modal.show();
 };
 
@@ -158,22 +165,25 @@ Importer.prototype.createAddStudentModal = function (course) {
 // Private Functions //
 ///////////////////////
 
-function importXLSX(course, modal, $file) {
+function importXLSX(course, modal, $file, $errorDiv, $inputDiv, $errorMsg) {
     var file   = $file.get(0).files[0],
         reader = new FileReader(),
         cID    = course.cID;
 
-    modal.$importButton.remove();
-    modal.$body.empty();
+    modal.$importButton.hide();
+    $inputDiv.hide();
+    $errorDiv.hide();   
     modal.$body
         .spin()
         .addClass('spin-min-height');
   
     if (!file){
-        modal.error('Error', 'No file submitted');
+        //modal.error('Error', 'No file submitted');
+        fileErrorHandler($errorDiv, $inputDiv, $errorMsg, "No File Submitted", modal);
         return;
     } else if (!IO.checkExtensionXLSX(file)) {
-        modal.error('Error', 'Incorrect file type submitted');
+        //modal.error('Error', 'Incorrect file type submitted');
+        fileErrorHandler($errorDiv, $inputDiv, $errorMsg, "Incorrect file type submitted", modal);
         return;
     } else {            
         reader.onload = function(e) {
@@ -183,7 +193,8 @@ function importXLSX(course, modal, $file) {
             try {
                 workbook = XLSX.read(sheetData, { type: 'array' });
             } catch(error) {
-                modal.error('Error', 'Incorrect file type submitted');
+                //modal.error('Error', 'Incorrect file type submitted');
+                fileErrorHandler($errorDiv, $inputDiv, $errorMsg, "Incorrect file type submitted", modal);
                 return;
             }
 
@@ -195,7 +206,8 @@ function importXLSX(course, modal, $file) {
             result = IO.checkClasslistFormat(jsonSheet);
             //check if any errors caught in the file's format
             if(result.error) { 
-                modal.error('Error', result.error);
+                //modal.error('Error', result.error);
+                fileErrorHandler($errorDiv, $inputDiv, $errorMsg, result.error, modal);
                 return;
             }                    
             // if no error, send formatted sheet
@@ -207,13 +219,24 @@ function importXLSX(course, modal, $file) {
             }).done(function(status, xhr) {
                 modal.success('Success', 'Classlist successfully added!');
             }).fail(function(xhr, status, errorThrown) {
-                modal.error("Error", xhr.responseText);
+                //modal.error("Error", xhr.responseText);
+                fileErrorHandler($errorDiv, $inputDiv, $errorMsg, xhr.responseText, modal);
             }).always(function(a, status, b) {
                 modal.$body.spin(false);
             });
         };
         reader.readAsArrayBuffer(file);
     }
+}
+
+function fileErrorHandler($errorDiv, $inputDiv, $errorMsg, errorText, modal) {
+    modal.$body.spin(false);
+    //show error info
+    $errorDiv.show();
+    $errorMsg.text(errorText);
+    //display form info again
+    $inputDiv.show();
+    modal.$importButton.show();    
 }
 
 function findErrors (netID, stdNum, fName, lName) {

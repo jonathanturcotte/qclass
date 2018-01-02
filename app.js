@@ -43,6 +43,7 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'",
+                'data:',
                 'https://code.jquery.com',              // jQuery
                 'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap

@@ -57,9 +57,9 @@ SessionManager.prototype.endSession = function(course){
         session.modal.show();
 
         removeToastNotification(session.course.cID);
-        
-        var $timerContainer = $('.start-modal-timer-container'),
-            $timerText      = $('.start-modal-timer');
+
+        var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
+            $timerText      = session.modal.$window.find('.start-modal-timer');
 
         // Tell the server to end the session
         session.modal.$finishButton.addClass('disabled');
@@ -67,7 +67,7 @@ SessionManager.prototype.endSession = function(course){
         session.modal.$body.spin();
         
         $.post({
-            url: 'professor/class/stop/' + session.course.cID
+            url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime
         }).done(function(data, status, xhr) {
             // On success, show completion
             displaySessionEnded.call(this, session);
@@ -172,7 +172,7 @@ function displaySessionEnded(session) {
     // Display the modal if it's currently hidden
     session.modal.show();
     
-    var $timerContainer = $('.start-modal-timer-container');
+    var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
 
     removeToastNotification(session.course.cID);
 
@@ -192,9 +192,8 @@ function displaySessionEnded(session) {
             window.app.classPage.refreshTables();
         }
 
-        // Always remove the session from the session manager
-        // and remove the modal from the DOM (instead of just
-        // hiding it)  when the hide animation is over
+        // Manually set the modal to be removed when closed now that
+        // the session is over
         session.modal.$window.on('hidden.bs.modal', function (e) {
             session.modal.remove();
         });
@@ -206,18 +205,24 @@ function displaySessionEnded(session) {
 // Find and remove the toastr notification for a running session
 // if it exists
 function removeToastNotification(id) {
-    var $toast = $('.toast-session-' + id).parent();
-    if ($toast)
+    var $toast = $('.toast-session-' + id);
+    if ($toast.length > 0)
         toastr.clear($toast);
 }
 
 // Create a new session for a given course and return it
 function createSession(course) {
     return {
-    course  : course,
-    modal   : new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false }),
-    code    : '',
-    endTime : 0
+    course    : course,
+    code      : '',
+    startTime : 0,
+    endTime   : 0,
+    modal     : new ModalWindow({
+                    id        : 'running-session-' + course.cID,
+                    title     : 'Start Attendance Session',
+                    closeable : false,
+                    minimize  : true
+                    })
     };
 }
 
