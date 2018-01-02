@@ -10,7 +10,7 @@ Exporter.prototype.createExportModal = function (course) {
         $overallCheck = $('<input>', {type: 'checkbox', id: 'overall', name: 'overall'}),
         $indivCheck   = $('<input>', {type: 'checkbox', id: 'session', name: 'session'}),
         $checkDiv     = $('<div>', {style: 'display: none'}),
-        $xlsxMessageDiv  = $('<div>', {class: 'alert alert-info', text: 'Output is seperated into two excel sheets'});
+        $xlsxMessageDiv  = $('<div>', {class: 'alert alert-info', text: 'Output is separated into two excel sheets'});
 
     $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
     modal.$body

@@ -57,9 +57,9 @@ SessionManager.prototype.endSession = function(course){
         session.modal.show();
 
         removeToastNotification(session.course.cID);
-        
-        var $timerContainer = $('.start-modal-timer-container'),
-            $timerText      = $('.start-modal-timer');
+
+        var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
+            $timerText      = session.modal.$window.find('.start-modal-timer');
 
         // Tell the server to end the session
         session.modal.$finishButton.addClass('disabled');
@@ -172,7 +172,7 @@ function displaySessionEnded(session) {
     // Display the modal if it's currently hidden
     session.modal.show();
     
-    var $timerContainer = $('.start-modal-timer-container');
+    var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
 
     removeToastNotification(session.course.cID);
 
@@ -205,8 +205,8 @@ function displaySessionEnded(session) {
 // Find and remove the toastr notification for a running session
 // if it exists
 function removeToastNotification(id) {
-    var $toast = $('.toast-session-' + id).parent();
-    if ($toast)
+    var $toast = $('.toast-session-' + id);
+    if ($toast.length > 0)
         toastr.clear($toast);
 }
 
@@ -214,10 +214,15 @@ function removeToastNotification(id) {
 function createSession(course) {
     return {
     course    : course,
-    modal     : new ModalWindow({ id: 'startModal', title: 'Start Attendance Session', closeable: false, minimize: true }),
     code      : '',
     startTime : 0,
-    endTime   : 0
+    endTime   : 0,
+    modal     : new ModalWindow({
+                    id        : 'running-session-' + course.cID,
+                    title     : 'Start Attendance Session',
+                    closeable : false,
+                    minimize  : true
+                    })
     };
 }
 
