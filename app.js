@@ -1,28 +1,29 @@
-var express      = require('express'),
-    path         = require('path'),
-    http         = require('http'),
-    https        = require('https'),
-    fs           = require('fs'),
-    favicon      = require('serve-favicon'),
-    logger       = require('morgan'),
-    cookieParser = require('cookie-parser'),
-    bodyParser   = require('body-parser'),
-    helmet       = require('helmet'),
-    csv          = require('express-csv'),
-    session      = require('express-session'),
-    auth         = require('./api/auth'),
-    passport     = require('passport'),
-    SamlStrategy = require('passport-saml').Strategy,
+var express       = require('express'),
+    path          = require('path'),
+    http          = require('http'),
+    https         = require('https'),
+    fs            = require('fs'),
+    favicon       = require('serve-favicon'),
+    logger        = require('morgan'),
+    cookieParser  = require('cookie-parser'),
+    bodyParser    = require('body-parser'),
+    helmet        = require('helmet'),
+    csv           = require('express-csv'),
+    session       = require('express-session'),
+    auth          = require('./api/auth'),
+    passport      = require('passport'),
+    SamlStrategy  = require('passport-saml').Strategy,
 
-    keyPath      = '/etc/letsencrypt/live/qclass.ca/privkey.pem',
-    certPath     = '/etc/letsencrypt/live/qclass.ca/fullchain.pem',
+    keyPath       = '/etc/letsencrypt/live/qclass.ca/privkey.pem',
+    certPath      = '/etc/letsencrypt/live/qclass.ca/cert.pem',
+    fullChainPath = '/etc/letsencrypt/live/qclass.ca/fullchain.pem',
 
     // Setup SSL options, checking to see if the real certs exist
     // before falling back to our unsigned ones. This is so that
     // we can continue developing locally without having to change anything.
     sslOptions = {
-        key:  fs.readFileSync(fs.existsSync(keyPath)  ? keyPath  : 'app.key'),
-        cert: fs.readFileSync(fs.existsSync(certPath) ? certPath : 'app.crt')
+        key:  fs.readFileSync(fs.existsSync(keyPath)       ? keyPath       : 'app.key'),
+        cert: fs.readFileSync(fs.existsSync(fullChainPath) ? fullChainPath : 'app.crt')
     },
 
     // Require our routes and APIs
@@ -84,19 +85,22 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // TODO: Somehow skip this for localhost testing
+// see: https://stackoverflow.com/questions/24419814/passport-saml-and-saml-encryption
 var passportStrat = new SamlStrategy({
-        callbackUrl: 'https://qclass.ca/login/callback',
-        entryPoint: 'https://idptest.queensu.ca/idp/shibboleth', // location of IDP
-        issuer: 'qclass', // The identifier for our SP
-        cert: fs.readFileSync('sso/idp.crt'), // X509 cert for the idp, needs to be all on one line
-        privateCert: fs.readFileSync(keyPath) // Our private key that matches the HTTPS public cert
+        callbackUrl   : 'https://qclass.ca/login/callback',          // The login callback
+        entryPoint    : 'https://idptest.queensu.ca/idp/shibboleth', // location of IDP
+        issuer        : 'qclass',                                    // The identifier for our SP
+        cert          : fs.readFileSync('sso/idp.crt', 'utf8'),      // X509 cert for the idp, needs to be all on one line
+        decryptionPvk : fs.readFileSync(keyPath, 'utf8')             // Our private key
     }, function (profile, done) {
         // Might replace this with the auth.autnenticate
     }
 );
 
 console.log("\nGenerating test SAML XML\n");
-var res = passportStrat.generateServiceProviderMetadata();
+var cert = fs.readFileSync(certPath, 'utf8');
+//console.log(cert);
+var res = passportStrat.generateServiceProviderMetadata(cert);
 fs.writeFileSync('sso/sp-metadata.xml', res);
 
 passport.use(passportStrat);
