@@ -30,10 +30,21 @@ router.param('classID', function(req, res, next, classID) {
     if (!regex.class.id.test(classID))
         return routeHelper.sendError(res, null, 'Invalid classID', 400);
 
+    req.user.isOwner = false;
+    req.user.isAdmin = false;
     db.ownsClass(classID, req.user.netID, function(err, result) {
         if (err) return routeHelper.sendError(res, err, 'Error processing request');
-        if (!result) return routeHelper.sendError(res, null, 'User does not own the requested class', 403);
-        next();
+        if (!result) {
+            db.isAdmin(req.user.netID, classID, function (err, result) {
+                if (err) return routeHelper.sendError(res, err, 'Error processing request');
+                if (!result) return routeHelper.sendError(res, null, 'User is not authorized for the requested class', 403);
+                req.user.isAdmin = true;
+                next();
+            })
+        } else {
+            req.user.isOwner = true;
+            next();
+        }
     });
 });
 

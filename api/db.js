@@ -251,6 +251,10 @@ exports.getAdminsByClass = function (classID, callback) {
     runQuery(query, [classID], callback);
 };
 
+exports.isAdmin = function (netID, classID, callback) {
+    runExistenceQuery('SELECT 1 FROM administrators WHERE pNetID = ? AND cID = ?', [netID, classID], callback);
+};
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query 
