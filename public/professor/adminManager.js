@@ -54,9 +54,10 @@ function updateTable (course) {
             for (var i = 0; i < data.length; i++) {
                 var $deleteButton = $('<button>', { title: 'Remove', class: 'btn btn-default btn-sm' })
                     .append($('<i>', { class: 'fas fa-times' })
-                        .attr('aria-hidden', 'true'))
-                    .click(removeAdmin.bind(this, data[i].pNetID, course, $deleteButton)),
+                        .attr('aria-hidden', 'true')),
                     name = '-';
+                    
+                $deleteButton.click(removeAdmin.bind(this, data[i].pNetID, course, $deleteButton));
 
                 if (data[i].fName && data[i].fName.length > 0 && data[i].lName && data[i].lName.length > 0) 
                     name = data[i].fName + ' ' + data[i].lName;
