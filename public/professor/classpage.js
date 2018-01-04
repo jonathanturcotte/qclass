@@ -102,10 +102,12 @@ function build () {
     // Create the adminManager for use with editAdministrators
     this.adminManager = new AdminManager();
 
-    // Add the edit button
-    $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
-        .click(editAdministrators.bind(this))
-        .appendTo($editDiv);
+    // Add the edit button if owner
+    if (this.course.isOwner) {
+        $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
+            .click(editAdministrators.bind(this))
+            .appendTo($editDiv);
+    }
 
     // Attendance section
     $('<label>', { text: 'Start an attendance session:', class: 'class-attendance-label' })

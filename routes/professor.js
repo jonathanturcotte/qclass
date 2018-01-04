@@ -32,16 +32,14 @@ router.param('classID', function(req, res, next, classID) {
         return routeHelper.sendError(res, null, 'Invalid classID', 400);
 
     req.user.isOwner = false;
-    req.user.isAdmin = false;
     db.ownsClass(classID, req.user.netID, function(err, result) {
         if (err) return routeHelper.sendError(res, err, 'Error processing request');
         if (!result) {
             db.isAdmin(req.user.netID, classID, function (err, result) {
                 if (err) return routeHelper.sendError(res, err, 'Error processing request');
                 if (!result) return routeHelper.sendError(res, null, 'User is not authorized for the requested class', 403);
-                req.user.isAdmin = true;
                 next();
-            })
+            });
         } else {
             req.user.isOwner = true;
             next();
@@ -117,7 +115,7 @@ router.put('/class/editCode/:classID', function(req, res, next) {
 });
 
 // Add a new administrator
-router.post('/class/:classID/admins/add/:netID', function (req, res, next) {
+router.post('/class/:classID/admins/add/:netID', mustOwnClass, function (req, res, next) {
     var adminID = req.params.netID;
 
     // Validate netID parameter
@@ -140,7 +138,7 @@ router.post('/class/:classID/admins/add/:netID', function (req, res, next) {
 });
 
 // Remove an existing administrator
-router.delete('/class/:classID/admins/remove/:netID', function (req, res, next) {
+router.delete('/class/:classID/admins/remove/:netID', mustOwnClass, function (req, res, next) {
     if (!req.params.netID) return routeHelper.sendError(res, null, 'No netID provided', 400);
 
     db.removeAdmin(req.params.classID, req.params.netID, function (err, results, fields) {
@@ -306,6 +304,12 @@ router.get('/:classID/exportAttendance', function(req, res, next) {
         });
     });
 });
+
+function mustOwnClass (req, res, next) {
+    if (!req.user.isOwner)
+        return routeHelper.sendError(res, null, new RouteError(1, 'User must own class'), 403);
+    next();
+}
 
 // Runs the general enroll function that adds (if needed) and enrolls each student
 // reqStudents can contain a single student or an entire classList
