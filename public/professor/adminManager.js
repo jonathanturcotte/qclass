@@ -1,4 +1,5 @@
-var ModalWindow = require('../modalwindow');
+var ModalWindow = require('../modalwindow'),
+    regex       = require('../lib/regex');
     
 var AdminManager = function () {};
 
@@ -84,7 +85,7 @@ function addAdmin (course) {
     // Validate netID
     if (!netID) {
         showFormError.call(this, 'NetID cannot be empty');
-    } else if (!/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(netID)) {
+    } else if (!regex.user.netID.test(netID)) {
         showFormError.call(this, 'Invalid NetID format');
     } else {
         // Disable form
