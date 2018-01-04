@@ -87,11 +87,13 @@ app.use(passport.session());
 // TODO: Somehow skip this for localhost testing
 // see: https://stackoverflow.com/questions/24419814/passport-saml-and-saml-encryption
 var passportStrat = new SamlStrategy({
-        callbackUrl   : 'https://qclass.ca/login/callback',          // The login callback
-        entryPoint    : 'https://idptest.queensu.ca/idp/shibboleth', // location of IDP
-        issuer        : 'qclass',                                    // The identifier for our SP
-        cert          : fs.readFileSync('sso/idp.crt', 'utf8'),      // X509 cert for the idp, needs to be all on one line
-        decryptionPvk : fs.readFileSync(keyPath, 'utf8')             // Our private key
+        callbackUrl      : 'https://qclass.ca/login/callback',                       // The login callback
+        logoutCallbackUrl: 'https://qclass.ca/logout/callback',                      // Logout callback 
+        entryPoint       : 'https://idptest.queensu.ca/idp/shibboleth',              // location of IDP
+        logoutUrl        : 'https://idptest.queensu.ca/idp/Shibboleth.sso/SLO/POST', // URL for logging out on the IDP
+        issuer           : 'https://qclass.ca',                                      // The identifier for our SP
+        cert             : fs.readFileSync('sso/idp.crt', 'utf8'),                   // X509 cert for the idp, needs to be all on one line
+        decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                          // Our private key
     }, function (profile, done) {
         // Might replace this with the auth.autnenticate
     }

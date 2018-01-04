@@ -11,6 +11,11 @@ router.post('/login/callback',
     }
 );
 
+router.post('/logout/callback', function (req, res, next) {
+    req.logout();
+    res.redirect('/'); // Not sure where to redirect to
+});
+
 // GET user info
 router.get('/user-info', function(req, res, next) {
     // As students should make up the majority of the users,
