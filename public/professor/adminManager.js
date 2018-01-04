@@ -55,7 +55,7 @@ function updateTable (course) {
                 var $deleteButton = $('<button>', { title: 'Remove', class: 'btn btn-default btn-sm' })
                     .append($('<i>', { class: 'fas fa-times' })
                         .attr('aria-hidden', 'true'))
-                    .click(removeAdmin.bind(this, data[i].pNetID, course.cID, $deleteButton)),
+                    .click(removeAdmin.bind(this, data[i].pNetID, course, $deleteButton)),
                     name = '-';
 
                 if (data[i].fName && data[i].fName.length > 0 && data[i].lName && data[i].lName.length > 0) 
@@ -102,16 +102,12 @@ function addAdmin (course) {
             var msg, json = xhr.responseJSON;
 
             if (!json || !json.errorCode)
-                msg = 'Error adding admin ' + xhr.responseStatus;
+                msg = 'Error adding admin - ' + xhr.status;
             else { 
                 msg = json.message;
             }
             
-            if (json && json.errorCode && (json.errorCode === 1 || json.errorCode === 2)) {
-                showFormError.call(this, msg);
-            } else {
-                showFormSuccess.call(this, msg);
-            }
+            showFormError.call(this, msg);
         }.bind(this))
         .always(function (a, status, b) {
             updateTable.call(this, course);
@@ -152,17 +148,20 @@ function showMessage (success, msg, $element) {
         .show();
 }
 
-function removeAdmin (netID, classID, $deleteButton) {
+function removeAdmin (netID, course, $deleteButton) {
     $deleteButton.prop('disabled', true);
 
     $.ajax({
-        url: '/professor/class/' + classID + '/admins/remove/' + netID,
+        url: '/professor/class/' + course.cID + '/admins/remove/' + netID,
         method: 'DELETE'
-    }).done(function (data, status, xhr) {
+    })
+    .done(function (data, status, xhr) {
         showTableMessage.call(this, true, 'Successfully deleted admin ' + netID);
-    }.bind(this)).fail(function (xhr, status, errorStatus) {
+    }.bind(this))
+    .fail(function (xhr, status, errorStatus) {
         showTableMessage.call(this, false, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
-    }.bind(this)).always(function (a, status, b) {
+    }.bind(this))
+    .always(function (a, status, b) {
         updateTable.call(this, course);
     }.bind(this));
 }

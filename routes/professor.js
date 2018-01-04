@@ -5,7 +5,8 @@ var express            = require('express'),
     db                 = require('../api/db'),
     regex              = require('../api/regex'),
     attendanceSessions = require('../api/data/attendanceSessions'),
-    EnrollStudent      = require('../models/EnrollStudent');
+    EnrollStudent      = require('../models/EnrollStudent'),
+    RouteError         = require('../models/RouteError');
 
 // Authenticate every request to the professor API against the DB
 // If successful, req.user will gain the firstName and lastName of the prof 
@@ -120,15 +121,20 @@ router.post('/class/:classID/admins/add/:netID', function (req, res, next) {
     var adminID = req.params.netID;
 
     // Validate netID parameter
-    if (!adminID) return routeHelper.sendError(res, null, { errorCode: 1, message: 'No netID provided' }, 400);
+    if (!adminID) return routeHelper.sendError(res, null, new RouteError(1, 'No netID provided'), 400);
     if (!regex.user.netID.test(adminID))
-        return routeHelper.sendError(res, null, { errorCode: 2, message: 'Invalid netID syntax' }, 400);
+        return routeHelper.sendError(res, null, new RouteError(2, 'Invalid netID syntax'), 400);
     if (adminID === req.user.netID)
-        return routeHelper.sendError(res, null, { errorCode: 3, message: 'Owner cannot be added as an administrator' }, 409);
+        return routeHelper.sendError(res, null, new RouteError(3, 'Owner cannot be added as an administrator'), 409);
 
     // Add new admin
     db.addAdmin(req.params.classID, adminID, function (err, results, fields) {
-        if (err) return routeHelper.sendError(res, err, 'Error adding administrator');
+        if (err) {
+            if (err.errno === 1062)
+                return routeHelper.sendError(res, err, new RouteError(4, 'Administrator already exists'), 409);
+            else 
+                return routeHelper.sendError(res, err, 'Error adding administrator');
+        }
         res.status(201).send('');
     });
 });
