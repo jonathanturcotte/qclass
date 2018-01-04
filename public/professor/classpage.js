@@ -99,6 +99,9 @@ function build () {
     this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName/' + this.course.cID);
     this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode/' + this.course.cID);
 
+    // Create the adminManager for use with editAdministrators
+    this.adminManager = new AdminManager();
+
     // Add the edit button
     $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
         .click(editAdministrators.bind(this))
@@ -143,8 +146,7 @@ function build () {
 }
 
 function editAdministrators() {
-    this.adminManager = new AdminManager(this.course);
-    this.adminManager.buildModal();
+    this.adminManager.buildAndShowModal(this.course);
 }
 
 /**
