@@ -91,29 +91,34 @@ function addAdmin (course) {
         // Disable form
         this.$addButton.prop('disabled', true);
         this.$netIDField.prop('disabled', true);
-        this.$formMessage.hide();
-        clearFormError.call(this);
 
         $.post({
             url: '/professor/class/' + course.cID + '/admins/add/' + netID
         })
         .done(function (data, status, xhr) {
             showFormSuccess.call(this, 'Admin successfully added');
+            updateTable.call(this, course);
         }.bind(this))
         .fail(function (xhr, status, errorThrown) {
-            var msg, json = xhr.responseJSON;
+            var msg,
+                shouldUpdate = true,
+                json = xhr.responseJSON;
 
             if (!json || !json.errorCode)
                 msg = 'Error adding admin - ' + xhr.status;
             else { 
                 msg = json.message;
+
+                // Don't update table if the error code is known to not affect the DB
+                if (json.errorCode > 1)
+                    shouldUpdate = false;
             }
-            
             showFormError.call(this, msg);
+
+            if (shouldUpdate)
+                updateTable.call(this, course);
         }.bind(this))
         .always(function (a, status, b) {
-            updateTable.call(this, course);
-
             // Re-enable form
             this.$addButton.prop('disabled', false);
             this.$netIDField.prop('disabled', false);

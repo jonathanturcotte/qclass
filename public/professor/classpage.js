@@ -31,6 +31,7 @@ var ClassPage = function() {
     this.exporter = new Exporter();
     this.importer = new Importer();
     this.sessions = new SessionManager();
+    this.adminManager = new AdminManager();
 };
 
 /**
@@ -98,9 +99,6 @@ function build () {
     // Wrap the title and course code in divs so that Editable can append an edit icon in-line on hover
     this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName/' + this.course.cID);
     this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode/' + this.course.cID);
-
-    // Create the adminManager for use with editAdministrators
-    this.adminManager = new AdminManager();
 
     // Add the edit button if owner
     if (this.course.isOwner) {

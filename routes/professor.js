@@ -119,17 +119,17 @@ router.post('/class/:classID/admins/add/:netID', mustOwnClass, function (req, re
     var adminID = req.params.netID;
 
     // Validate netID parameter
-    if (!adminID) return routeHelper.sendError(res, null, new RouteError(1, 'No netID provided'), 400);
+    if (!adminID) return routeHelper.sendError(res, null, new RouteError(2, 'No netID provided'), 400);
     if (!regex.user.netID.test(adminID))
-        return routeHelper.sendError(res, null, new RouteError(2, 'Invalid netID syntax'), 400);
+        return routeHelper.sendError(res, null, new RouteError(3, 'Invalid netID syntax'), 400);
     if (adminID === req.user.netID)
-        return routeHelper.sendError(res, null, new RouteError(3, 'Owner cannot be added as an administrator'), 409);
+        return routeHelper.sendError(res, null, new RouteError(4, 'Owner cannot be added as an administrator'), 409);
 
     // Add new admin
     db.addAdmin(req.params.classID, adminID, function (err, results, fields) {
         if (err) {
             if (err.errno === 1062)
-                return routeHelper.sendError(res, err, new RouteError(4, 'Administrator already exists'), 409);
+                return routeHelper.sendError(res, err, new RouteError(5, 'Administrator already exists'), 409);
             else 
                 return routeHelper.sendError(res, err, 'Error adding administrator');
         }
