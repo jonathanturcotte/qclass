@@ -71,6 +71,16 @@ body {
     white-space: pre;
     max-width: 270px;
     outline: 0px;
+    display: inline-block;
+}
+
+.classlist-admin-indicator {
+    font-weight: bold;
+    font-size: small;
+    float: right;
+    margin-bottom: 70%;
+    margin-top: 20%;
+    margin-right: 15px;
 }
 
 .classpage {

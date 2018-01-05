@@ -49,8 +49,8 @@ function processData(data) {
     }
 
     // Iterate session entries to fill sessions and create session-student links 
-    for (var i in data.entries) {
-        var entry = data.entries[i];
+    for (var j in data.entries) {
+        var entry = data.entries[j];
         if (!sessions[entry.attTime]) {
             sessions[entry.attTime] = {
                 time:          entry.attTime,

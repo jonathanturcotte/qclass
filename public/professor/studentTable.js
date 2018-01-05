@@ -66,8 +66,8 @@ function openDeleteModal(student) {
             
     $deleteButton.click(tryRemoveStudent.bind(this, $deleteButton, modal, student));
 
-    modal.$body.append($('<p>', { text: 'Are you sure you want to remove ' + student.fName + ' ' + student.lName 
-        + ' (' + student.stdNum + ', ' + student.netID + ')?' }));
+    modal.$body.append($('<p>', { text: 'Are you sure you want to remove ' + student.fName + ' ' + student.lName +
+        ' (' + student.stdNum + ', ' + student.netID + ')?' }));
     modal.$footer.prepend($deleteButton);
     modal.$closeButton.text('Cancel');
 }

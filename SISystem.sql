@@ -48,6 +48,12 @@ create table attendance (
 	primary key (cID, attTime, sNetID)
 );
 
+create table administrators (
+	cID    char(36) not null,
+	pNetID varchar(10) not null,
+	primary key (cID, pNetID)
+);
+
 /*
 create table lecture (
 	lecNum		int not null,
