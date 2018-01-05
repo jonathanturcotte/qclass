@@ -17,7 +17,7 @@ exports.sendError = function(res, err, body = 'Internal Server Error', status = 
     if (err && err.httpStatus) {
         // handle custom error object from one of our internal API calls
         body = err.body;
-        status = err.httpStatus;
+        status = err.httpStatus || status;
         err = null;
     }
     var isBodyString = typeof(body) === 'string'; 

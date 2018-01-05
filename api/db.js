@@ -1,7 +1,7 @@
 var mysql         = require('mysql'),
     uuid          = require('uuid/v4'),
     async         = require('async'),
-    EnrollStudent = require('../models/EnrollStudent');
+    EnrollStudent = require('../models/enrollStudent');
 
 var pool = mysql.createPool({
     host:       "localhost",
@@ -239,6 +239,32 @@ exports.removeSession = function (classID, time, callback) {
             runQuery(removeAttHist, [classID, time], callback);
         }
     });
+};
+
+exports.addAdmin = function (classID, netID, callback) {
+    runQuery('INSERT INTO administrators (cID, pNetID) VALUES (?, ?)', [classID, netID], callback);
+};
+
+exports.removeAdmin = function (classID, netID, callback) {
+    runQuery('DELETE FROM administrators WHERE cID = ? AND pNetID = ?', [classID, netID], callback);
+};
+
+exports.getAdministeredClasses = function (netID, callback) {
+    var query = `SELECT c.cID, c.cName, c.cCode
+                 FROM course c JOIN administrators a ON c.cID = a.cID
+                 WHERE a.pNetID = ?`;
+    runQuery(query, [netID], callback);
+};
+
+exports.getAdminsByClass = function (classID, callback) {
+    var query = `SELECT a.pNetID, p.fName, p.lName
+                 FROM administrators a LEFT JOIN professor p ON p.pNetID = a.pNetID
+                 WHERE a.cID = ?`;
+    runQuery(query, [classID], callback);
+};
+
+exports.isAdmin = function (netID, classID, callback) {
+    runExistenceQuery('SELECT 1 FROM administrators WHERE pNetID = ? AND cID = ?', [netID, classID], callback);
 };
 
 /**

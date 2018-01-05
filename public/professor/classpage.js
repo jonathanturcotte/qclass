@@ -1,4 +1,5 @@
 var SessionManager = require('./sessions'),
+    AdminManager   = require('./adminManager'),
     Table          = require('../components/table'),
     SessionTable   = require('./sessionTable'),
     StudentTable   = require('./studentTable'),
@@ -30,6 +31,7 @@ var ClassPage = function() {
     this.exporter = new Exporter();
     this.importer = new Importer();
     this.sessions = new SessionManager();
+    this.adminManager = new AdminManager();
 };
 
 /**
@@ -98,10 +100,12 @@ function build () {
     this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName/' + this.course.cID);
     this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode/' + this.course.cID);
 
-    // Add the edit button
-    $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
-        .click(editAdministrators.bind(this))
-        .appendTo($editDiv);
+    // Add the edit button if owner
+    if (this.course.isOwner) {
+        $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
+            .click(editAdministrators.bind(this))
+            .appendTo($editDiv);
+    }
 
     // Attendance section
     $('<label>', { text: 'Start an attendance session:', class: 'class-attendance-label' })
@@ -142,7 +146,7 @@ function build () {
 }
 
 function editAdministrators() {
-    //TODO: complete
+    this.adminManager.buildAndShowModal(this.course);
 }
 
 /**
