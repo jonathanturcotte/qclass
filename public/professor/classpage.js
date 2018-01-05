@@ -157,7 +157,7 @@ function getDurationSelect(classID) {
     // Parse the previously selected value
     if (prevChoiceCookie) {
         prevChoice = Number.parseInt(prevChoiceCookie);
-        if (prevChoice === NaN) {
+        if (isNaN(prevChoice)) {
             prevChoice = null;        
         }
     }

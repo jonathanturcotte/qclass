@@ -60,12 +60,12 @@ exports.enroll = function(classID, students, callback) {
                                     innerCallback();
                                 }
                             }
-                        })
+                        });
                     } else { // student exists, need to check current enrollment to avoid attempting duplicates
                         con.query('SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?', [student.netID, classID], function(err, results, fields) {
                             if (err) innerCallback(err);
                             else {
-                                if (!results.length > 0) toEnroll.push(student);
+                                if (results.length <= 0) toEnroll.push(student);
                                 innerCallback();
                             }
                         });

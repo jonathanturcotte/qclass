@@ -7,4 +7,4 @@
 module.exports = function (text, milliseconds) {
     this.text = text;
     this.milliseconds = milliseconds;
-}
+};
