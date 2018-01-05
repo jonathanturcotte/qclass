@@ -1,7 +1,7 @@
 var mysql         = require('mysql'),
     uuid          = require('uuid/v4'),
     async         = require('async'),
-    EnrollStudent = require('../models/EnrollStudent');
+    EnrollStudent = require('../models/enrollStudent');
 
 var pool = mysql.createPool({
     host:       "localhost",

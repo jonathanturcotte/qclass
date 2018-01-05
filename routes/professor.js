@@ -5,8 +5,8 @@ var express            = require('express'),
     db                 = require('../api/db'),
     regex              = require('../api/regex'),
     attendanceSessions = require('../api/data/attendanceSessions'),
-    EnrollStudent      = require('../models/EnrollStudent'),
-    RouteError         = require('../models/RouteError');
+    EnrollStudent      = require('../models/enrollStudent'),
+    RouteError         = require('../models/routeError');
 
 // Authenticate every request to the professor API against the DB
 // If successful, req.user will gain the firstName and lastName of the prof 
@@ -55,7 +55,7 @@ router.get('/classes', function(req, res, next) {
         db.getAdministeredClasses(req.user.netID, function (err, adminClasses, fields) {
             if (err) return routeHelper.sendError(res, err, 'Error getting administered classes');
             res.json({ classes: classes, adminClasses: adminClasses });
-        })
+        });
     }); 
 });
 

@@ -119,7 +119,7 @@ function updateSuccess (data, textStatus, jqXHR) {
         classes.push(data.classes[i]);
     }
 
-    for (var i = 0; i < data.adminClasses.length; i++) {
+    for (i = 0; i < data.adminClasses.length; i++) {
         data.adminClasses[i].isOwner = false;
         classes.push(data.adminClasses[i]);
     }

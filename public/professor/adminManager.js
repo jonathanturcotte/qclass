@@ -77,7 +77,7 @@ function updateTable (course) {
         .always(function(a, status, b) {
             this.$tBody.spin(false);
         }.bind(this));
-};
+}
 
 function addAdmin (course) {
     var netID = this.$netIDField.val();
