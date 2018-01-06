@@ -98,11 +98,12 @@ SessionManager.prototype.terminateSession = function (course, callback) {
     var session = getSession(course, this.sessions);
 
     if (session) {
-        removeToastNotification(session.course.cID);
-
+        
         $.post({
             url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime
         }).done(function(data, status, xhr) {
+            removeToastNotification(session.course.cID);
+            session.modal.remove();
             callback(true);
         }).fail(function(xhr, status, errorThrown) {
             callback(false);
