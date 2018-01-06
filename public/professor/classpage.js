@@ -1,5 +1,6 @@
 var SessionManager = require('./sessions'),
     AdminManager   = require('./adminManager'),
+    CourseDeleter  = require('./courseDeleter'),
     Table          = require('../components/table'),
     SessionTable   = require('./sessionTable'),
     StudentTable   = require('./studentTable'),
@@ -32,6 +33,7 @@ var ClassPage = function() {
     this.importer = new Importer();
     this.sessions = new SessionManager();
     this.adminManager = new AdminManager();
+    this.courseDeleter = new CourseDeleter();
 };
 
 /**
@@ -100,11 +102,14 @@ function build () {
     this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName/' + this.course.cID);
     this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode/' + this.course.cID);
 
-    // Add the edit button if owner
+    // Add the edit and delete button if owner
     if (this.course.isOwner) {
         $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
             .click(editAdministrators.bind(this))
             .appendTo($editDiv);
+        $('<button>', { text: 'Delete Course', class: 'class-deletecourse-button btn btn-danger btn-square btn-x1' })
+            .click(deleteCourse.bind(this))
+            .appendTo($editDiv);    
     }
 
     // Attendance section
@@ -147,6 +152,10 @@ function build () {
 
 function editAdministrators() {
     this.adminManager.buildAndShowModal(this.course);
+}
+
+function deleteCourse() {
+    this.courseDeleter.buildAndShowModal(this.course, this.sessions);
 }
 
 /**

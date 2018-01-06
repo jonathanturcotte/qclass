@@ -175,6 +175,15 @@ router.post('/class/enrollStudent/:classID', function(req, res, next) {
     enroll(std, req.params.classID, res);
 });
 
+// For deleting a course
+router.delete('/class/:classID/removeCourse', function (req, res , next) {
+    
+    db.removeCourse(req.params.classID, function (err, results, fields) {
+        if (err) return routeHelper.sendError(res, err, 'Error deleting course');
+        res.status(204).send('');
+    });
+});
+
 // For deleting a student from a class
 router.delete('/class/:classID/remove-student/:netID', function (req, res, next) {
     if (!req.params.netID)

@@ -224,6 +224,55 @@ exports.getSessionAttInfo = function(classID, callback) {
     runQuery(query, [classID], callback);
 };
 
+// Uses a transaction to perform multiple queries with rollback upon failure
+// Removes: enrollment and admin info + course
+exports.removeCourse = function (classID, callback) {
+
+    useConnection(callback, function (con) {
+        // begins series of queries
+        con.beginTransaction(function (err) {            
+            if (err) { callback(err); }
+            // First deletes enrollment information
+            con.query('DELETE FROM enrolled WHERE cID=?', classID, function (err, result, fields) {
+                if (err) { 
+                    con.rollback(function() {
+                         callback(err);  
+                    });
+                }
+                // Second query deletes admin information
+                con.query('DELETE FROM administrators WHERE cID=?', classID, function (err, result, fields) {
+                    if (err) { 
+                        con.rollback(function() {
+                             callback(err);  
+                        });
+                    }
+                    // Third query deletes course information
+                    con.query('DELETE FROM course WHERE cID=?', classID, function (err, result, fields) {
+                        if (err) { 
+                            con.rollback(function() {
+                                 callback(err);  
+                            });
+                        }
+                        // Commit changes
+                        con.commit(function (err) {
+                            if (err) { 
+                                con.rollback(function() {
+                                     callback(err);  
+                                });
+                            }
+                            callback();
+
+                        });
+                    }); 
+                });
+            });
+        });
+        
+    });
+        
+
+};
+
 exports.removeFromClass = function (netID, classID, callback) {
     var query = 'DELETE FROM enrolled WHERE sNetID = ? AND cID = ?';
     runQuery(query, [netID, classID], callback);
