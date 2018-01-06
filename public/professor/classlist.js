@@ -24,6 +24,8 @@ ClassList.prototype.updateClasses = function () {
 ClassList.prototype.selectFirstClass = function () {
     if (this.classes.length !== 0)
         selectClass(this.classes[0]);
+    else
+        window.app.classPage.displayBlankPage();
 };
 
 /**

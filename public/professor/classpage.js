@@ -51,6 +51,10 @@ ClassPage.prototype.displayCourse = function (course) {
     build.call(this);
 };
 
+ClassPage.prototype.displayBlankPage = function () {
+    this.$element.empty()
+};
+
 ClassPage.prototype.refreshTables = function () {
     this.tableUpdater.updateTables();
 };
