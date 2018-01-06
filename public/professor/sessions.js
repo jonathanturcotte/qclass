@@ -94,7 +94,7 @@ SessionManager.prototype.endSession = function(course){
 };
 
 // Terminates a session without interacting with modals (used for course deletion)
-SessionManager.prototype.terminateSession = function (course) {
+SessionManager.prototype.terminateSession = function (course, callback) {
     var session = getSession(course, this.sessions);
 
     if (session) {
@@ -103,15 +103,15 @@ SessionManager.prototype.terminateSession = function (course) {
         $.post({
             url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime
         }).done(function(data, status, xhr) {
-            return true;
+            callback(true);
         }).fail(function(xhr, status, errorThrown) {
-            return false;
+            callback(false);
         }).always(function(a, status, b) {
             this.sessions = _.without(this.sessions, session);
         }.bind(this));
     }
     else 
-        return true;
+        callback(true);
 };
 
 SessionManager.prototype.hideSession = function (course) {

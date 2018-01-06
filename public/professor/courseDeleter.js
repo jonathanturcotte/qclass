@@ -22,8 +22,6 @@ CourseDeleter.prototype.buildAndShowModal = function (course, sessions) {
 
 function deleteCourse (course, sessions) {
 
-    var sessStop;
-
     this.$deleteButton.remove();
     this.modal.$body.empty();
     this.modal.$body
@@ -31,27 +29,27 @@ function deleteCourse (course, sessions) {
         .addClass('spin-min-height');
     
     // First kill any running sessions
-    sessStop = sessions.terminateSession(course); 
-
-    if (sessStop) {
-        $.ajax({
-            url: '/professor/class/' + course.cID + '/removeCourse',
-            method: 'DELETE'
-        })
-        .done(function (data, status, xhr) {
-            this.modal.success('Success', course.cCode + ' successfully deleted!');
-            window.app.classList.updateClasses();
-        }.bind(this))
-        .fail(function (xhr, status, errorThrown) {
-            this.modal.error('Error', xhr.responseText);
-        }.bind(this))
-        .always(function(a, status, b) {
-            this.modal.$body.spin(false);
-        }.bind(this));
-    }
-    else {
-        this.modal.error('Error', "Unable to end the session running");
-    }
+    sessions.terminateSession(course, function (stopped) {
+        if (stopped) {
+            $.ajax({
+                url: '/professor/class/' + course.cID + '/removeCourse',
+                method: 'DELETE'
+            })
+            .done(function (data, status, xhr) {
+                this.modal.success('Success', course.cCode + ' successfully deleted!');
+                window.app.classList.updateClasses();
+            }.bind(this))
+            .fail(function (xhr, status, errorThrown) {
+                this.modal.error('Error', xhr.responseText);
+            }.bind(this))
+            .always(function(a, status, b) {
+                this.modal.$body.spin(false);
+            }.bind(this));
+        }
+        else {
+            this.modal.error('Error', "Unable to end the session running");
+        }
+    }.bind(this)); 
 }
 
 module.exports = CourseDeleter;
