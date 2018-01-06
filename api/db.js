@@ -225,7 +225,7 @@ exports.getSessionAttInfo = function(classID, callback) {
 };
 
 // Uses a transaction to perform multiple queries with rollback upon failure
-// Removes: enrollment and admin info + course
+// Removes: enrollment, admin, session, attendance and course 
 exports.removeCourse = function (classID, callback) {
 
     useConnection(callback, function (con) {
@@ -246,31 +246,43 @@ exports.removeCourse = function (classID, callback) {
                              callback(err);  
                         });
                     }
-                    // Third query deletes course information
-                    con.query('DELETE FROM course WHERE cID=?', classID, function (err, result, fields) {
+                    // Third query deletes attendance information
+                    con.query('DELETE FROM attendance WHERE cID=?', classID, function (err, result, fields) {
                         if (err) { 
                             con.rollback(function() {
                                  callback(err);  
                             });
                         }
-                        // Commit changes
-                        con.commit(function (err) {
+                        // Fourth query deletes session information 
+                        con.query('DELETE FROM attendanceSession WHERE cID=?', classID, function (err, result, fields) {
                             if (err) { 
                                 con.rollback(function() {
                                      callback(err);  
                                 });
                             }
-                            callback();
-
+                            // Fifth query deletes course information
+                            con.query('DELETE FROM course WHERE cID=?', classID, function (err, result, fields) {
+                                if (err) { 
+                                    con.rollback(function() {
+                                         callback(err);  
+                                    });
+                                }
+                                // Commit changes
+                                con.commit(function (err) {
+                                    if (err) { 
+                                        con.rollback(function() {
+                                        callback(err);  
+                                        });
+                                    }
+                                    callback();
+                                });
+                            });
                         });
                     }); 
                 });
             });
-        });
-        
+        });        
     });
-        
-
 };
 
 exports.removeFromClass = function (netID, classID, callback) {
