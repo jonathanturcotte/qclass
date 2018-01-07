@@ -271,7 +271,7 @@ exports.removeCourse = function (classID, callback) {
                                 con.commit(function (err) {
                                     if (err) { 
                                         con.rollback(function() {
-                                        callback(err);  
+                                            callback(err);  
                                         });
                                     }
                                     callback();

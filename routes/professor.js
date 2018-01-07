@@ -176,8 +176,7 @@ router.post('/class/enrollStudent/:classID', function(req, res, next) {
 });
 
 // For deleting a course
-router.delete('/class/:classID/removeCourse', function (req, res , next) {
-    
+router.delete('/class/:classID', function (req, res , next) {    
     db.removeCourse(req.params.classID, function (err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error deleting course');
         res.status(204).send('');

@@ -71,7 +71,10 @@ SessionManager.prototype.endSession = function(course){
         }).done(function(data, status, xhr) {
             // On success, show completion
             displaySessionEnded.call(this, session);
-        }).fail(function(xhr, status, errorThrown) {
+            // Remove session from session manager
+            this.sessions = _.without(this.sessions, session);
+        }.bind(this))
+        .fail(function(xhr, status, errorThrown) {
             // On failure, display the error
             var text = 'Error ending session';
             if (xhr.responseText)
@@ -85,11 +88,8 @@ SessionManager.prototype.endSession = function(course){
         }).always(function(a, status, b) {
             // Remove the finish button, remove the hide button
             // Make the modal closeable
-            session.modal.$body.spin(false);
-
-            // Always remove the session from the session manager
-            this.sessions = _.without(this.sessions, session);
-        }.bind(this));
+            session.modal.$body.spin(false);           
+        });
     }
 };
 
@@ -97,19 +97,18 @@ SessionManager.prototype.endSession = function(course){
 SessionManager.prototype.terminateSession = function (course, callback) {
     var session = getSession(course, this.sessions);
 
-    if (session) {
-        
+    if (session) {        
         $.post({
             url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime
         }).done(function(data, status, xhr) {
             removeToastNotification(session.course.cID);
             session.modal.remove();
-            callback(true);
-        }).fail(function(xhr, status, errorThrown) {
-            callback(false);
-        }).always(function(a, status, b) {
             this.sessions = _.without(this.sessions, session);
-        }.bind(this));
+            callback(true);
+        }.bind(this))
+        .fail(function(xhr, status, errorThrown) {
+            callback(false);
+        });
     }
     else 
         callback(true);

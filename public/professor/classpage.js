@@ -1,6 +1,6 @@
 var SessionManager = require('./sessions'),
     AdminManager   = require('./adminManager'),
-    CourseDeleter  = require('./courseDeleter'),
+    CourseManager  = require('./courses'),
     Table          = require('../components/table'),
     SessionTable   = require('./sessionTable'),
     StudentTable   = require('./studentTable'),
@@ -33,7 +33,7 @@ var ClassPage = function() {
     this.importer = new Importer();
     this.sessions = new SessionManager();
     this.adminManager = new AdminManager();
-    this.courseDeleter = new CourseDeleter();
+    this.courseManager = new courseManager();
 };
 
 /**
@@ -159,7 +159,7 @@ function editAdministrators() {
 }
 
 function deleteCourse() {
-    this.courseDeleter.buildAndShowModal(this.course, this.sessions);
+    this.courseManager.buildAndShowModal(this.course, this.sessions);
 }
 
 /**
