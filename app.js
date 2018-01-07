@@ -45,6 +45,7 @@ app.use(helmet({
         directives: {
             defaultSrc: ["'self'",
                 'data:',
+                'https://idptest.queensu.ca',           // IdP for SSO
                 'https://code.jquery.com',              // jQuery
                 'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
