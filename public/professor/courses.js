@@ -50,4 +50,4 @@ function deleteCourse (course, sessions) {
     }.bind(this)); 
 }
 
-module.exports = CourseDeleter;
+module.exports = CourseManager;
