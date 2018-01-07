@@ -96,7 +96,7 @@ var passportStrat = new SamlStrategy({
         cert             : fs.readFileSync('sso/idp.crt', 'utf8'),                   // X509 cert for the idp, needs to be all on one line
         decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                          // Our private key
     }, function (profile, done) {
-        // Might replace this with the auth.autnenticate
+        return done(null, profile); // TODO: Replace with something more meaningful    
     }
 );
 
