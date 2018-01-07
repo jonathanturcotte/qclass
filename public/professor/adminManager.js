@@ -3,7 +3,7 @@ var ModalWindow = require('../modalwindow'),
     
 var AdminManager = function () {};
 
-AdminManager.prototype.buildAndShowModal = function (course) {
+AdminManager.prototype.manageAdmins = function (course) {
     var netIDFieldID = 'add-admin-netID-field';
 
     this.modal = new ModalWindow({ title: 'Edit Administrators' });

@@ -109,10 +109,10 @@ function build () {
     // Add the edit and delete button if owner
     if (this.course.isOwner) {
         $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
-            .click(editAdministrators.bind(this))
+            .click(this.adminManager.manageAdmins.bind(this, this.course))
             .appendTo($editDiv);
         $('<button>', { text: 'Delete Course', class: 'class-deletecourse-button btn btn-danger btn-square btn-x1' })
-            .click(deleteCourse.bind(this))
+            .click(this.courseManager.deleteCourse.bind(this, this.course, this.sessions))
             .appendTo($editDiv);    
     }
 
@@ -152,14 +152,6 @@ function build () {
     // Initialize the tableUpdater and fill the tables
     this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
     this.tableUpdater.updateTables();
-}
-
-function editAdministrators() {
-    this.adminManager.buildAndShowModal(this.course);
-}
-
-function deleteCourse() {
-    this.courseManager.buildAndShowModal(this.course, this.sessions);
 }
 
 /**

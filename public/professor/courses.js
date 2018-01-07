@@ -3,11 +3,48 @@ var ModalWindow = require('../modalwindow'),
 
 var CourseManager = function () {};
 
-CourseManager.prototype.buildAndShowModal = function (course, sessions) {    
+CourseManager.prototype.createCourse = function () {
+    var modal         = new ModalWindow({id: "addClassModal", title: "Add Class"}),
+        $cCodeInput   = $('<input>', { type: 'text', name: 'cCode', id: 'cCode' }),
+        $cNameInput   = $('<input>', { type: 'text', name: 'cName', id: 'cName' }),
+        $submitButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Submit', id: 'submitAddClasses' });
+
+    modal.$body
+        .append($('<p>', {text: 'Course Code:'}))
+        .append($cCodeInput)
+        .append($('<p>', {text: 'Course Name:'}))
+        .append($cNameInput);
+    modal.$footer
+        .prepend($submitButton);
+    $submitButton
+        .click(function () {
+            $submitButton.remove();
+            modal.$body.empty();
+            modal.$body
+                .spin()
+                .addClass('spin-min-height');
+
+            $.post({
+                url: '/professor/class/add',
+                data: { code: $cCodeInput.val(), name: $cNameInput.val() },
+                dataType: 'json'
+            }).done(function(data, status, xhr) {
+                modal.success("Success", $cCodeInput.val() + ' successfully added!');
+                window.app.classList.updateClasses();
+            }).fail(function(xhr, status, errorThrown) {
+                modal.error("Error", xhr.responseText);
+            }).always(function(a, status, b) {
+                modal.$body.spin(false);
+            });
+        });
+    modal.show();
+};
+
+CourseManager.prototype.deleteCourse = function (course, sessions) {
     this.modal = new ModalWindow({ title: 'Delete Course'});
     
     this.$deleteButton = $('<button>', { type: 'submit', class: 'btn btn-danger',  text: 'Delete', id: 'deleteButton' })
-        .click(deleteCourse.bind(this, course, sessions));
+        .click(removeCourse.bind(this, course, sessions));
 
     this.modal.$body
         .append($('<p>', { text: 'Are you sure you want to delete ' + course.cCode + '?' }))
@@ -19,7 +56,7 @@ CourseManager.prototype.buildAndShowModal = function (course, sessions) {
         .prepend(this.$deleteButton);
 };
 
-function deleteCourse (course, sessions) {
+function removeCourse (course, sessions) {
     this.$deleteButton.remove();
     this.modal.$body.empty();
     this.modal.$body
