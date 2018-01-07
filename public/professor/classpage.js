@@ -33,7 +33,7 @@ var ClassPage = function() {
     this.importer = new Importer();
     this.sessions = new SessionManager();
     this.adminManager = new AdminManager();
-    this.courseManager = new courseManager();
+    this.courseManager = new CourseManager();
 };
 
 /**
