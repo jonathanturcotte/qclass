@@ -29,11 +29,11 @@ var durationOptions = [
 */
 var ClassPage = function() {
     this.$element = $('.classpage');
-    this.exporter = new Exporter();
-    this.importer = new Importer();
-    this.sessions = new SessionManager();
-    this.adminManager = new AdminManager();
-    this.courseManager = new CourseManager();
+    this.exporter       = new Exporter();
+    this.importer       = new Importer();
+    this.sessionManager = new SessionManager();
+    this.adminManager   = new AdminManager();
+    this.courseManager  = new CourseManager();
 };
 
 /**
@@ -52,7 +52,7 @@ ClassPage.prototype.displayCourse = function (course) {
 };
 
 ClassPage.prototype.displayBlankPage = function () {
-    this.$element.empty()
+    this.$element.empty();
 };
 
 ClassPage.prototype.refreshTables = function () {
@@ -108,12 +108,18 @@ function build () {
 
     // Add the edit and delete button if owner
     if (this.course.isOwner) {
-        $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
-            .click(this.adminManager.manageAdmins.bind(this, this.course))
-            .appendTo($editDiv);
-        $('<button>', { text: 'Delete Course', class: 'class-deletecourse-button btn btn-danger btn-square btn-x1' })
-            .click(this.courseManager.deleteCourse.bind(this, this.course, this.sessions))
-            .appendTo($editDiv);    
+        var $adminButton = $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
+                .click(this.adminManager.manageAdmins.bind(this, this.course)),
+            $delButton = $('<button>', { text: 'Delete Course', class: 'class-deletecourse-button btn btn-danger btn-square btn-x1' })
+                .click(this.courseManager.deleteCourse.bind(this, this.course, this.sessionManager));
+
+        // check if there are running sessions for this class, and 
+        // disable the delete course button if there are
+        if (this.sessionManager.isCourseRunning(this.course))
+            $delButton.attr('disabled', 'disabled');
+
+        $adminButton.appendTo($editDiv);
+        $delButton.appendTo($editDiv);
     }
 
     // Attendance section
@@ -128,7 +134,7 @@ function build () {
 
     // Bind duration to start button press
     $startButton.click(function () { 
-        this.sessions.startSession(this.course, this.$duration.val()); 
+        this.sessionManager.startSession(this.course, this.$duration.val());
     }.bind(this));
 
     // The session table and export button

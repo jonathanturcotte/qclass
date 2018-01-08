@@ -62,29 +62,21 @@ function removeCourse (course, sessions) {
     this.modal.$body
         .spin()
         .addClass('spin-min-height');
-    
-    // First kill any running sessions
-    sessions.terminateSession(course, function (stopped) {
-        if (stopped) {
-            $.ajax({
-                url: '/professor/class/' + course.cID,
-                method: 'DELETE'
-            })
-            .done(function (data, status, xhr) {
-                this.modal.success('Success', course.cCode + ' successfully deleted!');
-                window.app.classList.updateClasses();
-            }.bind(this))
-            .fail(function (xhr, status, errorThrown) {
-                this.modal.error('Error', xhr.responseText);
-            }.bind(this))
-            .always(function(a, status, b) {
-                this.modal.$body.spin(false);
-            }.bind(this));
-        }
-        else {
-            this.modal.error('Error', "Unable to end the running session");
-        }
-    }.bind(this)); 
+
+    $.ajax({
+        url: '/professor/class/' + course.cID,
+        method: 'DELETE'
+    })
+    .done(function (data, status, xhr) {
+        this.modal.success('Success', course.cCode + ' successfully deleted!');
+        window.app.classList.updateClasses();
+    }.bind(this))
+    .fail(function (xhr, status, errorThrown) {
+        this.modal.error('Error', xhr.responseText);
+    }.bind(this))
+    .always(function(a, status, b) {
+        this.modal.$body.spin(false);
+    }.bind(this));
 }
 
 module.exports = CourseManager;

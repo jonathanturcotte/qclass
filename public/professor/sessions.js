@@ -17,6 +17,8 @@ SessionManager.prototype.startSession = function (course, duration) {
     } else {
         var session = createSession(course);
 
+        disableDeleteCourse(course.cID);
+
         session.modal.show();
         session.modal.$body.spin()
             .addClass('spin-min-height');
@@ -93,27 +95,6 @@ SessionManager.prototype.endSession = function(course){
     }
 };
 
-// Terminates a session without interacting with modals (used for course deletion)
-SessionManager.prototype.terminateSession = function (course, callback) {
-    var session = getSession(course, this.sessions);
-
-    if (session) {        
-        $.post({
-            url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime
-        }).done(function(data, status, xhr) {
-            removeToastNotification(session.course.cID);
-            session.modal.remove();
-            this.sessions = _.without(this.sessions, session);
-            callback(true);
-        }.bind(this))
-        .fail(function(xhr, status, errorThrown) {
-            callback(false);
-        });
-    }
-    else 
-        callback(true);
-};
-
 SessionManager.prototype.hideSession = function (course) {
     // Get the session associated with the course
     var session = getSession(course, this.sessions);
@@ -146,6 +127,12 @@ SessionManager.prototype.showSession = function (course) {
         removeToastNotification(course.cID);
         session.modal.show();
     }
+};
+
+// Check if the the given course has a session running
+SessionManager.prototype.isCourseRunning = function (course) {
+    var session = getSession(course, this.sessions);
+    return !!session;
 };
 
 ///////////////////////
@@ -196,6 +183,7 @@ function displaySessionEnded(session) {
     var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
 
     removeToastNotification(session.course.cID);
+    enableDeleteCourse(session.course.cID);
 
     session.modal.$title.text('Session Complete');
     $timerContainer
@@ -254,6 +242,28 @@ function getSession(course, sessions) {
         if (sessions[i].course.cID === course.cID){
             return sessions[i];
         }
+    }
+}
+
+// Disables the delete course button until a session
+// is completed or ended early
+function disableDeleteCourse(id) {
+    if (window.app.classPage.course.cID === id) {
+        var $button = $('.class-deletecourse-button');
+        $button.attr({
+            'disabled': 'disabled',
+            'title'   : 'Stop the currently running session before deleting this course'
+        });
+    }
+}
+
+// Enable the delete course button for a course,
+// but only if that course is the one being currently shown
+function enableDeleteCourse(id) {
+    if (window.app.classPage.course.cID === id) {
+        var $button = $('.class-deletecourse-button');
+        $button.removeAttr('disabled');
+        $button.removeAttr('title');
     }
 }
 
