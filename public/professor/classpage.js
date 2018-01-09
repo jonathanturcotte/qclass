@@ -67,11 +67,13 @@ ClassPage.prototype.refreshTables = function () {
  * Builds the classpage, adds it to the DOM
  */
 function build () {
-    var $topDiv      = $('<div>', { class: 'class-top-div' }),
-        $titleDiv    = $('<div>', { class: 'class-title-div' }),
+    var $topDiv      = $('<div>', { class: 'class-top-div row' }),
+        $titleDiv    = $('<div>', { class: 'class-title-div col-auto' }),
         $nameDiv     = $('<div>'),
         $codeDiv     = $('<div>'),
-        $editDiv     = $('<div>', { class: 'class-edit-div' }),
+        $optionsDiv  = $('<div>', { class: 'class-options-div col' }),
+        $adminButton = $('<button>', { text: 'Edit Administrators', class: 'class-admin-button btn btn-danger btn-square btn-xl' }),
+        $delButton   = $('<button>', { text: 'Delete Course', class: 'class-delete-button btn btn-danger btn-square btn-x1' }),
         $titleCode   = $('<h2>', { class: 'class-title-code title-field', text: this.course.cCode }),
         $titleName   = $('<h3>', { class: 'class-title-name title-field', text: this.course.cName }),
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
@@ -91,7 +93,8 @@ function build () {
                     .append($titleCode))
                 .append($nameDiv)
                     .append($titleName))
-            .append($editDiv))
+            .append($optionsDiv))
+                // .append($buttonDiv))
         .append($attDiv
             .append($attDivLeft
                 .append($startButton))
@@ -108,10 +111,8 @@ function build () {
 
     // Add the edit and delete button if owner
     if (this.course.isOwner) {
-        var $adminButton = $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
-                .click(this.adminManager.manageAdmins.bind(this, this.course)),
-            $delButton = $('<button>', { text: 'Delete Course', class: 'class-deletecourse-button btn btn-danger btn-square btn-x1' })
-                .click(this.courseManager.deleteCourse.bind(this, this.course, this.sessionManager));
+        $adminButton.click(this.adminManager.manageAdmins.bind(this, this.course));
+        $delButton.click(this.courseManager.deleteCourse.bind(this, this.course, this.sessionManager));
 
         // check if there are running sessions for this class, and 
         // disable the delete course button if there are
@@ -123,8 +124,8 @@ function build () {
                 'title'          : 'Stop the running session before deleting'
             }).tooltip();
 
-        $adminButton.appendTo($editDiv);
-        $delButton.appendTo($editDiv);
+        $adminButton.appendTo($optionsDiv);
+        $delButton.appendTo($optionsDiv);
     }
 
     // Attendance section

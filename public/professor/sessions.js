@@ -249,7 +249,7 @@ function getSession(course, sessions) {
 // is completed or ended early, and adds a tooltip explaining this
 function disableDeleteCourse(id) {
     if (window.app.classPage.course.cID === id) {
-        var $button = $('.class-deletecourse-button');
+        var $button = $('.class-delete-button');
         $button.attr({
             'disabled'       : 'disabled',
             'data-toggle'    : 'tooltip',
@@ -263,7 +263,7 @@ function disableDeleteCourse(id) {
 // but only if that course is the one being currently shown
 function enableDeleteCourse(id) {
     if (window.app.classPage.course.cID === id) {
-        var $button = $('.class-deletecourse-button');
+        var $button = $('.class-delete-button');
         $button.removeAttr('disabled')
             .removeAttr('title')
             .removeAttr('data-toggle')

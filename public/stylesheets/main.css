@@ -91,7 +91,9 @@ body {
     max-height: calc(100vh - 56px);
     min-height: calc(100vh - 56px);
     width: calc(100vw - 300px);
+    min-width: 600px;
     overflow-y: auto;
+    overflow-x: auto;
 }
 
 .class-top-div {
@@ -99,11 +101,11 @@ body {
 }
 
 .class-title-div {
-    float: left;
+    text-align: left;
 }
 
-.class-edit-div {
-    float: right;
+.class-options-div {
+    text-align: right;
 }
 
 .editable-icon {
@@ -159,8 +161,13 @@ body {
     margin-top: 10px;
 }
 
-.class-deletecourse-button {
+.class-admin-button {
+    margin-bottom: 10px;
+}
+
+.class-delete-button {
     margin-left: 10px;
+    vertical-align: top;
 }
 
 .class-table-column-div {
