@@ -5,6 +5,10 @@ body {
     background: rgba(0, 0, 0, 0) url("/images/dust_scratches.png") repeat scroll 0% 0%;
 }
 
+.main-container {
+    overflow-x: hidden;
+}
+
 .noselect {
         -webkit-touch-callout: none; /* iOS Safari */
           -webkit-user-select: none; /* Safari */
@@ -84,6 +88,8 @@ body {
 }
 
 .classpage {
+    display: flex;
+    flex-direction: column;
     padding-top: 20px;
     padding-left: 30px;
     padding-right: 15px;
@@ -91,13 +97,9 @@ body {
     max-height: calc(100vh - 56px);
     min-height: calc(100vh - 56px);
     width: calc(100vw - 300px);
-    min-width: 600px;
+    min-width: 500px;
     overflow-y: auto;
     overflow-x: auto;
-}
-
-.class-top-div {
-    height: 110px;
 }
 
 .class-title-div {
@@ -109,21 +111,18 @@ body {
 }
 
 .editable-icon {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: url('/images/pencil.svg');
-    background-size: 20px 20px;
+    visibility: visible;
     margin-left: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
 }
 
 .editable-icon-hidden {
-    display: none;
+    visibility: hidden;
 }
 
 .class-attendance-div {
     height: 150px;
+    padding-bottom: 15px;
 }
 
 .class-attendance-div-left {
@@ -172,7 +171,7 @@ body {
 
 .class-table-column-div {
     text-align: center;
-    padding-top: 15px;
+    padding-bottom: 15px;
 }
 
 .hidden {
