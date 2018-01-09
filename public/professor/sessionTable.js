@@ -31,7 +31,12 @@ SessionTable.prototype.update = function (data) {
 
     // Persist/update the data
     this.data = data;
-
+    // Disable/enable export button
+    if(this.data.sessionCount) {
+        enableExport();
+    } else {
+        disableExport();
+    }
     // Add in reverse order to ensure that the latest sessions
     // are at the top of the table
     for (var i in data.sessions) {
@@ -145,6 +150,29 @@ function openAttendanceModal(date, sessionStudents) {
 
     modal.$body.append($table);
     modal.show();
+}
+
+// Disable export button
+function disableExport() {
+    var $exportButton = $('.class-export-button');
+
+    $exportButton.attr({
+        'disabled'       : 'disabled',
+        'data-toggle'    : 'tooltip',
+        'data-placement' : 'top',
+        'title'          : 'Stop the running session before deleting'
+    }).tooltip();
+}
+
+// Reenable expot button
+function enableExport() {
+    var $exportButton = $('.class-export-button');
+
+    $exportButton.removeAttr('disabled')
+        .removeAttr('title')
+        .removeAttr('data-toggle')
+        .removeAttr('data-placement')
+        .tooltip('dispose');    
 }
 
 module.exports = SessionTable;
