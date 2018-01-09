@@ -111,17 +111,13 @@ body {
 }
 
 .editable-icon {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background: url('/images/pencil.svg');
-    background-size: 20px 20px;
+    visibility: visible;
     margin-left: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
 }
 
 .editable-icon-hidden {
-    display: none;
+    visibility: hidden;
 }
 
 .class-attendance-div {
