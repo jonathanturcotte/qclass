@@ -281,8 +281,8 @@ function sessionOffChanges(id) {
         
         // Change back to red start button
         $startButton.removeClass('btn-success')
-                    .addClass('btn-danger')
-                    .text('Start');
+            .addClass('btn-danger')
+            .text('Start');
     }
 }
 
