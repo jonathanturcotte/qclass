@@ -1,6 +1,7 @@
 var XLSX         = require('xlsx'),
     IO           = require('./io'),
-    ModalWindow  = require('../modalwindow');
+    ModalWindow  = require('../modalwindow'),
+    regex        = require('../lib/regex');
 
 var Importer = function () {};
 
@@ -218,6 +219,9 @@ function importXLSX(course, modal, $file, $errorDiv, $inputDiv, $errorMsg) {
                 contentType: 'application/json'
             }).done(function(status, xhr) {
                 modal.success('Success', 'Classlist successfully added!');
+                modal.$window.on('hidden.bs.modal', function (e) {
+                    window.app.classPage.refreshTables();
+                });
             }).fail(function(xhr, status, errorThrown) {
                 //modal.error("Error", xhr.responseText);
                 fileErrorHandler($errorDiv, $inputDiv, $errorMsg, xhr.responseText, modal);
