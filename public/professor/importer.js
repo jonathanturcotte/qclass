@@ -242,7 +242,7 @@ function fileErrorHandler($errorDiv, $inputDiv, $errorMsg, errorText, modal) {
 function findErrors (netID, stdNum, fName, lName) {
     var result = [false, false, false, false];
     // check netID
-    if (!netID || typeof(netID) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(netID))) {
+    if (!netID || typeof(netID) !== 'string' || !regex.user.netID.test(netID)) {
         if(!netID)
             result[0] = "No NetID Provided";
         else
