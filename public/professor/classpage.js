@@ -77,7 +77,7 @@ function build () {
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
-        $startButton = $('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }),
+        $startButton = $('<button>', { class: 'btn btn-circle btn-xl', id: 'startButton'}),
         $tableRow    = $('<div>', { class: 'class-content row' }),
         $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
         $tableCol2   = $('<div>', { class: 'class-table-column-div col' }),
@@ -141,6 +141,15 @@ function build () {
     $startButton.click(function () { 
         this.sessionManager.startSession(this.course, this.$duration.val());
     }.bind(this));
+
+    // Change start button depending on whether a session is running
+    if (this.sessionManager.isCourseRunning(this.course)) {        
+        $startButton.addClass('btn-success');
+        $startButton.text('Show');
+    } else {
+        $startButton.addClass('btn-danger');
+        $startButton.text('Start');
+    }
 
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);

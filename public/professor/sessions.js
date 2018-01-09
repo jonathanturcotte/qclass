@@ -17,7 +17,7 @@ SessionManager.prototype.startSession = function (course, duration) {
     } else {
         var session = createSession(course);
 
-        disableDeleteCourse(course.cID);
+        sessionOnChanges(course.cID);
 
         session.modal.show();
         session.modal.$body.spin()
@@ -183,7 +183,7 @@ function displaySessionEnded(session) {
     var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
 
     removeToastNotification(session.course.cID);
-    enableDeleteCourse(session.course.cID);
+    sessionOffChanges(session.course.cID);
 
     session.modal.$title.text('Session Complete');
     $timerContainer
@@ -247,28 +247,38 @@ function getSession(course, sessions) {
 
 // Disables the delete course button until a session
 // is completed or ended early, and adds a tooltip explaining this
-function disableDeleteCourse(id) {
+function sessionOnChanges(id) {
     if (window.app.classPage.course.cID === id) {
-        var $button = $('.class-deletecourse-button');
-        $button.attr({
+        var $delButton   = $('.class-deletecourse-button'),
+            $startButton = $('#startButton');
+        $delButton.attr({
             'disabled'       : 'disabled',
             'data-toggle'    : 'tooltip',
             'data-placement' : 'top',
             'title'          : 'Stop the running session before deleting'
         }).tooltip();
+
+        $startButton.removeClass('btn-danger')
+                    .addClass('btn-success')
+                    .text('Show');
     }
 }
 
 // Enable the delete course button for a course,
 // but only if that course is the one being currently shown
-function enableDeleteCourse(id) {
+function sessionOffChanges(id) {
     if (window.app.classPage.course.cID === id) {
-        var $button = $('.class-deletecourse-button');
+        var $button = $('.class-deletecourse-button'),
+        $startButton = $('#startButton');
         $button.removeAttr('disabled')
             .removeAttr('title')
             .removeAttr('data-toggle')
             .removeAttr('data-placement')
             .tooltip('dispose');
+    
+    $startButton.removeClass('btn-success')
+                .addClass('btn-danger')
+                .text('Start');
     }
 }
 
