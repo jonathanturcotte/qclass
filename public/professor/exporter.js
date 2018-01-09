@@ -5,7 +5,7 @@ var Exporter = function () {};
 
 Exporter.prototype.createExportModal = function (course) {
     var modal         = new ModalWindow({ id: 'exportModal', title: 'Export Attendance Information'}),
-        $fileName     = $('<input>', {type: 'text', id: 'fileName', name: 'fileName', style: 'margin-bottom: 20px'}),
+        $fileName     = $('<input>', {type: 'text', class: 'form-control', id: 'fileName', name: 'fileName' }),
         $fileType     = $('<select>', {class: 'btn btn-secondary dropdown-toggle dropdown-toggle-split', id: 'fileType', name: 'fileType'} ),
         $overallCheck = $('<input>', {type: 'checkbox', id: 'overall', name: 'overall'}),
         $indivCheck   = $('<input>', {type: 'checkbox', id: 'session', name: 'session'}),
@@ -15,14 +15,17 @@ Exporter.prototype.createExportModal = function (course) {
     $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
     modal.$body
         .append($('<p>', {text: 'Specify output file name and type:'}))
-        .append($fileName)
-        .append($fileType
-            .append($('<option>', { text: 'xlsx', value: 'xlsx'}))
-            .append($('<option>', { text: 'csv', value: 'csv'})))
+        
+        .append($('<div>', { class: 'input-group', style: 'margin-bottom: 20px'})
+            .append($fileName)
+            .append($('<span>', { class: 'input-group-btn'})
+                .append($fileType
+                    .append($('<option>', { text: 'xlsx', value: 'xlsx'}))
+                    .append($('<option>', { text: 'csv', value: 'csv'})))))
         // Message specific to xlsx
         .append($xlsxMessageDiv
             .prepend($('<strong>', {text: 'Note: '})));
-         
+        
         
         // TODO: Finish adding the include checkboxes for exporting only the
         // overall information, the individual information, or both
