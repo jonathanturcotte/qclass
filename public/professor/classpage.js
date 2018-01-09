@@ -28,7 +28,7 @@ var durationOptions = [
  * Creates a class page, responsible for the central window of the professor site
 */
 var ClassPage = function() {
-    this.$element = $('.classpage');
+    this.$element       = $('.classpage');
     this.exporter       = new Exporter();
     this.importer       = new Importer();
     this.sessionManager = new SessionManager();
@@ -116,7 +116,12 @@ function build () {
         // check if there are running sessions for this class, and 
         // disable the delete course button if there are
         if (this.sessionManager.isCourseRunning(this.course))
-            $delButton.attr('disabled', 'disabled');
+            $delButton.attr({
+                'disabled'       : 'disabled',
+                'data-toggle'    : 'tooltip',
+                'data-placement' : 'top',
+                'title'          : 'Stop the running session before deleting'
+            }).tooltip();
 
         $adminButton.appendTo($editDiv);
         $delButton.appendTo($editDiv);

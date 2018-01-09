@@ -246,14 +246,16 @@ function getSession(course, sessions) {
 }
 
 // Disables the delete course button until a session
-// is completed or ended early
+// is completed or ended early, and adds a tooltip explaining this
 function disableDeleteCourse(id) {
     if (window.app.classPage.course.cID === id) {
         var $button = $('.class-deletecourse-button');
         $button.attr({
-            'disabled': 'disabled',
-            'title'   : 'Stop the currently running session before deleting this course'
-        });
+            'disabled'       : 'disabled',
+            'data-toggle'    : 'tooltip',
+            'data-placement' : 'top',
+            'title'          : 'Stop the running session before deleting'
+        }).tooltip();
     }
 }
 
@@ -262,8 +264,11 @@ function disableDeleteCourse(id) {
 function enableDeleteCourse(id) {
     if (window.app.classPage.course.cID === id) {
         var $button = $('.class-deletecourse-button');
-        $button.removeAttr('disabled');
-        $button.removeAttr('title');
+        $button.removeAttr('disabled')
+            .removeAttr('title')
+            .removeAttr('data-toggle')
+            .removeAttr('data-placement')
+            .tooltip('dispose');
     }
 }
 
