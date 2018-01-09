@@ -261,8 +261,8 @@ function sessionOnChanges(id) {
 
         // Change start button to green show button
         $startButton.removeClass('btn-danger')
-                    .addClass('btn-success')
-                    .text('Show');
+            .addClass('btn-success')
+            .text('Show');
     }
 }
 
