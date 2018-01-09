@@ -245,40 +245,40 @@ function getSession(course, sessions) {
     }
 }
 
-// Disables the delete course button until a session
-// is completed or ended early, and adds a tooltip explaining this
+// Make changes to class page when session running
 function sessionOnChanges(id) {
     if (window.app.classPage.course.cID === id) {
         var $delButton   = $('.class-deletecourse-button'),
-            $startButton = $('#startButton');
+            $startButton = $('.start-button');
+        // Disable delete button
         $delButton.attr({
             'disabled'       : 'disabled',
             'data-toggle'    : 'tooltip',
             'data-placement' : 'top',
             'title'          : 'Stop the running session before deleting'
         }).tooltip();
-
+        // Change to green show button
         $startButton.removeClass('btn-danger')
                     .addClass('btn-success')
                     .text('Show');
     }
 }
 
-// Enable the delete course button for a course,
-// but only if that course is the one being currently shown
+// Make changes to class page for when no session is running 
 function sessionOffChanges(id) {
     if (window.app.classPage.course.cID === id) {
-        var $button = $('.class-deletecourse-button'),
-        $startButton = $('#startButton');
-        $button.removeAttr('disabled')
+        var $delButton = $('.class-deletecourse-button'),
+        $startButton = $('.start-button');
+          // enable delete button
+        $delButton.removeAttr('disabled')
             .removeAttr('title')
             .removeAttr('data-toggle')
             .removeAttr('data-placement')
             .tooltip('dispose');
-    
-    $startButton.removeClass('btn-success')
-                .addClass('btn-danger')
-                .text('Start');
+        // change back to red start button
+        $startButton.removeClass('btn-success')
+                    .addClass('btn-danger')
+                    .text('Start');
     }
 }
 

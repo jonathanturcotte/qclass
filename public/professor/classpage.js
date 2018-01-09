@@ -77,12 +77,14 @@ function build () {
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
-        $startButton = $('<button>', { class: 'btn btn-circle btn-xl', id: 'startButton'}),
+        $startButton = $('<button>', { class: 'btn btn-circle btn-xl start-button'}),
         $tableRow    = $('<div>', { class: 'class-content row' }),
         $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
         $tableCol2   = $('<div>', { class: 'class-table-column-div col' }),
         $sessionDiv  = $('<div>', { class: 'table-div' }),
-        $studentDiv  = $('<div>', { class: 'table-div' });
+        $studentDiv  = $('<div>', { class: 'table-div' }),
+        // boolean variable to check if session running
+        sessionCheck = this.sessionManager.isCourseRunning(this.course);
 
     this.$element
         .append($topDiv
@@ -115,7 +117,7 @@ function build () {
 
         // check if there are running sessions for this class, and 
         // disable the delete course button if there are
-        if (this.sessionManager.isCourseRunning(this.course))
+        if (sessionCheck)
             $delButton.attr({
                 'disabled'       : 'disabled',
                 'data-toggle'    : 'tooltip',
@@ -143,7 +145,7 @@ function build () {
     }.bind(this));
 
     // Change start button depending on whether a session is running
-    if (this.sessionManager.isCourseRunning(this.course)) {        
+    if (sessionCheck) {        
         $startButton.addClass('btn-success');
         $startButton.text('Show');
     } else {
