@@ -116,7 +116,8 @@ app.use(passport.session());
 // Enforce authentication for all requests
 // Must remain above the other routes/middlewares to force
 // authentication for all the subsequent ones
-app.get('*', passport.authenticate('saml', { successRedirect: '/', failureRedirect: '/login/fail' }));
+app.get('*', passport.authenticate('saml', { failureRedirect: '/login/fail' }));
+app.post('*', passport.authenticate('saml', { failureRedirect: '/login/fail' }));
 
 // Serve the static pages
 app.use(express.static(path.join(__dirname, 'public')));
