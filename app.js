@@ -103,7 +103,6 @@ var passportStrat = new SamlStrategy({
         cert             : fs.readFileSync('sso/idp.crt', 'utf8'),                      // X509 cert for the idp, needs to be all on one line
         decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                             // Our private key
     }, function (profile, done) {
-        console.log("SAML - In passport callback");
         return done(null, profile); // TODO: Replace with something more meaningful
     }
 );
@@ -116,8 +115,7 @@ app.use(passport.session());
 // Enforce authentication for all requests
 // Must remain above the other routes/middlewares to force
 // authentication for all the subsequent ones
-app.get('*', passport.authenticate('saml', { failureRedirect: '/login/fail' }));
-app.post('*', passport.authenticate('saml', { failureRedirect: '/login/fail' }));
+app.all('*', passport.authenticate('saml', { failureRedirect: '/login/fail' }));
 
 // Serve the static pages
 app.use(express.static(path.join(__dirname, 'public')));
