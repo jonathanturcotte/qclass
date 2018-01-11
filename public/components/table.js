@@ -1,9 +1,5 @@
 /**
  * Generic implementation for fixed size, scrollable tables
- * @param {Object} course
- * @param {string} course.cID
- * @param {string} course.cCode
- * @param {string} course.cName
  * @param {Object} options
  * @param {string[]=} options.classList 
  * @param {Number=} options.height
@@ -12,7 +8,7 @@
  * the text of the column header and the number denoting its fixed width in pixels
  * @param {Object=} options.$appendTarget
  */
-var Table = function (course, options) {   
+var Table = function (options) {   
     var classes,
         width = options.width || 300;
 
@@ -26,7 +22,6 @@ var Table = function (course, options) {
 
     // Store references
     this.$element = $('<div>', { class: 'table-container' });
-    this.course   = course;
     this.columns  = options.columns;
 
     // Set table as two separate tables to allow for fixed headers while scrolling

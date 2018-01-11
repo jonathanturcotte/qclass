@@ -7,21 +7,19 @@ var ModalWindow = require('../modalwindow'),
  * @param {Object} $container jQuery object to which the table will be appended
  */
 var SessionTable = function(course, $appendTarget) {
-    Table.call(this,
-        course,
-        {
-            classList: ['session-table'], 
-            height: 300, 
-            width: 397,
-            columns: [
-                ['Date', 140], 
-                ['Attendance', 96], 
-                ['Rate', 66], 
-                ['Actions', 95]
-            ], 
-            $appendTarget: $appendTarget
-        }
-    );
+    Table.call(this, {
+        classList: ['session-table'], 
+        height: 300, 
+        width: 397,
+        columns: [
+            ['Date', 140], 
+            ['Attendance', 96], 
+            ['Rate', 66], 
+            ['Actions', 95]
+        ], 
+        $appendTarget: $appendTarget
+    });
+    this.course = course;
 };
 SessionTable.prototype = Object.create(Table.prototype);
 SessionTable.prototype.constructor = SessionTable;
