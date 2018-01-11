@@ -63,11 +63,9 @@ exports.enroll = function(classID, students, callback) {
                         });
                     } else { // student exists, need to check current enrollment to avoid attempting duplicates
                         con.query('SELECT 1 FROM enrolled WHERE sNetID = ? AND cID = ?', [student.netID, classID], function(err, results, fields) {
-                            if (err) innerCallback(err);
-                            else {
-                                if (results.length <= 0) toEnroll.push(student);
-                                innerCallback();
-                            }
+                            if (err) return innerCallback(err);
+                            if (results.length <= 0) toEnroll.push(student);
+                            innerCallback();
                         });
                     }
                 }
@@ -80,24 +78,36 @@ exports.enroll = function(classID, students, callback) {
                 if (newStudents.length > 0) {
                     for (var i = 0; i < newStudents.length; i++) 
                         newStudents[i] = [ newStudents[i].netID, newStudents[i].stdNum, newStudents[i].firstName, newStudents[i].lastName ];
-                    con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [newStudents], function(err, results, fields) {
-                        if (err) callback(err);
-                        else _runEnrollQuery(con, classID, toEnroll, callback);
+                    
+                    con.beginTransaction(function (err) {
+                        if (err) return con.rollback(function() { callback(err); });
+
+                        con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [newStudents], function(err, results, fields) {
+                            if (err) return con.rollback(function() { callback(err); });
+                            if (toEnroll.length < 1) 
+                                return callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } });
+                            
+                            for (var i = 0; i < toEnroll.length; i++)
+                                toEnroll[i] = [toEnroll[i].netID, classID];
+                            
+                            con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [toEnroll], function(err, results, fields) {
+                                if (err) return con.rollback(function() { callback(err); });
+                                callback(null, results, fields);
+                            });
+                        });
                     });
-                } else _runEnrollQuery(con, classID, toEnroll, callback);
+                } else {
+                    if (toEnroll.length < 1) callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } });
+                    else {
+                        for (var i = 0; i < toEnroll.length; i++)
+                            toEnroll[i] = [toEnroll[i].netID, classID];
+                        con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [toEnroll], callback);
+                    }
+                }
             }
         });
     });
 };
-
-function _runEnrollQuery(con, classID, toEnroll, callback) {
-    if (toEnroll.length < 1) callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } });
-    else {
-        for (var i = 0; i < toEnroll.length; i++)
-            toEnroll[i] = [toEnroll[i].netID, classID];
-        con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [toEnroll], callback);
-    }
-}
 
 exports.profExists = function(netID, callback) {
     runQuery('SELECT * FROM professor WHERE pNetID = ? LIMIT 1', [netID], callback);
@@ -137,24 +147,33 @@ exports.getEnrolledStudentsWithInfo = function(classID, callback) {
 };
 
 exports.startAttendance = function(classID, duration, time, callback) {
-    var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-    runQuery(newSessionQuery, [[[classID, time, duration]]], function(err, results, fields) {
-        if (err) return callback(err);
+    useConnection(callback, function(con) {
+        con.beginTransaction(function (err) {
+            if (err) return con.rollback(function() { callback(err); });
 
-        // Get current enrollment list
-        exports.getEnrolledStudents(classID, function(err, enrolled, fields) {
-            if (err) return callback(err);
+            var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
+            con.query(newSessionQuery, [[[classID, time, duration]]], function(err, results, fields) {
+                if (err) return con.rollback(function() { callback(err); });
 
-            // Create rows for all enrolled students with no recorded attendance to give a snapshot of enrollment at this time
-            if (enrolled.length > 0) {
-                var bulkAttendanceInsert = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES ?',
-                    entries = [];
+                // Get current enrollment list
+                exports.getEnrolledStudents(classID, function(err, enrolled, fields) {
+                    if (err) return con.rollback(function() { callback(err); });
 
-                for (var i = 0; i < enrolled.length; i++)
-                    entries[i] = [classID, time, enrolled[i].sNetID, 0];
-                
-                runQuery(bulkAttendanceInsert, [entries], callback);
-            } else callback(null, [], []);
+                    // Create rows for all enrolled students with no recorded attendance to give a snapshot of enrollment at this time
+                    if (enrolled.length > 0) {
+                        var bulkAttendanceInsert = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES ?',
+                            entries = [];
+
+                        for (var i = 0; i < enrolled.length; i++)
+                            entries[i] = [classID, time, enrolled[i].sNetID, 0];
+                        
+                        con.query(bulkAttendanceInsert, [entries], function (err, results, fields) {
+                            if (err) return con.rollback(function() { callback(err); });
+                            callback(null, results, fields);
+                        });
+                    } else callback(null, [], []);
+                });
+            });
         });
     });
 };
@@ -227,53 +246,34 @@ exports.getSessionAttInfo = function(classID, callback) {
 // Uses a transaction to perform multiple queries with rollback upon failure
 // Removes: enrollment, admin, session, attendance and course 
 exports.removeCourse = function (classID, callback) {
-
     useConnection(callback, function (con) {
         // begins series of queries
         con.beginTransaction(function (err) {            
-            if (err) { callback(err); }
+            if (err) { return callback(err); }
+            
             // First deletes enrollment information
             con.query('DELETE FROM enrolled WHERE cID=?', classID, function (err, result, fields) {
-                if (err) { 
-                    con.rollback(function() {
-                         callback(err);  
-                    });
-                }
+                if (err) return con.rollback(function() { callback(err); });
+                
                 // Second query deletes admin information
                 con.query('DELETE FROM administrators WHERE cID=?', classID, function (err, result, fields) {
-                    if (err) { 
-                        con.rollback(function() {
-                             callback(err);  
-                        });
-                    }
+                    if (err) return con.rollback(function() { callback(err); });
+                    
                     // Third query deletes attendance information
                     con.query('DELETE FROM attendance WHERE cID=?', classID, function (err, result, fields) {
-                        if (err) { 
-                            con.rollback(function() {
-                                 callback(err);  
-                            });
-                        }
+                        if (err) return con.rollback(function() { callback(err); });
+                        
                         // Fourth query deletes session information 
                         con.query('DELETE FROM attendanceSession WHERE cID=?', classID, function (err, result, fields) {
-                            if (err) { 
-                                con.rollback(function() {
-                                     callback(err);  
-                                });
-                            }
+                            if (err) return con.rollback(function() { callback(err); });
+                            
                             // Fifth query deletes course information
                             con.query('DELETE FROM course WHERE cID=?', classID, function (err, result, fields) {
-                                if (err) { 
-                                    con.rollback(function() {
-                                         callback(err);  
-                                    });
-                                }
+                                if (err) return con.rollback(function() { callback(err); });
+                                
                                 // Commit changes
                                 con.commit(function (err) {
-                                    if (err) { 
-                                        con.rollback(function() {
-                                            callback(err);  
-                                        });
-                                    }
+                                    if (err) return con.rollback(function() { callback(err); });
                                     callback();
                                 });
                             });
@@ -291,14 +291,21 @@ exports.removeFromClass = function (netID, classID, callback) {
 };
 
 exports.removeSession = function (classID, time, callback) {
-    var removeSession = 'DELETE FROM attendanceSession WHERE cID=? AND attTime=?';
-    runQuery(removeSession, [classID, time], function (err, results, fields) {
-        if (err)
-            callback(err);
-        else {
-            var removeAttHist = 'DELETE FROM attendance WHERE cID=? AND attTime=?';
-            runQuery(removeAttHist, [classID, time], callback);
-        }
+    useConnection(callback, function (con) {
+        con.beginTransaction(function (err) {
+            if (err) return con.rollback(function() { callback(err); });
+
+            var removeSession = 'DELETE FROM attendanceSession WHERE cID=? AND attTime=?';
+            con.query(removeSession, [classID, time], function (err, results, fields) {
+                if (err) return con.rollback(function() { callback(err); });
+                
+                var removeAttHist = 'DELETE FROM attendance WHERE cID=? AND attTime=?';
+                con.query(removeAttHist, [classID, time], function (err, results, fields) {
+                    if (err) return con.rollback(function() { callback(err); });
+                    callback(null, results, fields);
+                });
+            });
+        });
     });
 };
 
