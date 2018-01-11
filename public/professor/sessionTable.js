@@ -154,25 +154,32 @@ function openAttendanceModal(date, sessionStudents) {
 
 // Disable export button
 function disableExport() {
-    var $exportButton = $('.class-export-button');
+    var $exportButtonDiv = $('.exp-button-div'),
+        $exportButton    = $('.class-export-button');
 
-    $exportButton.attr({
-        'disabled'       : 'disabled',
+    $exportButtonDiv.attr({
         'data-toggle'    : 'tooltip',
         'data-placement' : 'top',
-        'title'          : 'Stop the running session before deleting'
+        'title'          : 'No Session History to Export'
     }).tooltip();
+    
+    $exportButton.attr({
+        'disabled' : 'disabled' 
+    });
+    
 }
 
 // Reenable expot button
 function enableExport() {
-    var $exportButton = $('.class-export-button');
-
-    $exportButton.removeAttr('disabled')
-        .removeAttr('title')
+    var $exportButtonDiv = $('.exp-button-div'),
+        $exportButton    = $('.class-export-button');
+        
+    $exportButtonDiv.removeAttr('title')
         .removeAttr('data-toggle')
         .removeAttr('data-placement')
-        .tooltip('dispose');    
+        .tooltip('dispose');  
+        
+    $exportButton.removeAttr('disabled');
 }
 
 module.exports = SessionTable;

@@ -155,12 +155,13 @@ function build () {
     }
 
     // The session table and export button
+    
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
-
-    $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
-        .click(this.exporter.createExportModal.bind(this, this.course))
+    $('<div>', { class: "exp-button-div; container", style: "display: inline-block; margin-top: 10px" })
+        .append($('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
+            .click(this.exporter.createExportModal.bind(this, this.course)))
         .appendTo($sessionDiv);
-
+    
     // The student table and associated buttons
     this.studentTable = new StudentTable(this.course, $studentDiv);
 
