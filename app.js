@@ -100,6 +100,7 @@ var passportStrat = new SamlStrategy({
         entryPoint       : 'https://idptest.queensu.ca/idp/profile/SAML2/Redirect/SSO', // location of IDP
         logoutUrl        : 'https://idptest.queensu.ca/idp/Shibboleth.sso/SLO/POST',    // URL for logging out on the IDP
         issuer           : 'https://qclass.ca',                                         // The identifier for our SP
+        identifierFormat : '',                                                          // The requested format, for ITS we don't need it
         cert             : fs.readFileSync('sso/idp.crt', 'utf8'),                      // X509 cert for the idp, needs to be all on one line
         decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                             // Our private key
     }, function (profile, done) {
@@ -108,6 +109,8 @@ var passportStrat = new SamlStrategy({
 );
 
 var cert = fs.readFileSync(certPath, 'utf8');
+var res = passportStrat.generateServiceProviderMetadata(cert);
+fs.writeFileSync('sso/sp-metadata.xml', res);
 passport.use(passportStrat);
 app.use(passport.initialize());
 app.use(passport.session());
