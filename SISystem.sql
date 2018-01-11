@@ -5,7 +5,7 @@ use SISystem;
 
 create table course (
 	cID			char(36) not null,
-	cCode 		varchar(10) not null,
+	cCode 		varchar(30) not null,
 	cName		varchar(100),
 	pNetID		varchar(10) not null,
 	primary key (cID)

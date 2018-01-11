@@ -138,8 +138,10 @@ function findErrors(cCode, cName) {
     if(!cCode || typeof(cCode) !== 'string' || !regex.class.code.test(cCode)) {
         if(!cCode)
             result[0] = 'No Course Code Provided';
+        else if (cCode.length > 30)
+            result[0] = 'Course Name Too Long';
         else
-            result[0] = 'Improper Course Code Format (Ex. MATH 101)';
+            result[0] = 'Please Do Not Enter Special Characters';
     }
     //check course name
     if(!cName || typeof(cName) !== 'string' || !regex.class.name.test(cName)) {
