@@ -127,7 +127,7 @@ function build () {
                 'data-placement' : 'top',
                 'title'          : 'Stop running session before deleting course'
             }).tooltip();
-            
+
             $delButton.addClass('disabled');
         }
 

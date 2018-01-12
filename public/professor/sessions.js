@@ -282,7 +282,7 @@ function sessionOffChanges(id) {
             .tooltip('dispose');
 
         $delButton.removeClass('disabled');
-        
+
         // Change back to red start button
         $startButton.removeClass('btn-success')
             .addClass('btn-danger')

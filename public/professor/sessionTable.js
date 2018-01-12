@@ -162,21 +162,21 @@ function disableExport() {
         'data-placement' : 'top',
         'title'          : 'No Session History to Export'
     }).tooltip();
-    
+
     $exportButton.addClass('disabled');
-    
+
 }
 
 // Reenable expot button
 function enableExport() {
     var $exportButtonDiv = $('.exp-button-div'),
         $exportButton    = $('.class-export-button');
-        
+
     $exportButtonDiv.removeAttr('title')
         .removeAttr('data-toggle')
         .removeAttr('data-placement')
-        .tooltip('dispose');  
-        
+        .tooltip('dispose');
+
     $exportButton.removeClass('disabled');
 }
 
