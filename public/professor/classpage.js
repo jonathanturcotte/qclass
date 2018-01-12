@@ -73,6 +73,7 @@ function build () {
         $codeDiv     = $('<div>'),
         $optionsDiv  = $('<div>', { class: 'class-options-div col' }),
         $adminButton = $('<button>', { text: 'Edit Administrators', class: 'class-admin-button btn btn-danger btn-square btn-xl' }),
+        $delDiv      = $('<div>', { class: "del-button-div", style: "display: inline-block" }),
         $delButton   = $('<button>', { text: 'Delete Course', class: 'class-delete-button btn btn-danger btn-square btn-x1' }),
         $titleCode   = $('<h2>', { class: 'class-title-code title-field', text: this.course.cCode }),
         $titleName   = $('<h3>', { class: 'class-title-name title-field', text: this.course.cName }),
@@ -114,20 +115,24 @@ function build () {
     // Add the edit and delete button if owner
     if (this.course.isOwner) {
         $adminButton.click(this.adminManager.manageAdmins.bind(this, this.course));
-        $delButton.click(this.courseManager.deleteCourse.bind(this, this.course, this.sessionManager));
+
+        // Need to append button to div to get tooltips
+        $delDiv.append($delButton.click(this.courseManager.deleteCourse.bind(this, this.course, this.sessionManager)));
 
         // check if there are running sessions for this class, and 
         // disable the delete course button if there are
-        if (runningSession)
-            $delButton.attr({
-                'disabled'       : 'disabled',
+        if (runningSession) {
+            $delDiv.attr({
                 'data-toggle'    : 'tooltip',
                 'data-placement' : 'top',
-                'title'          : 'Stop the running session before deleting'
+                'title'          : 'Stop running session before deleting course'
             }).tooltip();
+            
+            $delButton.addClass('disabled');
+        }
 
         $adminButton.appendTo($optionsDiv);
-        $delButton.appendTo($optionsDiv);
+        $delDiv.appendTo($optionsDiv);
     }
 
     // Attendance section
@@ -155,13 +160,12 @@ function build () {
     }
 
     // The session table and export button
-    
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
-    $('<div>', { class: "exp-button-div; container", style: "display: inline-block; margin-top: 10px" })
+    $('<div>', { class: "exp-button-div", style: "display: inline-block; margin-top: 10px" })
         .append($('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
             .click(this.exporter.createExportModal.bind(this, this.course)))
         .appendTo($sessionDiv);
-    
+
     // The student table and associated buttons
     this.studentTable = new StudentTable(this.course, $studentDiv);
 
