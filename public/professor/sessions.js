@@ -259,7 +259,8 @@ function sessionOnChanges(id) {
             'title'          : 'Stop running session before deleting course'
         }).tooltip();
 
-        $delButton.addClass('disabled');
+        $delButton.addClass('disabled')
+            .css('pointer-events', 'none');
 
         // Change start button to green show button
         $startButton.removeClass('btn-danger')
@@ -281,7 +282,8 @@ function sessionOffChanges(id) {
             .removeAttr('data-placement')
             .tooltip('dispose');
 
-        $delButton.removeClass('disabled');
+        $delButton.removeClass('disabled')
+            .css('pointer-events', 'auto');
 
         // Change back to red start button
         $startButton.removeClass('btn-success')
