@@ -31,7 +31,7 @@ AdminManager.prototype.manageAdmins = function (course) {
     });
 
     // Add admin form components
-    this.$formMessage = $('<p>', { style: 'display: none; text-align: right;' })
+    this.$formMessage = $('<p>', { style: 'display: none; text-align: right;' });
     this.$netIDField = $('<input>', { 
         id: this.netIDFieldID, 
         type: 'text', 
@@ -40,8 +40,11 @@ AdminManager.prototype.manageAdmins = function (course) {
         width: 100,
         placeholder: 'NetID'
     });
-    this.$addButton     = $('<button>', { class: 'btn btn-primary', text: 'Add' })
-        .click(addAdmin.bind(this, course));
+    this.$addButton     = $('<button>', { 
+        class: 'btn btn-primary', 
+        text: 'Add', 
+        style: 'vertical-align: top;' 
+    }).click(addAdmin.bind(this, course));
 
     // Construct and append the add admin form
     this.$addForm = $('<div>', { class: 'admin-add-form' }).append([
@@ -96,7 +99,7 @@ function addAdmin (course) {
 
     // Validate netID
     if (!netID) {
-        showFormError.call(this, 'NetID cannot be empty');
+        showFormError.call(this, 'Empty NetID');
     } else if (!regex.user.netID.test(netID)) {
         showFormError.call(this, 'Invalid NetID format');
     } else {
@@ -108,7 +111,7 @@ function addAdmin (course) {
             url: '/professor/class/' + course.cID + '/admins/add/' + netID
         })
         .done(function (data, status, xhr) {
-            showFormSuccess.call(this, 'Admin successfully added');
+            showFormSuccess.call(this, 'Added ' + netID);
             updateTable.call(this, course);
         }.bind(this))
         .fail(function (xhr, status, errorThrown) {
