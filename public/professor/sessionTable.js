@@ -160,7 +160,7 @@ function disableExport() {
     $exportButtonDiv.attr({
         'data-toggle'    : 'tooltip',
         'data-placement' : 'top',
-        'title'          : 'No Session History to Export'
+        'title'          : 'No session history to export'
     }).tooltip();
 
     $exportButton.addClass('disabled')
