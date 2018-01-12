@@ -61,8 +61,9 @@ AdminManager.prototype.manageAdmins = function (course) {
     updateTable.call(this, course);
 };
 
-function updateTable (course) {
-    this.$tableMessage.hide();
+function updateTable (course, shouldKeepMessage) {
+    if (!shouldKeepMessage)
+        this.$tableMessage.hide();
     this.table.$tbody.empty().spin();
 
     $.get('/professor/class/' + course.cID + '/admins')
@@ -184,7 +185,7 @@ function removeAdmin (netID, course, $deleteButton) {
         showTableMessage.call(this, false, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
     }.bind(this))
     .always(function (a, status, b) {
-        updateTable.call(this, course);
+        updateTable.call(this, course, true);
     }.bind(this));
 }
 
