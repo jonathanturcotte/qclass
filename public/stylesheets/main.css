@@ -162,6 +162,9 @@ body {
 
 .class-delete-button {
     margin-left: 10px;
+}
+
+.del-button-div {
     vertical-align: top;
 }
 
