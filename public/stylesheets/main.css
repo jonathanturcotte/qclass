@@ -339,3 +339,19 @@ body {
 .title-field {
     display: inline-block;
 }
+
+.admin-table-div {
+    margin-top: 25px;
+    max-width: 322px;
+    min-width: 322px;
+}
+
+.admin-table-below {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.admin-add-form {
+    margin-left: 10px;
+    min-width: 156px;
+}

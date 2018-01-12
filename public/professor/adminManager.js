@@ -8,14 +8,35 @@ AdminManager.prototype.manageAdmins = function (course) {
     var netIDFieldID = 'add-admin-netID-field';
 
     this.modal = new ModalWindow({ title: 'Edit Administrators' });
+    this.modal.$body.css({
+        display: 'flex',
+        'align-items': 'center',
+        'flex-direction': 'column'
+    });
+
+    // Add table and its container
+    this.$tableMessage = $('<p>', { style: 'display: none;' });
+    this.$tableDiv = $('<div>', { class: 'admin-table-div' })
+        .append(this.$tableMessage)
+        .appendTo(this.modal.$body);        
+    this.table = new Table({ 
+        height: 250,
+        width: 322,
+        columns: [
+            ['NetID', 67],
+            ['Name', 180],
+            ['Actions', 75]
+        ],
+        $appendTarget: this.$tableDiv
+    });
 
     // Add admin form components
-    this.$formMessage  = $('<p>', { style: 'display: none;' });
-    this.$netIDField    = $('<input>', { 
+    this.$formMessage = $('<p>', { style: 'display: none; text-align: right;' })
+    this.$netIDField = $('<input>', { 
         id: this.netIDFieldID, 
         type: 'text', 
         class: 'form-control',
-        style: 'display: inline; margin-right: 15px;',
+        style: 'display: inline;',
         width: 100,
         placeholder: 'NetID'
     });
@@ -23,30 +44,15 @@ AdminManager.prototype.manageAdmins = function (course) {
         .click(addAdmin.bind(this, course));
 
     // Construct and append the add admin form
-    this.$addForm = $('<div>').append([
-        $('<p>', { text: 'Add a new administrator' }),
-        this.$formMessage,
+    this.$addForm = $('<div>', { class: 'admin-add-form' }).append([
         this.$netIDField,
         this.$addButton
-    ]).appendTo(this.modal.$body);
+    ]);
 
-    // Add table and its container
-    this.$tableMessage = $('<p>', { style: 'display: none;' });
-    this.$tableDiv = $('<div>', { style: 'margin-top: 25px;' })
-        .append($('<h5>', { text: 'Administrators' }))
-        .append(this.$tableMessage)
-        .appendTo(this.modal.$body);        
-        this.table = new Table({ 
-            classList: ['centered'],
-            height: 250,
-            width: 322,
-            columns: [
-                ['NetID', 67],
-                ['Name', 180],
-                ['Actions', 75]
-            ],
-            $appendTarget: this.$tableDiv
-         });
+    this.$belowTableDiv = $('<div>', { class: 'admin-table-below' })
+        .append(this.$formMessage)
+        .append(this.$addForm)
+        .appendTo(this.$tableDiv);
 
     // Fill the table
     updateTable.call(this, course);
