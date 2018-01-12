@@ -147,10 +147,6 @@ body {
     height: 40px;
 }
 
-.class-export-button {
-    margin-top: 10px;
-}
-
 .class-import-button {
     margin-top: 10px;
     margin-right: 10px;
@@ -166,6 +162,9 @@ body {
 
 .class-delete-button {
     margin-left: 10px;
+}
+
+.del-button-div {
     vertical-align: top;
 }
 
