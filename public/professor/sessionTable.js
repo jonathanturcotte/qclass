@@ -163,9 +163,7 @@ function disableExport() {
         'title'          : 'No Session History to Export'
     }).tooltip();
     
-    $exportButton.attr({
-        'disabled' : 'disabled' 
-    });
+    $exportButton.addClass('disabled');
     
 }
 
@@ -179,7 +177,7 @@ function enableExport() {
         .removeAttr('data-placement')
         .tooltip('dispose');  
         
-    $exportButton.removeAttr('disabled');
+    $exportButton.removeClass('disabled');
 }
 
 module.exports = SessionTable;
