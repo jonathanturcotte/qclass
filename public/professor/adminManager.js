@@ -1,4 +1,5 @@
 var ModalWindow = require('../modalwindow'),
+    Table       = require('../components/table'),
     regex       = require('../lib/regex');
     
 var AdminManager = function () {};
@@ -31,27 +32,33 @@ AdminManager.prototype.manageAdmins = function (course) {
 
     // Add table and its container
     this.$tableMessage = $('<p>', { style: 'display: none;' });
-    this.$table = $('<table>', { class: 'table-bordered table-sm table-hover', style: 'text-align: center;' })
-        .append($('<thead>')
-            .append($('<tr>')
-                .append($('<th>', { text: 'NetID' }))
-                .append($('<th>', { text: 'Name' }))
-                .append($('<th>', { text: 'Actions' }))));
-    this.$tBody = $('<tbody>').appendTo(this.$table);
     this.$tableDiv = $('<div>', { style: 'margin-top: 25px;' })
         .append($('<h5>', { text: 'Administrators' }))
         .append(this.$tableMessage)
-        .append(this.$table)
         .appendTo(this.modal.$body);        
+        this.table = new Table({ 
+            classList: ['centered'],
+            height: 250,
+            width: 322,
+            columns: [
+                ['NetID', 67],
+                ['Name', 180],
+                ['Actions', 75]
+            ],
+            $appendTarget: this.$tableDiv
+         });
 
+    // Fill the table
     updateTable.call(this, course);
 };
 
 function updateTable (course) {
-    this.$tBody.empty().spin();
+    this.$tableMessage.hide();
+    this.table.$tbody.empty().spin();
 
     $.get('/professor/class/' + course.cID + '/admins')
         .done(function (data, status, xhr) {
+            var tableData = [];
             for (var i = 0; i < data.length; i++) {
                 var $deleteButton = $('<button>', { title: 'Remove', class: 'btn btn-default btn-sm' })
                     .append($('<i>', { class: 'fas fa-times' })
@@ -63,19 +70,18 @@ function updateTable (course) {
                 if (data[i].fName && data[i].fName.length > 0 && data[i].lName && data[i].lName.length > 0) 
                     name = data[i].fName + ' ' + data[i].lName;
 
-                $('<tr>')
-                    .append($('<td>', { text: data[i].pNetID }))
-                    .append($('<td>', { text: name }))
-                    .append($('<td>')
-                        .append($deleteButton))
-                    .appendTo(this.$tBody);
+                tableData.push([
+                    data[i].pNetID,
+                    name,
+                    $('<td>').append($deleteButton)
+                ]);
             }
+            this.table.fill(tableData);
         }.bind(this))
         .fail(function (data, status, xhr) {
-            showTableMessage.call(this, false, 'Error getting admins');
+            this.table.error('Error getting admins');
         }.bind(this))
         .always(function(a, status, b) {
-            this.$tBody.spin(false);
         }.bind(this));
 }
 
