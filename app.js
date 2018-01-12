@@ -84,12 +84,14 @@ app.use(session({
 
 passport.serializeUser(function(user, done){
     console.log("SAML - Serialize User");
-    done(none, user);
+    console.log("User: " + user);
+    done(null, user);
 });
 
 passport.deserializeUser(function(user, done){
     console.log("SAML - Deserialize User");
-    done(none, user);
+    console.log("User: " + user);
+    done(null, user);
 });
 
 // TODO: Somehow skip this for localhost testing
@@ -104,6 +106,8 @@ var passportStrat = new SamlStrategy({
         cert             : fs.readFileSync('sso/idp.crt', 'utf8'),                      // X509 cert for the idp, needs to be all on one line
         decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                             // Our private key
     }, function (profile, done) {
+        console.log("SAML - Strategy callback");
+        console.log("Profile: " + profile);
         return done(null, profile); // TODO: Replace with something more meaningful
     }
 );
@@ -130,13 +134,17 @@ app.use('/professor', professor);
 
 
 app.post('/login/callback', function (req, res, next) {
-    console.log("SAML - CALLBACK");
+    console.log("SAML - post /login/callback");
+    console.log("req: " + req);
+    console.log("res: " + res);
     passport.authenticate('saml2', {'successRedirect': '/', 'failureRedirect': '/login/fail' });
 });
 
 app.get('/login/fail',
     function(req, res) {
         console.log("SAML - get /login/fail");
+        console.log("req: " + req);
+        console.log("res: " + res);
         res.send(401, 'Login failed');
     }
 );
