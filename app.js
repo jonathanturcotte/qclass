@@ -84,13 +84,15 @@ app.use(session({
 
 passport.serializeUser(function(user, done){
     console.log("SAML - Serialize User");
-    console.log("User: " + user);
+    console.log("User:");
+    console.log(user);
     done(null, user);
 });
 
 passport.deserializeUser(function(user, done){
     console.log("SAML - Deserialize User");
-    console.log("User: " + user);
+    console.log("User:");
+    console.log(user);
     done(null, user);
 });
 
@@ -107,7 +109,8 @@ var passportStrat = new SamlStrategy({
         decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                             // Our private key
     }, function (profile, done) {
         console.log("SAML - Strategy callback");
-        console.log("Profile: " + profile);
+        console.log("Profile: ");
+        console.log(profile);
         return done(null, profile); // TODO: Replace with something more meaningful
     }
 );
@@ -135,16 +138,20 @@ app.use('/professor', professor);
 
 app.post('/login/callback', function (req, res, next) {
     console.log("SAML - post /login/callback");
-    console.log("req: " + req);
-    console.log("res: " + res);
+    console.log("req:");
+    console.log(req);
+    console.log("res: ");
+    console.log(res);
     passport.authenticate('saml2', {'successRedirect': '/', 'failureRedirect': '/login/fail' });
 });
 
 app.get('/login/fail',
     function(req, res) {
         console.log("SAML - get /login/fail");
-        console.log("req: " + req);
-        console.log("res: " + res);
+        console.log("req:");
+        console.log(req);
+        console.log("res: ");
+        console.log(res);
         res.send(401, 'Login failed');
     }
 );
