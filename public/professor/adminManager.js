@@ -14,6 +14,17 @@ AdminManager.prototype.manageAdmins = function (course) {
         'flex-direction': 'column'
     });
 
+    // Add informational alert
+    $('<div>', { class: 'alert alert-info alert-dismissible fade show', role: 'alert' })
+    .append($('<button>', { class: 'close' })
+        .attr('data-dismiss', 'alert')
+        .attr('aria-label', 'Close')
+        .append($('<span>')
+            .attr('aria-hidden', 'true')
+            .html('&times;')))
+    .append('Administrators are able to start and stop sessions, add or remove students, export attendance, and edit the course name and code.')
+    .appendTo(this.modal.$body);
+
     // Add table and its container
     this.$tableMessage = $('<p>', { style: 'display: none;' });
     this.$tableDiv = $('<div>', { class: 'admin-table-div' })
