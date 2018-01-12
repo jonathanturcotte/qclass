@@ -74,6 +74,7 @@ function build () {
         $optionsDiv  = $('<div>', { class: 'class-options-div col' }),
         $adminButton = $('<button>', { text: 'Edit Administrators', class: 'class-admin-button btn btn-danger btn-square btn-xl' }),
         $delDiv      = $('<div>', { class: "del-button-div", style: "display: inline-block" }),
+        $expButton   = $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' }),
         $delButton   = $('<button>', { text: 'Delete Course', class: 'class-delete-button btn btn-danger btn-square btn-x1' }),
         $titleCode   = $('<h2>', { class: 'class-title-code title-field', text: this.course.cCode }),
         $titleName   = $('<h3>', { class: 'class-title-name title-field', text: this.course.cName }),
@@ -162,8 +163,11 @@ function build () {
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
     $('<div>', { class: "exp-button-div", style: "display: inline-block; margin-top: 10px" })
-        .append($('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
-            .click(this.exporter.createExportModal.bind(this, this.course)))
+        .append($expButton)
+            .click(function () {
+                if ($expButton.hasClass('disabled')) return;
+                this.exporter.createExportModal.bind(this, this.course);
+            })
         .appendTo($sessionDiv);
 
     // The student table and associated buttons
