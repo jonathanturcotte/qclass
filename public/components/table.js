@@ -106,7 +106,7 @@ Table.prototype.spin = function () {
 };
 
 function formatColumnWidth(width) {
-    return 'max-width: ' + width + 'px; min-width: ' + width + 'px;';
+    return 'width: ' + width + 'px;';
 }
 
 module.exports = Table;
