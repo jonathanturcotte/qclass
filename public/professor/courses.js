@@ -137,20 +137,20 @@ function findErrors(cCode, cName) {
     // check course code
     if(!cCode || typeof(cCode) !== 'string' || !regex.class.code.test(cCode)) {
         if(!cCode)
-            result[0] = 'No Course Code Provided';
+            result[0] = 'No course code provided';
         else if (cCode.length > 30)
-            result[0] = 'Course Name Too Long';
+            result[0] = 'Course name must be less than 100 characters';
         else
-            result[0] = 'Please Do Not Enter Special Characters';
+            result[0] = 'Valid inputs are alpha-numeric characters only';
     }
     //check course name
     if(!cName || typeof(cName) !== 'string' || !regex.class.name.test(cName)) {
         if(!cName)
-            result[1] = 'No Course Name Provided';
+            result[1] = 'No course name provided';
         else if (cName.length > 100)
-            result[1] = 'Course Name Too Long';
+            result[1] = 'Course name must be less than 100 characters';
         else
-            result[1] = 'Please Do Not Enter Special Characters';
+            result[1] = 'Valid inputs are alpha-numeric characters only';
     }
     return result;
 }
