@@ -281,6 +281,7 @@ body {
 
 .qtable2 {
     border-top: 0;
+    height: 100%;
 }
 
 .qtable thead tr {

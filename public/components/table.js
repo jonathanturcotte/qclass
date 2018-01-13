@@ -34,12 +34,11 @@ var Table = function (course, options) {
         class: classes + 'qtable1', 
         width: width
     }).appendTo(this.$element);
-    this.$bodyContainer = $('<div>', { style:'overflow-y:auto; display: inline-block;', height: (options.height || 300) - 36.5})
+    this.$bodyContainer = $('<div>', { style:'overflow-y:auto; display: inline-block;', height: (options.height || 300) - 36.5, width: width + 20})
         .appendTo(this.$element);
     this.$table2 = $('<table>', { 
         class: classes + 'qtable2', 
-        width: width,   
-        height: '100%'
+        width: width
     }).appendTo(this.$bodyContainer);
 
     // Add headers
