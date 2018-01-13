@@ -38,7 +38,8 @@ var Table = function (course, options) {
         .appendTo(this.$element);
     this.$table2 = $('<table>', { 
         class: classes + 'qtable2', 
-        width: width   
+        width: width,   
+        height: '100%'
     }).appendTo(this.$bodyContainer);
 
     // Add headers
