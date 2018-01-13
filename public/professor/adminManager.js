@@ -26,9 +26,7 @@ AdminManager.prototype.manageAdmins = function (course) {
     .appendTo(this.modal.$body);
 
     // Add table and its container
-    this.$tableMessage = $('<p>', { style: 'display: none;' });
     this.$tableDiv = $('<div>', { class: 'admin-table-div' })
-        .append(this.$tableMessage)
         .appendTo(this.modal.$body);        
     this.table = new Table({ 
         height: 250,
@@ -72,9 +70,7 @@ AdminManager.prototype.manageAdmins = function (course) {
     updateTable.call(this, course);
 };
 
-function updateTable (course, shouldKeepMessage) {
-    if (!shouldKeepMessage)
-        this.$tableMessage.hide();
+function updateTable (course) {
     this.table.$tbody.empty().spin();
 
     $.get('/professor/class/' + course.cID + '/admins')
@@ -82,11 +78,10 @@ function updateTable (course, shouldKeepMessage) {
             var tableData = [];
             for (var i = 0; i < data.length; i++) {
                 var $deleteButton = $('<button>', { title: 'Remove', class: 'btn btn-default btn-sm' })
+                    .click(openConfirmRemovalModal.bind(this, data[i].pNetID, course))
                     .append($('<i>', { class: 'fas fa-times' })
                         .attr('aria-hidden', 'true')),
                     name = '-';
-                    
-                $deleteButton.click(removeAdmin.bind(this, data[i].pNetID, course, $deleteButton));
 
                 if (data[i].fName && data[i].fName.length > 0 && data[i].lName && data[i].lName.length > 0) 
                     name = data[i].fName + ' ' + data[i].lName;
@@ -168,10 +163,6 @@ function clearFormError () {
     this.$netIDField.removeClass('is-invalid');
 }
 
-function showTableMessage (success, msg) {
-    showMessage(success, msg, this.$tableMessage);
-}
-
 function showMessage (success, msg, $element) {
     var remove = success === true ? 'text-danger' : 'text-success',
         add    = success === true ? 'text-success' : 'text-danger';
@@ -182,21 +173,46 @@ function showMessage (success, msg, $element) {
         .show();
 }
 
-function removeAdmin (netID, course, $deleteButton) {
-    $deleteButton.prop('disabled', true);
+function openConfirmRemovalModal (netID, course) {
+    var confirmModal = new ModalWindow({ title: 'Remove Admin' });
+
+    // Moce the backdrop infront of the first modal but behind the second
+    confirmModal.$window.css('z-index', 2001);
+    $('.modal-backdrop').eq(1).css('z-index', 2000);
+
+    confirmModal.$deleteButton = $('<button>', { class: 'btn btn-danger', text: 'Remove' })
+        .prependTo(confirmModal.$footer);
+
+    confirmModal.$deleteButton.click(function() {
+        confirmModal.$deleteButton.attr('disabled', 'disabled');
+        confirmModal.$closeButton.attr('disabled', 'disabled');
+        removeAdmin.call(this, netID, course, confirmModal);
+    }.bind(this));
+
+    confirmModal.$body.append($('<p>', { text: 'Are you sure you want to remove admin ' + netID + '?' }));
+    confirmModal.$closeButton.text('Cancel');    
+    confirmModal.show();
+}
+
+function removeAdmin (netID, course, confirmModal) {
+    confirmModal.$deleteButton.attr('disabled', 'disabled');
 
     $.ajax({
         url: '/professor/class/' + course.cID + '/admins/remove/' + netID,
         method: 'DELETE'
     })
     .done(function (data, status, xhr) {
-        showTableMessage.call(this, true, 'Successfully deleted admin ' + netID);
-    }.bind(this))
-    .fail(function (xhr, status, errorStatus) {
-        showTableMessage.call(this, false, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
-    }.bind(this))
-    .always(function (a, status, b) {
-        updateTable.call(this, course, true);
+        confirmModal.success(null, 'Successfully removed admin ' + netID);
+    }).fail(function (xhr, status, errorStatus) {
+        confirmModal.error(null, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
+    }).always(function (a, status, b) {
+        // Remove delete button since operation is over, change close text and enable
+        confirmModal.$deleteButton.remove();
+        confirmModal.$closeButton.text('OK');
+        confirmModal.$closeButton.attr('disabled', false);
+
+        // Update table on first modal
+        updateTable.call(this, course);
     }.bind(this));
 }
 
