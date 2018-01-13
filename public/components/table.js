@@ -34,10 +34,12 @@ var Table = function (course, options) {
         class: classes + 'qtable1', 
         width: width
     }).appendTo(this.$element);
+    this.$bodyContainer = $('<div>', { style:'overflow-y:auto; display: inline-block;', height: (options.height || 300) - 36.5, width: width + 20})
+        .appendTo(this.$element);
     this.$table2 = $('<table>', { 
         class: classes + 'qtable2', 
-        width: width   
-    }).appendTo(this.$element);
+        width: width
+    }).appendTo(this.$bodyContainer);
 
     // Add headers
     var $tr = $('<tr>');
@@ -52,7 +54,7 @@ var Table = function (course, options) {
         .appendTo(this.$table1);
 
     // Basic body structure
-    this.$tbody = $('<tbody>', { height: (options.height || 300) - 36.5  })
+    this.$tbody = $('<tbody>', { style:'overflow: visible' })
         .appendTo(this.$table2);
 
     // Append to DOM early
@@ -79,8 +81,7 @@ Table.prototype.fill = function (data) {
         for (var i = 0; i < row.length; i++) {
             if (row[i] instanceof $) {
                 $tr.append(row[i]
-                    .css('min-width', this.columns[i][1])
-                    .css('max-width', this.columns[i][1]));
+                    .css('width', this.columns[i][1]));
             } else {
                 $tr.append($('<td>', { 
                     text: row[i], 
@@ -106,7 +107,7 @@ Table.prototype.spin = function () {
 };
 
 function formatColumnWidth(width) {
-    return 'max-width: ' + width + 'px; min-width: ' + width + 'px;';
+    return 'width: ' + width + 'px;';
 }
 
 module.exports = Table;
