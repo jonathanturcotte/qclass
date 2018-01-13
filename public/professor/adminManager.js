@@ -40,7 +40,7 @@ AdminManager.prototype.manageAdmins = function (course) {
     });
 
     // Add admin form components
-    this.$formMessage = $('<p>', { style: 'display: none; text-align: right;' });
+    this.$formMessage = $('<p>', { class: 'admin-add-form-msg' });
     this.$netIDField = $('<input>', { 
         id: this.netIDFieldID, 
         type: 'text', 
@@ -62,7 +62,8 @@ AdminManager.prototype.manageAdmins = function (course) {
     ]);
 
     this.$belowTableDiv = $('<div>', { class: 'admin-table-below' })
-        .append(this.$formMessage)
+        .append($('<div>', { class: 'admin-add-form-msg-div' })
+            .append(this.$formMessage))
         .append(this.$addForm)
         .appendTo(this.$tableDiv);
 
