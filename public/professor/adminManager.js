@@ -22,7 +22,7 @@ AdminManager.prototype.manageAdmins = function (course) {
         .append($('<span>')
             .attr('aria-hidden', 'true')
             .html('&times;')))
-    .append('Administrators are able to start and stop sessions, add or remove students, export attendance, and edit the course name and code.')
+    .append('Administrators are able to start and stop sessions, add or remove students, export attendance, and edit the course name and code. Admins must be registered as professors in QClass.')
     .appendTo(this.modal.$body);
 
     // Add table and its container
@@ -30,10 +30,10 @@ AdminManager.prototype.manageAdmins = function (course) {
         .appendTo(this.modal.$body);        
     this.table = new Table({ 
         height: 250,
-        width: 322,
+        width: 382,
         columns: [
             ['NetID', 67],
-            ['Name', 180],
+            ['Name', 240],
             ['Actions', 75]
         ],
         $appendTarget: this.$tableDiv
@@ -152,6 +152,7 @@ function addAdmin (course) {
 function showFormSuccess (msg) {
     showMessage(true, msg, this.$formMessage);
     this.$netIDField.removeClass('is-invalid');
+    this.$netIDField.val('');
 }
 
 function showFormError (msg) {
