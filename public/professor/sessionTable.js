@@ -10,11 +10,11 @@ var SessionTable = function(course, $appendTarget) {
     Table.call(this, {
         classList: ['session-table'], 
         height: 300, 
-        width: 397,
+        width: 399,
         columns: [
             ['Date', 140], 
             ['Attendance', 96], 
-            ['Rate', 66], 
+            ['Rate', 68], 
             ['Actions', 95]
         ], 
         $appendTarget: $appendTarget
