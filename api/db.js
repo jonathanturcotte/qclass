@@ -84,15 +84,21 @@ exports.enroll = function(classID, students, callback) {
 
                         con.query('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES ?', [newStudents], function(err, results, fields) {
                             if (err) return con.rollback(function() { callback(err); });
-                            if (toEnroll.length < 1) 
-                                return callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } });
+                            if (toEnroll.length < 1) {
+                                return con.rollback(function() {
+                                    callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } }); 
+                                });
+                            }
                             
                             for (var i = 0; i < toEnroll.length; i++)
                                 toEnroll[i] = [toEnroll[i].netID, classID];
                             
                             con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [toEnroll], function(err, results, fields) {
                                 if (err) return con.rollback(function() { callback(err); });
-                                callback(null, results, fields);
+                                con.commit(function (err) {
+                                    if (err) return con.rollback(function() { callback(err); });
+                                    callback(null, results, fields);
+                                });
                             });
                         });
                     });
@@ -169,9 +175,17 @@ exports.startAttendance = function(classID, duration, time, callback) {
                         
                         con.query(bulkAttendanceInsert, [entries], function (err, results, fields) {
                             if (err) return con.rollback(function() { callback(err); });
-                            callback(null, results, fields);
+                            con.commit(function (err) {
+                                if (err) return con.rollback(function() { callback(err); });
+                                callback(null, results, fields);
+                            });
                         });
-                    } else callback(null, [], []);
+                    } else {
+                        con.commit(function (err) {
+                            if (err) return con.rollback(function() { callback(err); });
+                            callback(null, [], []);
+                        });
+                    }
                 });
             });
         });
@@ -302,7 +316,10 @@ exports.removeSession = function (classID, time, callback) {
                 var removeAttHist = 'DELETE FROM attendance WHERE cID=? AND attTime=?';
                 con.query(removeAttHist, [classID, time], function (err, results, fields) {
                     if (err) return con.rollback(function() { callback(err); });
-                    callback(null, results, fields);
+                    con.commit(function (err) {
+                        if (err) return con.rollback(function() { callback(err); });
+                        callback(null, results, fields);
+                    });
                 });
             });
         });
