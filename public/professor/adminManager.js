@@ -32,10 +32,10 @@ AdminManager.prototype.manageAdmins = function (course) {
         .appendTo(this.modal.$body);        
     this.table = new Table({ 
         height: 250,
-        width: 382,
+        width: 468,
         columns: [
             ['NetID', 67],
-            ['Name', 240],
+            ['Name', 326],
             ['Actions', 75]
         ],
         $appendTarget: this.$tableDiv
