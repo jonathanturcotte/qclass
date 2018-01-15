@@ -342,3 +342,31 @@ body {
 .title-field {
     display: inline-block;
 }
+
+.admin-table-div {
+    margin-left: 20px;
+}
+
+.admin-table-below {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    margin-right: 20px;
+}
+
+.admin-add-form {
+    margin-left: 10px;
+    min-width: 156px;
+}
+
+.admin-add-form-msg-div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.admin-add-form-msg {
+    display: none; 
+    text-align: right;
+    margin-bottom: 0;
+}
