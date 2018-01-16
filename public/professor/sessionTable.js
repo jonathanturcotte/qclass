@@ -7,21 +7,19 @@ var ModalWindow = require('../modalwindow'),
  * @param {Object} $container jQuery object to which the table will be appended
  */
 var SessionTable = function(course, $appendTarget) {
-    Table.call(this,
-        course,
-        {
-            classList: ['session-table'], 
-            height: 300, 
-            width: 397,
-            columns: [
-                ['Date', 140], 
-                ['Attendance', 96], 
-                ['Rate', 66], 
-                ['Actions', 95]
-            ], 
-            $appendTarget: $appendTarget
-        }
-    );
+    Table.call(this, {
+        classList: ['session-table'], 
+        height: 300, 
+        width: 399,
+        columns: [
+            ['Date', 140], 
+            ['Attendance', 96], 
+            ['Rate', 68], 
+            ['Actions', 95]
+        ], 
+        $appendTarget: $appendTarget
+    });
+    this.course = course;
 };
 SessionTable.prototype = Object.create(Table.prototype);
 SessionTable.prototype.constructor = SessionTable;
@@ -31,7 +29,12 @@ SessionTable.prototype.update = function (data) {
 
     // Persist/update the data
     this.data = data;
-
+    // Disable/enable export button
+    if(this.data.sessionCount) {
+        enableExport();
+    } else {
+        disableExport();
+    }
     // Add in reverse order to ensure that the latest sessions
     // are at the top of the table
     for (var i in data.sessions) {
@@ -145,6 +148,36 @@ function openAttendanceModal(date, sessionStudents) {
 
     modal.$body.append($table);
     modal.show();
+}
+
+// Disable export button
+function disableExport() {
+    var $exportButtonDiv = $('.exp-button-div'),
+        $exportButton    = $('.class-export-button');
+
+    $exportButtonDiv.attr({
+        'data-toggle'    : 'tooltip',
+        'data-placement' : 'top',
+        'title'          : 'No session history to export'
+    }).tooltip();
+
+    $exportButton.addClass('disabled')
+        .css('pointer-events', 'none');
+
+}
+
+// Reenable expot button
+function enableExport() {
+    var $exportButtonDiv = $('.exp-button-div'),
+        $exportButton    = $('.class-export-button');
+
+    $exportButtonDiv.removeAttr('title')
+        .removeAttr('data-toggle')
+        .removeAttr('data-placement')
+        .tooltip('dispose');
+
+    $exportButton.removeClass('disabled')
+        .css('pointer-events', 'auto');
 }
 
 module.exports = SessionTable;

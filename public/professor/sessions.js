@@ -17,6 +17,8 @@ SessionManager.prototype.startSession = function (course, duration) {
     } else {
         var session = createSession(course);
 
+        sessionOnChanges(course.cID);
+
         session.modal.show();
         session.modal.$body.spin()
             .addClass('spin-min-height');
@@ -71,7 +73,10 @@ SessionManager.prototype.endSession = function(course){
         }).done(function(data, status, xhr) {
             // On success, show completion
             displaySessionEnded.call(this, session);
-        }).fail(function(xhr, status, errorThrown) {
+            // Remove session from session manager
+            this.sessions = _.without(this.sessions, session);
+        }.bind(this))
+        .fail(function(xhr, status, errorThrown) {
             // On failure, display the error
             var text = 'Error ending session';
             if (xhr.responseText)
@@ -85,11 +90,8 @@ SessionManager.prototype.endSession = function(course){
         }).always(function(a, status, b) {
             // Remove the finish button, remove the hide button
             // Make the modal closeable
-            session.modal.$body.spin(false);
-
-            // Always remove the session from the session manager
-            this.sessions = _.without(this.sessions, session);
-        }.bind(this));
+            session.modal.$body.spin(false);           
+        });
     }
 };
 
@@ -125,6 +127,12 @@ SessionManager.prototype.showSession = function (course) {
         removeToastNotification(course.cID);
         session.modal.show();
     }
+};
+
+// Check if the the given course has a session running
+SessionManager.prototype.isCourseRunning = function (course) {
+    var session = getSession(course, this.sessions);
+    return !!session;
 };
 
 ///////////////////////
@@ -175,6 +183,7 @@ function displaySessionEnded(session) {
     var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
 
     removeToastNotification(session.course.cID);
+    sessionOffChanges(session.course.cID);
 
     session.modal.$title.text('Session Complete');
     $timerContainer
@@ -233,6 +242,53 @@ function getSession(course, sessions) {
         if (sessions[i].course.cID === course.cID){
             return sessions[i];
         }
+    }
+}
+
+// Make changes to class page when session running
+function sessionOnChanges(id) {
+    if (window.app.classPage.course.cID === id) {
+        var $delButton    = $('.class-delete-button'),
+            $delButtonDiv = $('.del-button-div'),
+            $startButton  = $('.start-button');
+
+        // Disable delete button
+        $delButtonDiv.attr({
+            'data-toggle'    : 'tooltip',
+            'data-placement' : 'top',
+            'title'          : 'Stop running session before deleting course'
+        }).tooltip();
+
+        $delButton.addClass('disabled')
+            .css('pointer-events', 'none');
+
+        // Change start button to green show button
+        $startButton.removeClass('btn-danger')
+            .addClass('btn-success')
+            .text('Show');
+    }
+}
+
+// Make changes to class page for when no session is running 
+function sessionOffChanges(id) {
+    if (window.app.classPage.course.cID === id) {
+        var $delButton    = $('.class-delete-button'),
+            $delButtonDiv = $('.del-button-div'),
+            $startButton  = $('.start-button');
+
+        // Enable delete button
+        $delButtonDiv.removeAttr('title')
+            .removeAttr('data-toggle')
+            .removeAttr('data-placement')
+            .tooltip('dispose');
+
+        $delButton.removeClass('disabled')
+            .css('pointer-events', 'auto');
+
+        // Change back to red start button
+        $startButton.removeClass('btn-success')
+            .addClass('btn-danger')
+            .text('Start');
     }
 }
 

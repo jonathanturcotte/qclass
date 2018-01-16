@@ -1,5 +1,6 @@
 var SessionManager = require('./sessions'),
     AdminManager   = require('./adminManager'),
+    CourseManager  = require('./courses'),
     Table          = require('../components/table'),
     SessionTable   = require('./sessionTable'),
     StudentTable   = require('./studentTable'),
@@ -27,11 +28,12 @@ var durationOptions = [
  * Creates a class page, responsible for the central window of the professor site
 */
 var ClassPage = function() {
-    this.$element = $('.classpage');
-    this.exporter = new Exporter();
-    this.importer = new Importer();
-    this.sessions = new SessionManager();
-    this.adminManager = new AdminManager();
+    this.$element       = $('.classpage');
+    this.exporter       = new Exporter();
+    this.importer       = new Importer();
+    this.sessionManager = new SessionManager();
+    this.adminManager   = new AdminManager();
+    this.courseManager  = new CourseManager();
 };
 
 /**
@@ -49,6 +51,10 @@ ClassPage.prototype.displayCourse = function (course) {
     build.call(this);
 };
 
+ClassPage.prototype.displayBlankPage = function () {
+    this.$element.empty();
+};
+
 ClassPage.prototype.refreshTables = function () {
     this.tableUpdater.updateTables();
 };
@@ -61,22 +67,28 @@ ClassPage.prototype.refreshTables = function () {
  * Builds the classpage, adds it to the DOM
  */
 function build () {
-    var $topDiv      = $('<div>', { class: 'class-top-div' }),
-        $titleDiv    = $('<div>', { class: 'class-title-div' }),
+    var $topDiv      = $('<div>', { class: 'class-top-div row' }),
+        $titleDiv    = $('<div>', { class: 'class-title-div col-auto' }),
         $nameDiv     = $('<div>'),
         $codeDiv     = $('<div>'),
-        $editDiv     = $('<div>', { class: 'class-edit-div' }),
+        $optionsDiv  = $('<div>', { class: 'class-options-div col' }),
+        $adminButton = $('<button>', { text: 'Edit Administrators', class: 'class-admin-button btn btn-danger btn-square btn-xl' }),
+        $delDiv      = $('<div>', { class: "del-button-div", style: "display: inline-block" }),
+        $delButton   = $('<button>', { text: 'Delete Course', class: 'class-delete-button btn btn-danger btn-square btn-x1' }),
         $titleCode   = $('<h2>', { class: 'class-title-code title-field', text: this.course.cCode }),
         $titleName   = $('<h3>', { class: 'class-title-name title-field', text: this.course.cName }),
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
-        $startButton = $('<button>', { class: 'btn btn-danger btn-circle btn-xl', text: 'Start' }),
+        $startButton = $('<button>', { class: 'btn btn-circle btn-xl start-button'}),
         $tableRow    = $('<div>', { class: 'class-content row' }),
         $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
         $tableCol2   = $('<div>', { class: 'class-table-column-div col' }),
         $sessionDiv  = $('<div>', { class: 'table-div' }),
-        $studentDiv  = $('<div>', { class: 'table-div' });
+        $studentDiv  = $('<div>', { class: 'table-div' }),
+
+        // Check if this course is currently running a session
+        runningSession = this.sessionManager.isCourseRunning(this.course);
 
     this.$element
         .append($topDiv
@@ -85,7 +97,7 @@ function build () {
                     .append($titleCode))
                 .append($nameDiv)
                     .append($titleName))
-            .append($editDiv))
+            .append($optionsDiv))
         .append($attDiv
             .append($attDivLeft
                 .append($startButton))
@@ -100,11 +112,28 @@ function build () {
     this.titleName = new Editable($titleName, this.course.cID, 'name', '/professor/class/editName/' + this.course.cID);
     this.titleCode = new Editable($titleCode, this.course.cID, 'code', '/professor/class/editCode/' + this.course.cID);
 
-    // Add the edit button if owner
+    // Add the edit and delete button if owner
     if (this.course.isOwner) {
-        $('<button>', { text: 'Edit Administrators', class: 'btn btn-danger btn-square btn-xl' })
-            .click(editAdministrators.bind(this))
-            .appendTo($editDiv);
+        $adminButton.click(this.adminManager.manageAdmins.bind(this, this.course));
+
+        // Need to append button to div to get tooltips
+        $delDiv.append($delButton.click(this.courseManager.deleteCourse.bind(this, this.course, this.sessionManager)));
+
+        // check if there are running sessions for this class, and 
+        // disable the delete course button if there are
+        if (runningSession) {
+            $delDiv.attr({
+                'data-toggle'    : 'tooltip',
+                'data-placement' : 'top',
+                'title'          : 'Stop running session before deleting course'
+            }).tooltip();
+
+            $delButton.addClass('disabled')
+                .css('pointer-events','none');
+        }
+
+        $adminButton.appendTo($optionsDiv);
+        $delDiv.appendTo($optionsDiv);
     }
 
     // Attendance section
@@ -119,14 +148,23 @@ function build () {
 
     // Bind duration to start button press
     $startButton.click(function () { 
-        this.sessions.startSession(this.course, this.$duration.val()); 
+        this.sessionManager.startSession(this.course, this.$duration.val());
     }.bind(this));
+
+    // Change start button depending on whether a session is running
+    if (runningSession) {        
+        $startButton.addClass('btn-success');
+        $startButton.text('Show');
+    } else {
+        $startButton.addClass('btn-danger');
+        $startButton.text('Start');
+    }
 
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
-
-    $('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
-        .click(this.exporter.createExportModal.bind(this, this.course))
+    $('<div>', { class: "exp-button-div", style: "display: inline-block; margin-top: 10px" })
+        .append($('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
+            .click(this.exporter.createExportModal.bind(this, this.course)))
         .appendTo($sessionDiv);
 
     // The student table and associated buttons
@@ -143,10 +181,6 @@ function build () {
     // Initialize the tableUpdater and fill the tables
     this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
     this.tableUpdater.updateTables();
-}
-
-function editAdministrators() {
-    this.adminManager.buildAndShowModal(this.course);
 }
 
 /**

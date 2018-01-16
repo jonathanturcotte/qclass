@@ -2,22 +2,20 @@ var Table = require('../components/table'),
     ModalWindow = require('../modalwindow');
 
 var StudentTable = function (course, $appendTarget) {
-    Table.call(this,
-        course,
-        {
-            classList: ['student-table'], 
-            height: 300, 
-            width: 485, 
-            columns: [
-                ['NetID', 67], 
-                ['Number', 80], 
-                ['First Name', 115], 
-                ['Last Name', 140],
-                ['Actions', 95]
-            ], 
-            $appendTarget: $appendTarget
-        }
-    );
+    Table.call(this, {
+        classList: ['student-table'], 
+        height: 300, 
+        width: 485, 
+        columns: [
+            ['NetID', 67], 
+            ['Number', 80], 
+            ['First Name', 115], 
+            ['Last Name', 140],
+            ['Actions', 95]
+        ], 
+        $appendTarget: $appendTarget
+    });
+    this.course = course;
 };
 StudentTable.prototype = Object.create(Table.prototype);
 StudentTable.prototype.constructor = StudentTable;

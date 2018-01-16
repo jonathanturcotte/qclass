@@ -1,6 +1,7 @@
 var XLSX         = require('xlsx'),
     IO           = require('./io'),
-    ModalWindow  = require('../modalwindow');
+    ModalWindow  = require('../modalwindow'),
+    regex        = require('../lib/regex');
 
 var Importer = function () {};
 
@@ -218,6 +219,9 @@ function importXLSX(course, modal, $file, $errorDiv, $inputDiv, $errorMsg) {
                 contentType: 'application/json'
             }).done(function(status, xhr) {
                 modal.success('Success', 'Classlist successfully added!');
+                modal.$window.on('hidden.bs.modal', function (e) {
+                    window.app.classPage.refreshTables();
+                });
             }).fail(function(xhr, status, errorThrown) {
                 //modal.error("Error", xhr.responseText);
                 fileErrorHandler($errorDiv, $inputDiv, $errorMsg, xhr.responseText, modal);
@@ -242,7 +246,7 @@ function fileErrorHandler($errorDiv, $inputDiv, $errorMsg, errorText, modal) {
 function findErrors (netID, stdNum, fName, lName) {
     var result = [false, false, false, false];
     // check netID
-    if (!netID || typeof(netID) !== 'string' || !(/^[0-9]{0,2}[a-z]{2,3}[0-9]{0,3}$/.test(netID))) {
+    if (!netID || typeof(netID) !== 'string' || !regex.user.netID.test(netID)) {
         if(!netID)
             result[0] = "No NetID Provided";
         else

@@ -33,7 +33,7 @@ function makeEditable () {
     storeResetValue.call(this);
 
     // Add the edit icon, and display/hide it when hovering
-    this.$el.parent().append($('<div>', { class: 'editable-icon editable-icon-hidden' }));
+    this.$el.parent().append($('<span>', { class: 'editable-icon editable-icon-hidden fas fa-edit' }));
     this.$el.hover(showEditIcon.bind(this), hideEditIcon.bind(this));
 
     // Handle enter and esc keypresses

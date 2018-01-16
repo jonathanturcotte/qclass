@@ -8,19 +8,24 @@
  */ 
 var ModalWindow = function(options) {
     // Initialization with defaults
-    this.id         = options.id        || 'modal-window';
+    this.id         = options.id;
     this.title      = options.title     || '';
     this.closeable  = options.closeable === undefined ? true  : options.closeable;
     this.minimize   = options.minimize  === undefined ? false : options.minimize;
 
     // Construction of the elements
     $('#' + this.id).remove();
-    this.$window = $('<div>', { id: this.id, class: 'modal fade', role: 'dialog', tabindex: -1, }),
+    this.$window = $('<div>', { class: 'modal fade', role: 'dialog', tabindex: -1, }),
     this.$footer = $('<div>', { class: 'modal-footer' }),
     this.$body   = $('<div>', { class: 'modal-body' }),
     this.$title  = $('<h4>', { class: 'modal-title', text: this.title }),
     this.$header = $('<div>', { class: 'modal-header' })
             .append(this.$title);
+
+    if (this.id) {
+        $('#' + this.id).remove();
+        this.$window.attr('id', this.id);
+    }
 
     this.$window.append($('<div>', { class: 'modal-dialog', role: 'document' })
         .append($('<div>', { class: 'modal-content' })

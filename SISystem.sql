@@ -5,7 +5,7 @@ use SISystem;
 
 create table course (
 	cID			char(36) not null,
-	cCode 		varchar(10) not null,
+	cCode 		varchar(30) not null,
 	cName		varchar(100),
 	pNetID		varchar(10) not null,
 	primary key (cID)
@@ -143,6 +143,10 @@ insert into attendance values
 	('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '11jlt10', 0),
 	('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12ozs', 0),
     ('1509398272000', 'abc49eb2-0630-4382-98b5-abcfd40627b8', '12cjd2', 1);
+    
+insert into administrators values
+	('abc49eb2-0630-4382-98b5-abcfd40627b8', '12hdm'),
+    ('abc49eb2-0630-4382-98b5-abcfd40627b8', '13asd');
 
 
 /*

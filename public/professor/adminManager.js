@@ -1,81 +1,106 @@
 var ModalWindow = require('../modalwindow'),
+    Table       = require('../components/table'),
     regex       = require('../lib/regex');
     
 var AdminManager = function () {};
 
-AdminManager.prototype.buildAndShowModal = function (course) {
+AdminManager.prototype.manageAdmins = function (course) {
     var netIDFieldID = 'add-admin-netID-field';
 
     this.modal = new ModalWindow({ title: 'Edit Administrators' });
+    this.modal.$body.css({
+        display: 'flex',
+        'align-items': 'center',
+        'flex-direction': 'column'
+    });
+
+    // Add informational alert
+    $('<div>', { class: 'alert alert-info alert-dismissible fade show', role: 'alert' })
+    .append($('<button>', { class: 'close' })
+        .attr('data-dismiss', 'alert')
+        .attr('aria-label', 'Close')
+        .append($('<span>')
+            .attr('aria-hidden', 'true')
+            .html('&times;')))
+    .append($('<p>', { text:'Administrators are able to start and stop sessions, add or remove students, export attendance, and edit the course name and code.' } ))
+    .append($('<div>', { style: 'text-align: center' })
+        .append($('<strong>', { text: 'Admins must be registered TAs or professors' })))
+    .appendTo(this.modal.$body);
+
+    // Add table and its container
+    this.$tableDiv = $('<div>', { class: 'admin-table-div' })
+        .appendTo(this.modal.$body);        
+    this.table = new Table({ 
+        height: 250,
+        width: 468,
+        columns: [
+            ['NetID', 67],
+            ['Name', 326],
+            ['Actions', 75]
+        ],
+        $appendTarget: this.$tableDiv
+    });
 
     // Add admin form components
-    this.$formMessage  = $('<p>', { style: 'display: none;' });
-    this.$netIDField    = $('<input>', { 
+    this.$formMessage = $('<p>', { class: 'admin-add-form-msg' });
+    this.$netIDField = $('<input>', { 
         id: this.netIDFieldID, 
         type: 'text', 
         class: 'form-control',
-        style: 'display: inline; margin-right: 15px;',
+        style: 'display: inline;',
         width: 100,
         placeholder: 'NetID'
     });
-    this.$addButton     = $('<button>', { class: 'btn btn-primary', text: 'Add' })
-        .click(addAdmin.bind(this, course));
+    this.$addButton     = $('<button>', { 
+        class: 'btn btn-primary', 
+        text: 'Add', 
+        style: 'vertical-align: top;' 
+    }).click(addAdmin.bind(this, course));
 
     // Construct and append the add admin form
-    this.$addForm = $('<div>').append([
-        $('<p>', { text: 'Add a new administrator' }),
-        this.$formMessage,
+    this.$addForm = $('<div>', { class: 'admin-add-form' }).append([
         this.$netIDField,
         this.$addButton
-    ]).appendTo(this.modal.$body);
+    ]);
 
-    // Add table and its container
-    this.$tableMessage = $('<p>', { style: 'display: none;' });
-    this.$table = $('<table>', { class: 'table-bordered table-sm table-hover', style: 'text-align: center;' })
-        .append($('<thead>')
-            .append($('<tr>')
-                .append($('<th>', { text: 'NetID' }))
-                .append($('<th>', { text: 'Name' }))
-                .append($('<th>', { text: 'Actions' }))));
-    this.$tBody = $('<tbody>').appendTo(this.$table);
-    this.$tableDiv = $('<div>', { style: 'margin-top: 25px;' })
-        .append($('<h5>', { text: 'Administrators' }))
-        .append(this.$tableMessage)
-        .append(this.$table)
-        .appendTo(this.modal.$body);        
+    this.$belowTableDiv = $('<div>', { class: 'admin-table-below' })
+        .append($('<div>', { class: 'admin-add-form-msg-div' })
+            .append(this.$formMessage))
+        .append(this.$addForm)
+        .appendTo(this.$tableDiv);
 
+    // Fill the table
     updateTable.call(this, course);
 };
 
 function updateTable (course) {
-    this.$tBody.empty().spin();
+    this.table.$tbody.empty().spin();
 
     $.get('/professor/class/' + course.cID + '/admins')
         .done(function (data, status, xhr) {
+            var tableData = [];
             for (var i = 0; i < data.length; i++) {
                 var $deleteButton = $('<button>', { title: 'Remove', class: 'btn btn-default btn-sm' })
+                    .click(openConfirmRemovalModal.bind(this, data[i].pNetID, course))
                     .append($('<i>', { class: 'fas fa-times' })
                         .attr('aria-hidden', 'true')),
                     name = '-';
-                    
-                $deleteButton.click(removeAdmin.bind(this, data[i].pNetID, course, $deleteButton));
 
                 if (data[i].fName && data[i].fName.length > 0 && data[i].lName && data[i].lName.length > 0) 
                     name = data[i].fName + ' ' + data[i].lName;
 
-                $('<tr>')
-                    .append($('<td>', { text: data[i].pNetID }))
-                    .append($('<td>', { text: name }))
-                    .append($('<td>')
-                        .append($deleteButton))
-                    .appendTo(this.$tBody);
+                tableData.push([
+                    data[i].pNetID,
+                    name,
+                    $('<td>').append($deleteButton)
+                ]);
             }
+            this.table.fill(tableData);
         }.bind(this))
         .fail(function (data, status, xhr) {
-            showTableMessage.call(this, false, 'Error getting admins');
+            this.table.error('Error getting admins');
         }.bind(this))
         .always(function(a, status, b) {
-            this.$tBody.spin(false);
         }.bind(this));
 }
 
@@ -84,7 +109,7 @@ function addAdmin (course) {
 
     // Validate netID
     if (!netID) {
-        showFormError.call(this, 'NetID cannot be empty');
+        showFormError.call(this, 'Empty NetID');
     } else if (!regex.user.netID.test(netID)) {
         showFormError.call(this, 'Invalid NetID format');
     } else {
@@ -96,7 +121,7 @@ function addAdmin (course) {
             url: '/professor/class/' + course.cID + '/admins/add/' + netID
         })
         .done(function (data, status, xhr) {
-            showFormSuccess.call(this, 'Admin successfully added');
+            showFormSuccess.call(this, 'Added ' + netID);
             updateTable.call(this, course);
         }.bind(this))
         .fail(function (xhr, status, errorThrown) {
@@ -129,6 +154,7 @@ function addAdmin (course) {
 function showFormSuccess (msg) {
     showMessage(true, msg, this.$formMessage);
     this.$netIDField.removeClass('is-invalid');
+    this.$netIDField.val('');
 }
 
 function showFormError (msg) {
@@ -141,10 +167,6 @@ function clearFormError () {
     this.$netIDField.removeClass('is-invalid');
 }
 
-function showTableMessage (success, msg) {
-    showMessage(success, msg, this.$tableMessage);
-}
-
 function showMessage (success, msg, $element) {
     var remove = success === true ? 'text-danger' : 'text-success',
         add    = success === true ? 'text-success' : 'text-danger';
@@ -155,20 +177,45 @@ function showMessage (success, msg, $element) {
         .show();
 }
 
-function removeAdmin (netID, course, $deleteButton) {
-    $deleteButton.prop('disabled', true);
+function openConfirmRemovalModal (netID, course) {
+    var confirmModal = new ModalWindow({ title: 'Remove Admin' });
+
+    // Moce the backdrop infront of the first modal but behind the second
+    confirmModal.$window.css('z-index', 2001);
+    $('.modal-backdrop').eq(1).css('z-index', 2000);
+
+    confirmModal.$deleteButton = $('<button>', { class: 'btn btn-danger', text: 'Remove' })
+        .prependTo(confirmModal.$footer);
+
+    confirmModal.$deleteButton.click(function() {
+        confirmModal.$deleteButton.attr('disabled', 'disabled');
+        confirmModal.$closeButton.attr('disabled', 'disabled');
+        removeAdmin.call(this, netID, course, confirmModal);
+    }.bind(this));
+
+    confirmModal.$body.append($('<p>', { text: 'Are you sure you want to remove admin ' + netID + '?' }));
+    confirmModal.$closeButton.text('Cancel');    
+    confirmModal.show();
+}
+
+function removeAdmin (netID, course, confirmModal) {
+    confirmModal.$deleteButton.attr('disabled', 'disabled');
 
     $.ajax({
         url: '/professor/class/' + course.cID + '/admins/remove/' + netID,
         method: 'DELETE'
     })
     .done(function (data, status, xhr) {
-        showTableMessage.call(this, true, 'Successfully deleted admin ' + netID);
-    }.bind(this))
-    .fail(function (xhr, status, errorStatus) {
-        showTableMessage.call(this, false, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
-    }.bind(this))
-    .always(function (a, status, b) {
+        confirmModal.success(null, 'Successfully removed admin ' + netID);
+    }).fail(function (xhr, status, errorStatus) {
+        confirmModal.error(null, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
+    }).always(function (a, status, b) {
+        // Remove delete button since operation is over, change close text and enable
+        confirmModal.$deleteButton.remove();
+        confirmModal.$closeButton.text('OK');
+        confirmModal.$closeButton.attr('disabled', false);
+
+        // Update table on first modal
         updateTable.call(this, course);
     }.bind(this));
 }

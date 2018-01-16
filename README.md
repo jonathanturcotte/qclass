@@ -33,6 +33,8 @@ Currently valid netIDs are:
 12ozs,
 11jlt10
 
+12hdm is an admin for ELEC 498
+
 ### Running on the Linux AWS
 #### Location
 The project is located on the AWS server under `/opt/Q-Clicker-Web`
