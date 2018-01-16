@@ -2,6 +2,25 @@ var ModalWindow = require('../modalwindow');
 
 var SessionManager = function () {
     this.sessions = [];
+    
+    //Check for running sessions on the server
+    $.get({
+        url: '/professor/refresh_sessions'
+    }).done(function(data, status, xhr) {
+        var session,
+            sessionInfo;
+        for(var i = 0; i < data.length; i++) {
+            session = createSession(data[i].cID);
+            sessionInfo = { code: data[i].cCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
+            $.extend(session, sessionInfo);
+            buildModal.call(this, session);
+            this.sessions.push(session);
+        }
+    }.bind(this))
+    .fail(function(xhr, status, errorThrown) {
+        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
+    });
+    
 };
 
 /**
@@ -135,6 +154,11 @@ SessionManager.prototype.isCourseRunning = function (course) {
     return !!session;
 };
 
+// For reloading the session manager upon page refresh
+SessionManager.prototype.refresh = function () {
+
+};
+
 ///////////////////////
 // Private Functions //
 ///////////////////////
@@ -227,10 +251,11 @@ function createSession(course) {
     startTime : 0,
     endTime   : 0,
     modal     : new ModalWindow({
-                    id        : 'running-session-' + course.cID,
-                    title     : 'Start Attendance Session',
-                    closeable : false,
-                    minimize  : true
+                    id         : 'running-session-' + course.cID,
+                    title      : 'Start Attendance Session',
+                    closeable  : false,
+                    minimize   : true,
+                    initHidden : true
                     })
     };
 }

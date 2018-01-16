@@ -19,6 +19,17 @@ exports.addClass = function(netID, code, name, callback) {
     });
 };
 
+exports.getRunningSessions = function(netID, callback) {
+    var query = `SELECT T1.cID AS cID, attTime, attDuration, cCode
+                 FROM administrators RIGHT JOIN (SELECT cID, attTime, attDuration, completed, pNetID, cCode
+                                                 FROM attendancesession NATURAL JOIN course
+                                                 WHERE completed = 0) AS T1
+                                                 ON T1.cID = administrators.cID
+                 WHERE administrators.pNetID=? OR T1.pNetID=?
+                 GROUP BY (attTime)`;
+    runQuery(query, [netID, netID], callback);
+};
+
 exports.editClassName = function(netID, cID, name, callback) {
     var query = 'UPDATE course SET cName=? WHERE cID=?';
     runQuery(query, [name, cID], callback);

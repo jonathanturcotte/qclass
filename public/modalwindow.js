@@ -5,13 +5,14 @@
  * @param {string=}  options.title
  * @param {boolean=} options.closeable
  * @param {boolean=} options.minimize
+ * @param {boolean=} options.initHidden
  */ 
 var ModalWindow = function(options) {
     // Initialization with defaults
     this.id         = options.id;
-    this.title      = options.title     || '';
-    this.closeable  = options.closeable === undefined ? true  : options.closeable;
-    this.minimize   = options.minimize  === undefined ? false : options.minimize;
+    this.title      = options.title      || '';
+    this.closeable  = options.closeable  === undefined ? true  : options.closeable;
+    this.minimize   = options.minimize   === undefined ? false : options.minimize;
 
     // Construction of the elements
     $('#' + this.id).remove();
