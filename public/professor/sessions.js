@@ -10,7 +10,7 @@ var SessionManager = function () {
         var session,
             sessionInfo;
         for(var i = 0; i < data.length; i++) {
-            session = createSession(data[i].cID);
+            session = createSession(data[i].cID, false);
             sessionInfo = { code: data[i].rCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
             $.extend(session, sessionInfo);
             buildModal.call(this, session);
@@ -34,7 +34,7 @@ SessionManager.prototype.startSession = function (course, duration) {
     if (getSession(course, this.sessions)){
         this.showSession(course);
     } else {
-        var session = createSession(course);
+        var session = createSession(course, true);
 
         sessionOnChanges(course.cID);
 
@@ -244,7 +244,7 @@ function removeToastNotification(id) {
 }
 
 // Create a new session for a given course and return it
-function createSession(course) {
+function createSession(course, visible) {
     return {
     course    : course,
     code      : '',
@@ -255,7 +255,7 @@ function createSession(course) {
                     title      : 'Start Attendance Session',
                     closeable  : false,
                     minimize   : true,
-                    initHidden : true
+                    initHide   : visible
                     })
     };
 }
