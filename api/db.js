@@ -29,6 +29,22 @@ exports.editClassCode = function(netID, cID, code, callback) {
     runQuery(query, [code, cID], callback);
 };
 
+exports.getProfessor = function (netID, callback) {
+    runQuery('SELECT * FROM professor WHERE pNetID = ?', [netID], callback);
+};
+
+exports.updateProfessor = function (netID, fName, lName, callback) {
+    runQuery('UPDATE professor SET fName = ?, lName = ? WHERE pNetID', [fName, lName], callback);
+};
+
+exports.getStudent = function (netID, callback) {
+    runQuery('SELECT * FROM student WHERE pNetID = ?', [netID], callback);
+};
+
+exports.updateStudent = function (netID, stdNum, fName, lName, callback) {
+    runQuery('UPDATE student SET stdNum = ?, fName = ?, lName = ? WHERE pNetID', [stdNum, fName, lName], callback);
+};
+
 /**
  * Enroll students in a class
  * @param {string} classID
