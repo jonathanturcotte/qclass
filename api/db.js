@@ -20,8 +20,8 @@ exports.addClass = function(netID, code, name, callback) {
 };
 
 exports.getRunningSessions = function(netID, callback) {
-    var query = `SELECT T1.cID AS cID, attTime, attDuration, cCode
-                 FROM administrators RIGHT JOIN (SELECT cID, attTime, attDuration, completed, pNetID, cCode
+    var query = `SELECT T1.cID AS cID, attTime, attDuration, rCode
+                 FROM administrators RIGHT JOIN (SELECT cID, attTime, attDuration, completed, pNetID, rCode
                                                  FROM attendancesession NATURAL JOIN course
                                                  WHERE completed = 0) AS T1
                                                  ON T1.cID = administrators.cID

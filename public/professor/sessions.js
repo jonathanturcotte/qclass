@@ -11,7 +11,7 @@ var SessionManager = function () {
             sessionInfo;
         for(var i = 0; i < data.length; i++) {
             session = createSession(data[i].cID);
-            sessionInfo = { code: data[i].cCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
+            sessionInfo = { code: data[i].rCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
             $.extend(session, sessionInfo);
             buildModal.call(this, session);
             this.sessions.push(session);
