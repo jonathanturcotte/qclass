@@ -29,12 +29,20 @@ exports.editClassCode = function(netID, cID, code, callback) {
     runQuery(query, [code, cID], callback);
 };
 
+exports.addProfessor = function (netID, fName, lName, callback) {
+    runQuery('INSERT INTO professor (pNetID, fName, lName) VALUES (?, ?, ?)', [user.netID, user,fName, user.lName], callback);
+};
+
 exports.getProfessor = function (netID, callback) {
     runQuery('SELECT * FROM professor WHERE pNetID = ?', [netID], callback);
 };
 
 exports.updateProfessor = function (netID, fName, lName, callback) {
     runQuery('UPDATE professor SET fName = ?, lName = ? WHERE pNetID', [fName, lName], callback);
+};
+
+exports.addStudent = function (netID, stdNum, fName, lName, callback) {
+    runQuery('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES (?, ?, ?)', [user.netID, user.stdNum, user,fName, user.lName], callback);
 };
 
 exports.getStudent = function (netID, callback) {
