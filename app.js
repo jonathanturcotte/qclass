@@ -214,16 +214,16 @@ function validateUser(user, callback) {
                 var result = results[0];
 
                 // Respond with student info if no difference is found between the authenticated user and the stored user, else update first
-                if (user.stdNum === result.stdNum && user.fName === result.fName && user.lName === result.lName)
+                if (user.studentNum === result.studentNum && user.fName === result.fName && user.lName === result.lName)
                     callback();
                 else {
-                    db.updateStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results, fields) {
+                    db.updateStudent(user.netID, user.studentNum, user.fName, user.lName, function (err, results, fields) {
                         if (err) return callback(new Error('Error updating user'));
                         callback();
                     });
                 }
             } else { // No student found - need to add new entry before responding
-                db.addStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results, fields) {
+                db.addStudent(user.netID, user.studentNum, user.fName, user.lName, function (err, results, fields) {
                     if (err) return callback(new Error('Error adding new student'));
                     callback();
                 });
