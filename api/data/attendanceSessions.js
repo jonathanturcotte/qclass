@@ -35,7 +35,7 @@ exports.start = function(params) {
         var code = generateUniqueCode(),
             time = Date.now();
 
-        db.startAttendance(params.classID, params.duration, time, function(err, results, fields) {
+        db.startAttendance(params.classID, params.duration, time, code, function(err, results, fields) {
             if (err)
                 params.callback(err);
             else {

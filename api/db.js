@@ -163,13 +163,13 @@ exports.getEnrolledStudentsWithInfo = function(classID, callback) {
     runQuery(query, [classID], callback);
 };
 
-exports.startAttendance = function(classID, duration, time, callback) {
+exports.startAttendance = function(classID, duration, time, code, callback) {
     useConnection(callback, function(con) {
         con.beginTransaction(function (err) {
             if (err) return con.rollback(function() { callback(err); });
 
-            var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration) VALUES ?';
-            con.query(newSessionQuery, [[[classID, time, duration]]], function(err, results, fields) {
+            var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration, rCode) VALUES ?';
+            con.query(newSessionQuery, [[[classID, time, duration, code]]], function(err, results, fields) {
                 if (err) return con.rollback(function() { callback(err); });
 
                 // Get current enrollment list

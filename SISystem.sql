@@ -36,6 +36,7 @@ create table attendanceSession (
 	cID			char(36) not null,
 	attTime 	bigint not null,
 	attDuration	int not null,
+	rCode		char(5) not null,
 	completed	bool not null default 0,
 	primary key (cID, attTime)
 );
