@@ -127,6 +127,19 @@ app.use(passport.session());
 // authentication for all the subsequent ones
 app.all('*', passport.authenticate('saml', { failureRedirect: '/login/fail' }));
 
+app.post('/login/callback', 
+    passport.authenticate('saml', { failureRedirect: '' }), // Set failure redirect to something that makes sense
+    function (req, res, next) {
+        console.log('Login callback');
+        res.redirect('/');
+    }
+);
+
+app.post('/logout/callback', function (req, res, next) {
+    req.logout();
+    res.redirect('/'); // Not sure where to redirect to
+});
+
 // Serve the static pages
 app.use(express.static(path.join(__dirname, 'public')));
 
