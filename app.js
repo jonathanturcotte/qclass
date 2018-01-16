@@ -103,13 +103,21 @@ var passportStrat = new SamlStrategy({
     }, function (profile, done) {
         console.log("SAML - Strategy callback");
         console.log("Logged in as: " + profile['email']);
-        return done(null, {
+
+        // Construct the user from the profile information
+        var user = {
             netID      : '1pvb69', //profile['email'].split('@')[0], // NetID
             studentNum : '10048466', //profile[''],                    // Student number
             fName      : profile['urn:oid:2.5.4.42'],    // First name
             lName      : profile['urn:oid:2.5.4.4'],     // Last name
             email      : profile['email'],               // Email
             isProf     : true                            // isProfessor
+        };
+
+        // Check user against the database
+        validateUser(user, function (err) {
+            if (err) return done(err);
+            return done(null, user);
         });
     }
 );
@@ -171,3 +179,55 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+
+function validateUser(user, callback) {
+    if (user.isProf) {
+        db.getProfessor(user.netID, function(err, results, fields) {
+            if (err) return callback(new Error('Error checking netID'));
+
+            // Return professor if found
+            if (results.length !== 0) {
+                var result = results[0];
+
+                // Respond with professor info if no difference is found between the authenticated user and the stored user, else update first
+                if (user.fName === result.fName && user.lName === result.lName)
+                    callback();
+                else {
+                    db.updateProfessor(user.netID, user.fName, user.lName, function (err, results, fields) {
+                        if (err) return callback(new Error('Error updating user'));
+                        callback();
+                    });
+                }
+            } else { // No professor found - need to add new entry before responding
+                db.addProfessor(user.netID, user.fName, user.lName, function (err, results, fields) {
+                    if (err) return callback(new Error('Error adding new professor'));
+                    callback();
+                });
+            }
+        });
+    } else { // user is student
+        db.getStudent(user.netID, function(err, results, fields) {
+            if (err) return callback(new Error('Error checking netID'));
+
+            // Return student if found
+            if (results.length !== 0) {
+                var result = results[0];
+
+                // Respond with student info if no difference is found between the authenticated user and the stored user, else update first
+                if (user.stdNum === result.stdNum && user.fName === result.fName && user.lName === result.lName)
+                    callback();
+                else {
+                    db.updateStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results, fields) {
+                        if (err) return callback(new Error('Error updating user'));
+                        callback();
+                    });
+                }
+            } else { // No student found - need to add new entry before responding
+                db.addStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results, fields) {
+                    if (err) return callback(new Error('Error adding new student'));
+                    callback();
+                });
+            }
+        });
+    }
+}
