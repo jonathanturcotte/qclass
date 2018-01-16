@@ -1,24 +1,10 @@
 var express     = require('express'),
     router      = express.Router(),
     routeHelper = require('./helper'),
-    db          = require('../api/db'),
-    passport    = require('passport');
-
-router.post('/login/callback', 
-    passport.authenticate('saml', { failureRedirect: '' }), // Set failure redirect to something that makes sense
-    function (req, res, next) {
-        console.log('Login callback');
-        res.redirect('/');
-    }
-);
-
-router.post('/logout/callback', function (req, res, next) {
-    req.logout();
-    res.redirect('/'); // Not sure where to redirect to
-});
+    db          = require('../api/db');
 
 // GET user info
-router.get('/user-info', passport.authenticate('saml'), function(req, res, next) {
+router.get('/user-info', function(req, res, next) {
     // As students should make up the majority of the users,
     // check if they're a student first
     db.studentExists(req.user.netID, function(err, results, fields) {

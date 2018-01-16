@@ -83,16 +83,10 @@ app.use(session({
  }));
 
 passport.serializeUser(function(user, done){
-    console.log("SAML - Serialize User");
-    console.log("User:");
-    console.log(user);
     done(null, user);
 });
 
 passport.deserializeUser(function(user, done){
-    console.log("SAML - Deserialize User");
-    console.log("User:");
-    console.log(user);
     done(null, user);
 });
 
@@ -109,9 +103,14 @@ var passportStrat = new SamlStrategy({
         decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                             // Our private key
     }, function (profile, done) {
         console.log("SAML - Strategy callback");
-        console.log("Profile: ");
-        console.log(profile);
-        return done(null, profile); // TODO: Replace with something more meaningful
+        console.log("Logged in as: " + profile['email']);
+        return done(null, {
+            netID      : profile['email'].split('@')[0], // NetID
+//          studentNum : profile[''],                    // Student number
+            fName      : profile['urn:oid:2.5.4.42'],    // First name
+            lName      : profile['urn:oid:2.5.4.4'],     // Last name
+            email      : profile['email']                // Email
+        });
     }
 );
 
@@ -122,10 +121,28 @@ passport.use(passportStrat);
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Enforce authentication for all requests
+app.get('/login', passport.authenticate('saml', {successRedirect: '/', failureRedirect: '/login/fail'}));
+
+app.post('/login/callback', passport.authenticate('saml', { successRedirect: '/', failureRedirect: '/login/fail' }));
+
+app.get('/login/fail',
+    function(req, res) {
+        console.log("SAML - get /login/fail");
+        res.send(401, 'Login failed');
+    }
+);
+
+// Enforce authentication for all other requests
 // Must remain above the other routes/middlewares to force
 // authentication for all the subsequent ones
-app.all('*', passport.authenticate('saml', { failureRedirect: '/login/fail' }));
+app.all('*', function(req, res, next){
+    if (!req.isAuthenticated()){
+        console.log("Not logged in, redirecting to SSO");
+        res.redirect('/login');
+    } else {
+        next();
+    }
+});
 
 // Serve the static pages
 app.use(express.static(path.join(__dirname, 'public')));
@@ -134,35 +151,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', general);
 app.use('/student', student);
 app.use('/professor', professor);
-
-
-app.post('/login/callback', function (req, res, next) {
-    console.log("SAML - post /login/callback");
-    console.log("req:");
-    console.log(req);
-    console.log("res: ");
-    console.log(res);
-    passport.authenticate('saml2', {'successRedirect': '/', 'failureRedirect': '/login/fail' });
-});
-
-app.get('/login/fail',
-    function(req, res) {
-        console.log("SAML - get /login/fail");
-        console.log("req:");
-        console.log(req);
-        console.log("res: ");
-        console.log(res);
-        res.send(401, 'Login failed');
-    }
-);
-
-app.get('/Shibboleth.sso/Metadata',
-    function(req, res) {
-        console.log('SAML - get metadata');
-        res.type('application/xml');
-        res.send(200, samlStrategy.generateServiceProviderMetadata(cert));
-    }
-);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
