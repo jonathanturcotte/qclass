@@ -7,15 +7,11 @@ var SessionManager = function () {
     $.get({
         url: '/professor/refresh_sessions'
     }).done(function(data, status, xhr) {
-        var session,
-            sessionInfo;
-        for(var i = 0; i < data.length; i++) {
-            session = createSession(data[i].cID, false);
-            sessionInfo = { code: data[i].rCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
-            $.extend(session, sessionInfo);
-            buildModal.call(this, session);
-            this.sessions.push(session);
-        }
+        // Reinitalizes all of the session modals
+        refreshModals.call(this,data);
+        // Refresh all toastr notifications
+        refreshToastr.call(this);
+
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         console.log("Error refreshing sessions - " + status + " - " + errorThrown);
@@ -314,6 +310,39 @@ function sessionOffChanges(id) {
         $startButton.removeClass('btn-success')
             .addClass('btn-danger')
             .text('Start');
+    }
+}
+
+// Refresh all session modals
+function refreshModals(data) {
+    var session,
+        sessionInfo,
+        course;
+    for(var i = 0; i < data.length; i++) {
+        course = { cCode: data[i].cCode, cID: data[i].cID , cName: data[i].cName , isOwner: true };
+        session = createSession(course, false);
+        sessionInfo = { code: data[i].rCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
+        $.extend(session, sessionInfo);
+        buildModal.call(this, session);
+        this.sessions.push(session);
+    }
+}
+
+// Refresh all toastr notifications
+function refreshToastr() {
+    for(var i = 0; i < this.sessions.length; i++) {
+        var session = this.sessions[i];
+        if (Date.now() < session.endTime){
+            // Override the default toastr notifications so that this doesn't
+            // automatically get dismissed. On click re-open the attendance modal
+            var options = {
+                'timeOut': '0',
+                'extendedTimeOut': '0',
+                'toastClass': 'toast toast-session-' + session.cID,
+                'onclick': this.showSession.bind(this, session.course)
+            };
+            toastr.info('Code: ' + session.code.toUpperCase(), 'Running session for ' + session.course.cCode, options);
+        }
     }
 }
 
