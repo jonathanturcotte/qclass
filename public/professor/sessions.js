@@ -150,11 +150,6 @@ SessionManager.prototype.isCourseRunning = function (course) {
     return !!session;
 };
 
-// For reloading the session manager upon page refresh
-SessionManager.prototype.refresh = function () {
-
-};
-
 ///////////////////////
 // Private Functions //
 ///////////////////////
