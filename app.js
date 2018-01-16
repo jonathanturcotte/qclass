@@ -10,7 +10,6 @@ var express       = require('express'),
     helmet        = require('helmet'),
     csv           = require('express-csv'),
     session       = require('express-session'),
-    auth          = require('./api/auth'),
     passport      = require('passport'),
     SamlStrategy  = require('passport-saml').Strategy,
 
@@ -105,11 +104,12 @@ var passportStrat = new SamlStrategy({
         console.log("SAML - Strategy callback");
         console.log("Logged in as: " + profile['email']);
         return done(null, {
-            netID      : profile['email'].split('@')[0], // NetID
-//          studentNum : profile[''],                    // Student number
+            netID      : '1pvb69', //profile['email'].split('@')[0], // NetID
+            studentNum : '10048466', //profile[''],                    // Student number
             fName      : profile['urn:oid:2.5.4.42'],    // First name
             lName      : profile['urn:oid:2.5.4.4'],     // Last name
-            email      : profile['email']                // Email
+            email      : profile['email'],               // Email
+            isProf     : true                            // isProfessor
         });
     }
 );
