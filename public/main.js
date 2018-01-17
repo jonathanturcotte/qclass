@@ -65,8 +65,7 @@ SignInApp.prototype.buildStudentDOM = function () {
  * Sign-out
  */
 SignInApp.prototype.signOut = function () {
-    // TODO - sign out from SSO and redirect to queen's page maybe?
-    console.log('Signing-out.');
+    $.post('/logout');
 };
 
 function initToastNotifications () {

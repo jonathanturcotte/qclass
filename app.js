@@ -38,36 +38,25 @@ var express       = require('express'),
     https        = https.createServer(sslOptions, app).listen(443);
 
 // Use Helmet to help cover some common header security issues
-//app.use(helmet({
-    //referrerPolicy: { policy: 'no-referrer' },
-    //contentSecurityPolicy: {
-        //directives: {
-            //defaultSrc: ["'self'",
-                //'data:',
-                //'https://idptest.queensu.ca',           // IdP for SSO
-                //'https://code.jquery.com',              // jQuery
-                //'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
-                //'https://maxcdn.bootstrapcdn.com',      // Bootstrap
-                //'https://use.fontawesome.com'],         // Font Awesome
-            //styleSrc: ["'self'",
-                //"'unsafe-inline'",
-                //'https://maxcdn.bootstrapcdn.com',      // Bootstrap
-                //'https://cdnjs.cloudflare.com'],        // Toastr
-            //imgSrc: ["'self'", 'data:']
-        //}
-    //}
-//}));
-
-// Initialize the socketIO
-//app.io = io.initialize();
-
-// Ensure that all traffic is being routed through https
-//app.all('*', function (req, res, next) {
-    //if (req.secure)
-        //return next();
-    //else
-        //res.redirect('https://' + req.hostname + req.url);
-//});
+app.use(helmet({
+    referrerPolicy: { policy: 'no-referrer' },
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'",
+                'data:',
+                'https://idptest.queensu.ca',           // IdP for SSO
+                'https://code.jquery.com',              // jQuery
+                'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
+                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
+                'https://use.fontawesome.com'],         // Font Awesome
+            styleSrc: ["'self'",
+                "'unsafe-inline'",
+                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
+                'https://cdnjs.cloudflare.com'],        // Toastr
+            imgSrc: ["'self'", 'data:']
+        }
+    }
+}));
 
 // TODO: Add favicon
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -95,13 +84,12 @@ var passportStrat = new SamlStrategy({
         callbackUrl      : 'https://qclass.ca/login/callback',                          // The login callback
         logoutCallbackUrl: 'https://qclass.ca/logout/callback',                         // Logout callback
         entryPoint       : 'https://idptest.queensu.ca/idp/profile/SAML2/Redirect/SSO', // location of IDP
-        logoutUrl        : 'https://idptest.queensu.ca/idp/Shibboleth.sso/SLO/POST',    // URL for logging out on the IDP
+        logoutUrl        : 'https://idptest.queensu.ca/idp/profile/Logout',             // URL for logging out on the IDP
         issuer           : 'https://qclass.ca',                                         // The identifier for our SP
         identifierFormat : '',                                                          // The requested format, for ITS we don't need it
         cert             : fs.readFileSync('sso/idp.crt', 'utf8'),                      // X509 cert for the idp, needs to be all on one line
         decryptionPvk    : fs.readFileSync(keyPath, 'utf8')                             // Our private key
     }, function (profile, done) {
-        console.log("SAML - Strategy callback");
         console.log("Logged in as: " + profile['email']);
 
         // Construct the user from the profile information
@@ -111,7 +99,9 @@ var passportStrat = new SamlStrategy({
             fName      : profile['urn:oid:2.5.4.42'],    // First name
             lName      : profile['urn:oid:2.5.4.4'],     // Last name
             email      : profile['email'],               // Email
-            isProf     : true                            // isProfessor
+            isProf     : true,                           // isProfessor
+            nameID     : profile['nameID'],              // NameID - needed for logout
+            nameIDFormat : profile['nameIDFormat']       // NameIDFormat - needed for logout
         };
 
         // Check user against the database
@@ -129,16 +119,12 @@ passport.use(passportStrat);
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Handle logging in through SSO
 app.get('/login', passport.authenticate('saml', {successRedirect: '/', failureRedirect: '/login/fail'}));
-
 app.post('/login/callback', passport.authenticate('saml', { successRedirect: '/', failureRedirect: '/login/fail' }));
-
-app.get('/login/fail',
-    function(req, res) {
-        console.log("SAML - get /login/fail");
-        res.send(401, 'Login failed');
-    }
-);
+app.get('/login/fail', function(req, res) {
+    res.send(401, 'Login failed');
+});
 
 // Enforce authentication for all other requests
 // Must remain above the other routes/middlewares to force
@@ -150,6 +136,21 @@ app.all('*', function(req, res, next){
     } else {
         next();
     }
+});
+
+// Handle logout
+app.post('/logout', function (req, res) {
+    console.log("logging out");
+    console.log(req.user);
+    passportStrat.logout(req, function (err, request){
+        if(!err) { res.redirect(request); }
+    })
+});
+
+app.post('/logout/callback', function (req, res){
+    console.log("logout callback");
+    req.logout();
+    //res.redirect('/');
 });
 
 // Serve the static pages
