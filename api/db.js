@@ -38,11 +38,11 @@ exports.getProfessor = function (netID, callback) {
 };
 
 exports.updateProfessor = function (netID, fName, lName, callback) {
-    runQuery('UPDATE professor SET fName = ?, lName = ? WHERE pNetID', [fName, lName], callback);
+    runQuery('UPDATE professor SET fName = ?, lName = ? WHERE pNetID = ?', [fName, lName, netID], callback);
 };
 
 exports.addStudent = function (netID, stdNum, fName, lName, callback) {
-    runQuery('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES (?, ?, ?)', [user.netID, user.stdNum, user,fName, user.lName], callback);
+    runQuery('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES (?, ?, ?, ?)', [user.netID, user.stdNum, user,fName, user.lName], callback);
 };
 
 exports.getStudent = function (netID, callback) {
@@ -50,7 +50,7 @@ exports.getStudent = function (netID, callback) {
 };
 
 exports.updateStudent = function (netID, stdNum, fName, lName, callback) {
-    runQuery('UPDATE student SET stdNum = ?, fName = ?, lName = ? WHERE pNetID', [stdNum, fName, lName], callback);
+    runQuery('UPDATE student SET stdNum = ?, fName = ?, lName = ? WHERE pNetID = ?', [stdNum, fName, lName, netID], callback);
 };
 
 /**
