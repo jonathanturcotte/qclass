@@ -17,9 +17,6 @@ SessionManager.prototype.startSession = function (course, duration) {
         this.showSession(course);
     } else {
         var session = createSession(course, true);
-
-        sessionOnChanges(course.cID);
-
         session.modal.show();
         session.modal.$body.spin()
             .addClass('spin-min-height');
@@ -29,6 +26,7 @@ SessionManager.prototype.startSession = function (course, duration) {
             data: { duration: duration },
             dataType: 'json'
         }).done(function(data, status, xhr) {
+            sessionOnChanges(course.cID);
             // This is a valid session, so append it's information to the session
             $.extend(session, data);
             this.sessions.push(session);
