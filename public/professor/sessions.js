@@ -2,21 +2,7 @@ var ModalWindow = require('../modalwindow');
 
 var SessionManager = function () {
     this.sessions = [];
-    
-    //Check for running sessions on the server
-    $.get({
-        url: '/professor/refresh_sessions'
-    }).done(function(data, status, xhr) {
-        // Reinitalizes all of the session modals
-        refreshModals.call(this,data);
-        // Refresh all toastr notifications
-        refreshToastr.call(this);
-
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
-    });
-    
+    refreshSessions.call(this);    
 };
 
 /**
@@ -129,7 +115,7 @@ SessionManager.prototype.hideSession = function (course) {
             'onclick': function () { this.showSession(course); }.bind(this)
         };
 
-        toastr.info('Code: ' + session.code.toUpperCase(), 'Running session for ' + session.course.cCode, options);
+        toastr.info('Code: ' + session.checkInCode.toUpperCase(), 'Running session for ' + session.course.cCode, options);
     }
 };
 
@@ -157,7 +143,7 @@ SessionManager.prototype.isCourseRunning = function (course) {
 // Build the running session modal
 function buildModal(session) {
     var $timerInfo = $('<div>', { class: 'start-modal-running-info' })
-        .append($('<h3>', { class: 'start-modal-code', text: "Code: " + session.code.toUpperCase() })),
+        .append($('<h3>', { class: 'start-modal-code', text: "Code: " + session.checkInCode.toUpperCase() })),
     $timerText = $('<h3>', { class: 'start-modal-timer' }),
     $timerContainer = $('<div>', { class: 'start-modal-timer-container' })
         .append($timerText);
@@ -235,18 +221,18 @@ function removeToastNotification(id) {
 }
 
 // Create a new session for a given course and return it
-function createSession(course, visible) {
+function createSession(course, showModal) {
     return {
-    course    : course,
-    code      : '',
-    startTime : 0,
-    endTime   : 0,
-    modal     : new ModalWindow({
+    course      : course,
+    checkInCode : '',
+    startTime   : 0,
+    endTime     : 0,
+    modal       : new ModalWindow({
                     id         : 'running-session-' + course.cID,
                     title      : 'Start Attendance Session',
                     closeable  : false,
                     minimize   : true,
-                    initHide   : visible
+                    initShow   : showModal
                     })
     };
 }
@@ -308,6 +294,22 @@ function sessionOffChanges(id) {
     }
 }
 
+// Refreshes all sesssions
+function refreshSessions() {
+     //Check for running sessions on the server
+     $.get({
+        url: '/professor/refresh-sessions'
+    }).done(function(data, status, xhr) {
+        // Reinitalizes all of the session modals
+        refreshModals.call(this,data);
+        // Refresh all toastr notifications
+        refreshToastr.call(this);
+    }.bind(this))
+    .fail(function(xhr, status, errorThrown) {
+        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
+    });
+}
+
 // Refresh all session modals
 function refreshModals(data) {
     var session,
@@ -316,7 +318,7 @@ function refreshModals(data) {
     for(var i = 0; i < data.length; i++) {
         course = { cCode: data[i].cCode, cID: data[i].cID , cName: data[i].cName , isOwner: true };
         session = createSession(course, false);
-        sessionInfo = { code: data[i].rCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
+        sessionInfo = { checkInCode: data[i].checkInCode, startTime: data[i].attTime, endTime: data[i].attTime + data[i].attDuration };
         $.extend(session, sessionInfo);
         buildModal.call(this, session);
         this.sessions.push(session);
@@ -333,10 +335,10 @@ function refreshToastr() {
             var options = {
                 'timeOut': '0',
                 'extendedTimeOut': '0',
-                'toastClass': 'toast toast-session-' + session.cID,
+                'toastClass': 'toast toast-session-' + session.course.cID,
                 'onclick': this.showSession.bind(this, session.course)
             };
-            toastr.info('Code: ' + session.code.toUpperCase(), 'Running session for ' + session.course.cCode, options);
+            toastr.info('Code: ' + session.checkInCode.toUpperCase(), 'Running session for ' + session.course.cCode, options);
         }
     }
 }

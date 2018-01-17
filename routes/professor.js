@@ -48,7 +48,7 @@ router.param('classID', function(req, res, next, classID) {
 });
 
 // GET all running sessions
-router.get('/refresh_sessions', function(req, res, next) {
+router.get('/refresh-sessions', function(req, res, next) {
     db.getRunningSessions(req.user.netID, function(err, sessions, fields) {
         if (err) return routeHelper.sendError(res, err, 'Could not get running sessions');
         res.json(sessions);
@@ -224,9 +224,9 @@ router.post('/class/start/:classID', function(req, res, next) {
         attendanceSessions.start({ 
             classID:  req.params.classID,
             duration: duration,
-            callback: function(err, code, startTime, endTime) {
+            callback: function(err, checkInCode, startTime, endTime) {
                 if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
-                res.json({ code: code, startTime: startTime, endTime: endTime });
+                res.json({ checkInCode: checkInCode, startTime: startTime, endTime: endTime });
             }
         });
     }

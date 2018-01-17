@@ -32,10 +32,10 @@ exports.start = function(params) {
     else if (isClassRunning(params.classID)) 
         params.callback({ httpStatus: 409 });
     else {
-        var code = generateUniqueCode(),
+        var checkInCode = generateUniqueCode(),
             time = Date.now();
 
-        db.startAttendance(params.classID, params.duration, time, code, function(err, results, fields) {
+        db.startAttendance(params.classID, params.duration, time, checkInCode, function(err, results, fields) {
             if (err)
                 params.callback(err);
             else {
@@ -43,8 +43,8 @@ exports.start = function(params) {
                     if (!result.success)
                         console.error('Error timing out session: ' + result.err.message);
                 });
-                sessions.push({ classID: params.classID, code: code, time: time, timeout: timeout });
-                params.callback(null, code, time, time + params.duration);
+                sessions.push({ classID: params.classID, checkInCode: checkInCode, time: time, timeout: timeout });
+                params.callback(null, checkInCode, time, time + params.duration);
             }
         });
     }
@@ -60,7 +60,7 @@ exports.getEntryByCode = function(code) {
     code = code.toLowerCase();
 
     for (var i = 0; i < sessions.length; i++) {
-        if  (sessions[i].code === code)
+        if  (sessions[i].checkInCode === code)
             return sessions[i];
     }
     return undefined;
@@ -129,7 +129,7 @@ var generateUniqueCode = function () {
     do {
         code = randToken.generate(5, ALPHABET);
         for (var i = 0; i < sessions.length; i++) {
-            if (sessions[i].code === code) {
+            if (sessions[i].checkInCode === code) {
                 exists = true;
                 break;
             }

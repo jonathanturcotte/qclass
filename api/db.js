@@ -20,8 +20,8 @@ exports.addClass = function(netID, code, name, callback) {
 };
 
 exports.getRunningSessions = function(netID, callback) {
-    var query = `SELECT T1.cID AS cID, cCode, cName, attTime, attDuration, rCode
-                 FROM administrators RIGHT JOIN (SELECT cID, cCode, cName, attTime, attDuration, completed, pNetID, rCode
+    var query = `SELECT T1.cID AS cID, cCode, cName, attTime, attDuration, checkInCode
+                 FROM administrators RIGHT JOIN (SELECT cID, cCode, cName, attTime, attDuration, completed, pNetID, checkInCode
                                                  FROM attendancesession NATURAL JOIN course
                                                  WHERE completed = 0) AS T1
                                                  ON T1.cID = administrators.cID
@@ -163,13 +163,13 @@ exports.getEnrolledStudentsWithInfo = function(classID, callback) {
     runQuery(query, [classID], callback);
 };
 
-exports.startAttendance = function(classID, duration, time, code, callback) {
+exports.startAttendance = function(classID, duration, time, checkInCode, callback) {
     useConnection(callback, function(con) {
         con.beginTransaction(function (err) {
             if (err) return con.rollback(function() { callback(err); });
 
-            var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration, rCode) VALUES ?';
-            con.query(newSessionQuery, [[[classID, time, duration, code]]], function(err, results, fields) {
+            var newSessionQuery = 'INSERT INTO attendanceSession (cID, attTime, attDuration, checkInCode) VALUES ?';
+            con.query(newSessionQuery, [[[classID, time, duration, checkInCode]]], function(err, results, fields) {
                 if (err) return con.rollback(function() { callback(err); });
 
                 // Get current enrollment list
