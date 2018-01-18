@@ -54,6 +54,10 @@ app.use(helmet({
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
                 'https://cdnjs.cloudflare.com'],        // Toastr
             imgSrc: ["'self'", 'data:']
+        },
+        frameguard: {
+            action: 'allow-from',
+            domain: 'https://idptest.queensu.ca'
         }
     }
 }));
