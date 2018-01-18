@@ -76,7 +76,7 @@ router.post('/class/add', function(req, res, next) {
     if (!regex.class.code.test(code)) 
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
 
-    if (name.length < 3 || name.length > 100 || !regex.class.name.test(name)) 
+    if (name.length < 1 || name.length > 100 || !regex.class.name.test(name)) 
         return routeHelper.sendError(res, null, 'Invalid class name', 400);
 
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
