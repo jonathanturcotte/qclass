@@ -54,10 +54,6 @@ app.use(helmet({
                 'https://maxcdn.bootstrapcdn.com',      // Bootstrap
                 'https://cdnjs.cloudflare.com'],        // Toastr
             imgSrc: ["'self'", 'data:']
-        },
-        frameguard: {
-            action: 'allow-from',
-            domain: 'https://idptest.queensu.ca'
         }
     }
 }));
@@ -85,10 +81,10 @@ passport.deserializeUser(function(user, done){
 // TODO: Somehow skip this for localhost testing
 // see: https://stackoverflow.com/questions/24419814/passport-saml-and-saml-encryption
 var passportStrat = new SamlStrategy({
-        callbackUrl      : 'https://qclass.ca/login/callback',                          // The login callback
-        logoutCallbackUrl: 'https://qclass.ca/logout/callback',                         // Logout callback
         entryPoint       : 'https://idptest.queensu.ca/idp/profile/SAML2/Redirect/SSO', // location of IDP
+        callbackUrl      : 'https://qclass.ca/login/callback',                          // The login callback
         logoutUrl        : 'https://idptest.queensu.ca/idp/profile/Logout',             // URL for logging out on the IDP
+        logoutCallbackUrl: 'https://qclass.ca/logout/callback',                         // Logout callback
         issuer           : 'https://qclass.ca',                                         // The identifier for our SP
         identifierFormat : '',                                                          // The requested format, for ITS we don't need it
         cert             : fs.readFileSync('sso/idp.crt', 'utf8'),                      // X509 cert for the idp, needs to be all on one line
@@ -135,7 +131,7 @@ app.get('/login/fail', function(req, res) {
 // authentication for all the subsequent ones
 app.all('*', function(req, res, next){
     if (!req.isAuthenticated()){
-        console.log("Not logged in, redirecting to SSO");
+        console.log(req.connection.remoteAddress + ": Not logged in, redirecting to SSO");
         res.redirect('/login');
     } else {
         next();
@@ -143,18 +139,21 @@ app.all('*', function(req, res, next){
 });
 
 // Handle logout
-app.post('/logout', function (req, res) {
-    console.log("logging out");
+app.get('/logout', function (req, res) {
+    console.log(req.connection.remoteAddress + ": Logging out");
     console.log(req.user);
     passportStrat.logout(req, function (err, request){
-        if(!err) { res.redirect(request); }
+        if(!err) {
+            req.logout();
+            res.redirect(request);
+        }
     })
 });
 
 app.post('/logout/callback', function (req, res){
     console.log("logout callback");
-    req.logout();
-    //res.redirect('/');
+    //req.logout();
+    res.redirect('/');
 });
 
 // Serve the static pages

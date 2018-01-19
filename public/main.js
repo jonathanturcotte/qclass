@@ -65,7 +65,7 @@ SignInApp.prototype.buildStudentDOM = function () {
  * Sign-out
  */
 SignInApp.prototype.signOut = function () {
-    $.post('/logout');
+    window.location.href = "https://qclass.ca/logout";
 };
 
 function initToastNotifications () {
