@@ -20,13 +20,12 @@ exports.addClass = function(netID, code, name, callback) {
 };
 
 exports.getRunningSessions = function(netID, callback) {
-    var query = `SELECT T1.cID AS cID, cCode, cName, attTime, attDuration, checkInCode
+    var query = `SELECT DISTINCT T1.cID AS cID, cCode, cName, attTime, attDuration, checkInCode
                  FROM administrators RIGHT JOIN (SELECT cID, cCode, cName, attTime, attDuration, completed, pNetID, checkInCode
                                                  FROM attendanceSession NATURAL JOIN course
                                                  WHERE completed = 0) AS T1
                                                  ON T1.cID = administrators.cID
-                 WHERE administrators.pNetID=? OR T1.pNetID=?
-                 GROUP BY (attTime)`;
+                 WHERE administrators.pNetID=? OR T1.pNetID=?`;
     runQuery(query, [netID, netID], callback);
 };
 
@@ -81,15 +80,15 @@ exports.enroll = function(classID, students, callback) {
                     }
                 }
             });
-        }, function (err) { 
+        }, function (err) {
             if (err) {
                 err.errorStudents = errorStudents;
                 callback(err);
             } else {
                 if (newStudents.length > 0) {
-                    for (var i = 0; i < newStudents.length; i++) 
+                    for (var i = 0; i < newStudents.length; i++)
                         newStudents[i] = [ newStudents[i].netID, newStudents[i].stdNum, newStudents[i].firstName, newStudents[i].lastName ];
-                    
+
                     con.beginTransaction(function (err) {
                         if (err) return con.rollback(function() { callback(err); });
 
@@ -97,13 +96,13 @@ exports.enroll = function(classID, students, callback) {
                             if (err) return con.rollback(function() { callback(err); });
                             if (toEnroll.length < 1) {
                                 return con.rollback(function() {
-                                    callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } }); 
+                                    callback({ httpStatus: 409, body: { customStatus: 1, message: 'All students already enrolled' } });
                                 });
                             }
-                            
+
                             for (var i = 0; i < toEnroll.length; i++)
                                 toEnroll[i] = [toEnroll[i].netID, classID];
-                            
+
                             con.query('INSERT INTO enrolled (sNetID, cID) VALUES ?', [toEnroll], function(err, results, fields) {
                                 if (err) return con.rollback(function() { callback(err); });
                                 con.commit(function (err) {
@@ -143,7 +142,7 @@ exports.isEnrolled = function(netID, classID, callback) {
 };
 
 exports.getEnrolledClasses = function(studentID, callback) {
-    var query = 
+    var query =
         `SELECT course.cID, course.cName, course.cCode
         FROM student
             INNER JOIN enrolled ON student.sNetID = enrolled.sNetID AND student.sNetID = ?
@@ -183,7 +182,7 @@ exports.startAttendance = function(classID, duration, time, checkInCode, callbac
 
                         for (var i = 0; i < enrolled.length; i++)
                             entries[i] = [classID, time, enrolled[i].sNetID, 0];
-                        
+
                         con.query(bulkAttendanceInsert, [entries], function (err, results, fields) {
                             if (err) return con.rollback(function() { callback(err); });
                             con.commit(function (err) {
@@ -214,7 +213,7 @@ exports.recordAttendance = function(netID, classID, time, callback) {
 };
 
 exports.getTeachesClasses = function(profID, callback) {
-    var query = 
+    var query =
         `SELECT course.cID, course.cName, course.cCode
          FROM course
          WHERE pNetID = ?`;
@@ -231,12 +230,12 @@ exports.getAttendanceSessions = function(classID, callback) {
 };
 
 exports.aggregateInfo = function(classID, callback) {
-    var query = 
-        `SELECT T1.sNetID, s.stdNum, s.fName, s.lName, COUNT(T2.attTime) AS attCount 
+    var query =
+        `SELECT T1.sNetID, s.stdNum, s.fName, s.lName, COUNT(T2.attTime) AS attCount
          FROM (SELECT *
                FROM enrolled
                WHERE enrolled.cID = ?) AS T1
-            LEFT JOIN (SELECT * 
+            LEFT JOIN (SELECT *
                        FROM attendance NATURAL JOIN attendanceSession
                        WHERE attendance.attended = 1) AS T2
                 ON T1.sNetID = T2.sNetID
@@ -247,7 +246,7 @@ exports.aggregateInfo = function(classID, callback) {
 };
 
 exports.getNumSession = function(classID, callback) {
-    var query = 
+    var query =
         `SELECT *
          FROM attendanceSession
          WHERE cID = ?
@@ -258,9 +257,9 @@ exports.getNumSession = function(classID, callback) {
 exports.getSessionAttInfo = function(classID, callback) {
     var query =
         `SELECT sess.attTime, sess.attDuration, a.sNetID, a.attended, s.fName, s.lName, s.stdNum
-            FROM (SELECT * FROM attendanceSession WHERE cID = ? AND completed = 1) sess 
-                LEFT JOIN attendance a 
-                    ON sess.cID = a.cID 
+            FROM (SELECT * FROM attendanceSession WHERE cID = ? AND completed = 1) sess
+                LEFT JOIN attendance a
+                    ON sess.cID = a.cID
                     AND sess.attTime = a.attTime
                 LEFT JOIN student s
                     ON a.sNetID = s.sNetID
@@ -269,33 +268,33 @@ exports.getSessionAttInfo = function(classID, callback) {
 };
 
 // Uses a transaction to perform multiple queries with rollback upon failure
-// Removes: enrollment, admin, session, attendance and course 
+// Removes: enrollment, admin, session, attendance and course
 exports.removeCourse = function (classID, callback) {
     useConnection(callback, function (con) {
         // begins series of queries
-        con.beginTransaction(function (err) {            
+        con.beginTransaction(function (err) {
             if (err) { return callback(err); }
-            
+
             // First deletes enrollment information
             con.query('DELETE FROM enrolled WHERE cID=?', classID, function (err, result, fields) {
                 if (err) return con.rollback(function() { callback(err); });
-                
+
                 // Second query deletes admin information
                 con.query('DELETE FROM administrators WHERE cID=?', classID, function (err, result, fields) {
                     if (err) return con.rollback(function() { callback(err); });
-                    
+
                     // Third query deletes attendance information
                     con.query('DELETE FROM attendance WHERE cID=?', classID, function (err, result, fields) {
                         if (err) return con.rollback(function() { callback(err); });
-                        
-                        // Fourth query deletes session information 
+
+                        // Fourth query deletes session information
                         con.query('DELETE FROM attendanceSession WHERE cID=?', classID, function (err, result, fields) {
                             if (err) return con.rollback(function() { callback(err); });
-                            
+
                             // Fifth query deletes course information
                             con.query('DELETE FROM course WHERE cID=?', classID, function (err, result, fields) {
                                 if (err) return con.rollback(function() { callback(err); });
-                                
+
                                 // Commit changes
                                 con.commit(function (err) {
                                     if (err) return con.rollback(function() { callback(err); });
@@ -303,10 +302,10 @@ exports.removeCourse = function (classID, callback) {
                                 });
                             });
                         });
-                    }); 
+                    });
                 });
             });
-        });        
+        });
     });
 };
 
@@ -323,7 +322,7 @@ exports.removeSession = function (classID, time, callback) {
             var removeSession = 'DELETE FROM attendanceSession WHERE cID=? AND attTime=?';
             con.query(removeSession, [classID, time], function (err, results, fields) {
                 if (err) return con.rollback(function() { callback(err); });
-                
+
                 var removeAttHist = 'DELETE FROM attendance WHERE cID=? AND attTime=?';
                 con.query(removeAttHist, [classID, time], function (err, results, fields) {
                     if (err) return con.rollback(function() { callback(err); });
@@ -365,14 +364,14 @@ exports.isAdmin = function (netID, classID, callback) {
 
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
- * @param {string} query 
+ * @param {string} query
  * @param {Array} values
  * @param {Function} callback (err, result)
  */
 function runExistenceQuery(query, values, callback) {
     runQuery(query, values, function(err, results, fields) {
         if (err) callback(err);
-        else if (results.length > 0) 
+        else if (results.length > 0)
             callback(undefined, true);
         else callback(undefined, false);
     });
