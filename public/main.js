@@ -1,8 +1,7 @@
-var NavBar      = require('./navbar'),
-    CheckIn     = require('./student/checkin'),
+var NavBar      = require('./components/navbar'),
     ClassList   = require('./professor/classlist'),
     ClassPage   = require('./professor/classpage'),
-    ModalWindow = require('./modalwindow');
+    CheckIn     = require('./student/checkin');
 
 SITE_NAME = "Q-Class";
 

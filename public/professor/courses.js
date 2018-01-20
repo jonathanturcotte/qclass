@@ -1,4 +1,4 @@
-var ModalWindow = require('../modalwindow'),
+var ModalWindow = require('../components/modalwindow'),
     regex       = require('../lib/regex');
 
 var CourseManager = function () {};

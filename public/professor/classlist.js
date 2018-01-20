@@ -1,5 +1,5 @@
 var ClassPage   = require('./classpage'),
-    ModalWindow = require('../modalwindow');
+    ModalWindow = require('../components/modalwindow');
 
 
 var ClassList = function () {
@@ -73,7 +73,8 @@ function buildList () {
                 .append($('<a>', { 
                     id: course.cID, class: 'nav-link classlist-link text-truncate text-white noselect', 
                     href: '#', 
-                    text: course.cCode + ':\n' + course.cName 
+                    text: course.cCode + ':\n' + course.cName,
+                    draggable: false 
                 }))
                 .click(selectClass.bind(this, course));
 

@@ -1,5 +1,5 @@
 var XLSX         = require('xlsx'),
-    ModalWindow  = require('../modalwindow');
+    ModalWindow  = require('../components/modalwindow');
 
 var Exporter = function () {};
 

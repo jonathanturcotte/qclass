@@ -47,6 +47,15 @@ router.param('classID', function(req, res, next, classID) {
     });
 });
 
+// GET all running sessions
+router.get('/refresh-sessions', function(req, res, next) {
+    db.getRunningSessions(req.user.netID, function(err, sessions, fields) {
+        if (err) return routeHelper.sendError(res, err, 'Could not get running sessions');
+        res.json(sessions);
+    });
+
+});
+
 // GET all classes associated with a specific professor 
 router.get('/classes', function(req, res, next) {
     db.getTeachesClasses(req.user.netID, function(err, classes, fields) {
@@ -67,7 +76,7 @@ router.post('/class/add', function(req, res, next) {
     if (!regex.class.code.test(code)) 
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
 
-    if (name.length < 3 || name.length > 100 || !regex.class.name.test(name)) 
+    if (name.length < 1 || name.length > 100 || !regex.class.name.test(name)) 
         return routeHelper.sendError(res, null, 'Invalid class name', 400);
 
     db.getTeachesClasses(req.user.netID, function(err, results, fields) {
@@ -215,9 +224,9 @@ router.post('/class/start/:classID', function(req, res, next) {
         attendanceSessions.start({ 
             classID:  req.params.classID,
             duration: duration,
-            callback: function(err, code, startTime, endTime) {
+            callback: function(err, checkInCode, startTime, endTime) {
                 if (err) return routeHelper.sendError(res, err, 'Error starting attendance session');
-                res.json({ code: code, startTime: startTime, endTime: endTime });
+                res.json({ checkInCode: checkInCode, startTime: startTime, endTime: endTime });
             }
         });
     }

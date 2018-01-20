@@ -5,13 +5,15 @@
  * @param {string=}  options.title
  * @param {boolean=} options.closeable
  * @param {boolean=} options.minimize
+ * @param {boolean=} options.initShow
  */ 
 var ModalWindow = function(options) {
     // Initialization with defaults
     this.id         = options.id;
-    this.title      = options.title     || '';
-    this.closeable  = options.closeable === undefined ? true  : options.closeable;
-    this.minimize   = options.minimize  === undefined ? false : options.minimize;
+    this.title      = options.title      || '';
+    this.closeable  = options.closeable  === undefined ? true  : options.closeable;
+    this.minimize   = options.minimize   === undefined ? false : options.minimize;
+    this.initShow   = options.initShow   === undefined ? true  : options.initShow;
 
     // Construction of the elements
     $('#' + this.id).remove();
@@ -38,14 +40,16 @@ var ModalWindow = function(options) {
     if (this.closeable){
         this.$window.modal({
             backdrop: true,
-            keyboard: true
+            keyboard: true,
+            show: this.initShow
         });
         this.makeCloseable();
     } else {
         // Otherwise, stop other closing methods
         this.$window.modal({
             backdrop: 'static',
-            keyboard: false
+            keyboard: false,
+            show: this.initShow
         });
     }
 
