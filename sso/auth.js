@@ -10,6 +10,7 @@ module.exports = function (passport, config) {
     passport.deserializeUser(function(user, done){
         done(null, user);
     });
+
     passport.use(new SamlStrategy({
         entryPoint        : config.sso.loginURL,                         // The location of IDP
         callbackUrl       : config.sso.loginCallback,                    // The login callback
