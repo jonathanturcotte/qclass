@@ -15,7 +15,7 @@ var sessions = [];
 exports.serverStartup = function() {
     db.getAllRunningSessions(function (err, results, fields) {
         if (err)
-            console.error(err);
+            console.error('Error - ' + err);
         else {
             for (var i = 0; i < results.length; i++) {
                 var session       = results[i],
