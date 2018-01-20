@@ -1,5 +1,5 @@
-var Table = require('../components/table'),
-    ModalWindow = require('../modalwindow');
+var Table       = require('../components/table'),
+    ModalWindow = require('../components/modalwindow');
 
 var StudentTable = function (course, $appendTarget) {
     Table.call(this, {

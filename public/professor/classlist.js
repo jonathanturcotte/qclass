@@ -1,5 +1,5 @@
 var ClassPage   = require('./classpage'),
-    ModalWindow = require('../modalwindow');
+    ModalWindow = require('../components/modalwindow');
 
 
 var ClassList = function () {

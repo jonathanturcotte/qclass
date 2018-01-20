@@ -1,4 +1,4 @@
-var ModalWindow = require('../modalwindow');
+var ModalWindow = require('../components/modalwindow');
 
 var SessionManager = function () {
     this.sessions = [];

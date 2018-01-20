@@ -1,6 +1,6 @@
 var XLSX         = require('xlsx'),
     IO           = require('./io'),
-    ModalWindow  = require('../modalwindow'),
+    ModalWindow  = require('../components/modalwindow'),
     regex        = require('../lib/regex');
 
 var Importer = function () {};
