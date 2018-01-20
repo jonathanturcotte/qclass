@@ -17,8 +17,8 @@ exports.serverStartup = function() {
         if (err)
             console.error(err);
         else {
-            for (var i = 0; i < resuts.length; i++) {
-                var session       = result[i],
+            for (var i = 0; i < results.length; i++) {
+                var session       = results[i],
                     currentTime   = Date.now(),
                     // Time information
                     endTime       = session.attTime + session.attDuration,
