@@ -10,6 +10,35 @@ const ALPHABET         = '0123456789abcdefghijklmnopqrstuvwxyz',
 // Array of running attendanceSessions, contains objects of the form { classID, code, time }
 var sessions = [];
 
+// Manages running sessions in the db: 
+// closes expired sessions, adds running sessions to array
+exports.serverStartup = function() {
+    db.getAllRunningSessions(function (err, results, fields) {
+        if (err)
+            console.error(err);
+        else {
+            for (var i = 0; i < resuts.length; i++) {
+                var session       = result[i],
+                    currentTime   = Date.now(),
+                    // Time information
+                    endTime       = session.attTime + session.attDuration,
+                    timeRemaining = endTime - currentTime,
+                    timeout;
+                // Check if session is timed out
+                if (currentTime > endTime)
+                    db.stopAttendance(session.cID, session.attTime);
+                else {
+                    timeout = setTimeout(_stopClass, timeRemaining, session.cID, session.attTime, false, function(result) {
+                        if (!result.success)
+                            console.error('Error timing out session: ' + result.err.message);
+                    });
+                    sessions.push({ classID: session.cID, checkInCode: session.checkInCode, time: session.attTime, timeout: timeout });
+                }
+            }
+        }
+    });
+};
+
 /**
  * Starts a new attendance session and creates a new session entry in the DB
  * @param {Object} params

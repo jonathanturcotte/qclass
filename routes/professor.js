@@ -49,7 +49,7 @@ router.param('classID', function(req, res, next, classID) {
 
 // GET all running sessions
 router.get('/refresh-sessions', function(req, res, next) {
-    db.getRunningSessions(req.user.netID, function(err, sessions, fields) {
+    db.getUsersRunningSessions(req.user.netID, function(err, sessions, fields) {
         if (err) return routeHelper.sendError(res, err, 'Could not get running sessions');
         res.json(sessions);
     });

@@ -19,15 +19,21 @@ exports.addClass = function(netID, code, name, callback) {
     });
 };
 
-exports.getRunningSessions = function(netID, callback) {
-    var query = `SELECT T1.cID AS cID, cCode, cName, attTime, attDuration, checkInCode
+// Gets running sessions for a specific user
+exports.getUsersRunningSessions = function(netID, callback) {
+    var query = `SELECT DISTINCT T1.cID AS cID, cCode, cName, attTime, attDuration, checkInCode
                  FROM administrators RIGHT JOIN (SELECT cID, cCode, cName, attTime, attDuration, completed, pNetID, checkInCode
-                                                 FROM attendancesession NATURAL JOIN course
+                                                 FROM attendanceSession NATURAL JOIN course
                                                  WHERE completed = 0) AS T1
                                                  ON T1.cID = administrators.cID
-                 WHERE administrators.pNetID=? OR T1.pNetID=?
-                 GROUP BY (attTime)`;
+                 WHERE administrators.pNetID=? OR T1.pNetID=?`;
     runQuery(query, [netID, netID], callback);
+};
+
+// Gets all sessions in the db with incomplete status
+exports.getAllRunningSessions = function(callback) {
+    var query = 'SELECT * FROM attendanceSession WHERE completed = 0';
+    runQuery(query, callback);
 };
 
 exports.editClassName = function(netID, cID, name, callback) {
