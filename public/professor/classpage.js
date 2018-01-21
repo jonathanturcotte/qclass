@@ -31,9 +31,20 @@ var ClassPage = function() {
     this.$element       = $('.classpage');
     this.exporter       = new Exporter();
     this.importer       = new Importer();
-    this.sessionManager = new SessionManager();
     this.adminManager   = new AdminManager();
     this.courseManager  = new CourseManager();
+    this.pageBuildFlag  = false;
+    this.sessionManager = new SessionManager(function() {
+
+        if (this.pageBuildFlag) {
+            if(this.sessionManager.isCourseRunning(this.course)) {
+                var $delButton    = $('.class-delete-button'),
+                    $delButtonDiv = $('.del-button-div'),
+                    $startButton  = $('.start-button');
+                sessionOnChanges($delButton, $delButtonDiv, $startButton);
+            } 
+        }
+    }.bind(this));
 };
 
 /**
@@ -80,16 +91,13 @@ function build () {
         $attDiv      = $('<div>', { class: 'class-attendance-div' }),
         $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
         $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
-        $startButton = $('<button>', { class: 'btn btn-circle btn-xl start-button'}),
+        $startButton = $('<button>', { class: 'btn btn-circle btn-danger btn-xl start-button', text: 'Start'}),
         $tableRow    = $('<div>', { class: 'class-content row' }),
         $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
         $tableCol2   = $('<div>', { class: 'class-table-column-div col' }),
         $sessionDiv  = $('<div>', { class: 'table-div' }),
-        $studentDiv  = $('<div>', { class: 'table-div' }),
-
-        // Check if this course is currently running a session
-        runningSession = this.sessionManager.isCourseRunning(this.course);
-
+        $studentDiv  = $('<div>', { class: 'table-div' });
+        
     this.$element
         .append($topDiv
             .append($titleDiv
@@ -118,23 +126,15 @@ function build () {
 
         // Need to append button to div to get tooltips
         $delDiv.append($delButton.click(this.courseManager.deleteCourse.bind(this, this.course, this.sessionManager)));
-
-        // check if there are running sessions for this class, and 
-        // disable the delete course button if there are
-        if (runningSession) {
-            $delDiv.attr({
-                'data-toggle'    : 'tooltip',
-                'data-placement' : 'top',
-                'title'          : 'Stop running session before deleting course'
-            }).tooltip();
-
-            $delButton.addClass('disabled')
-                .css('pointer-events','none');
-        }
-
+        
         $adminButton.appendTo($optionsDiv);
         $delDiv.appendTo($optionsDiv);
     }
+
+    // Check if this course is currently running a session
+    this.pageBuildFlag = true;
+    if (this.sessionManager.isCourseRunning(this.course))
+        sessionOnChanges($delButton, $delDiv, $startButton);
 
     // Attendance section
     $('<label>', { text: 'Start an attendance session:', class: 'class-attendance-label' })
@@ -150,15 +150,6 @@ function build () {
     $startButton.click(function () { 
         this.sessionManager.startSession(this.course, this.$duration.val());
     }.bind(this));
-
-    // Change start button depending on whether a session is running
-    if (runningSession) {        
-        $startButton.addClass('btn-success');
-        $startButton.text('Show');
-    } else {
-        $startButton.addClass('btn-danger');
-        $startButton.text('Start');
-    }
 
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
@@ -213,6 +204,23 @@ function getDurationSelect(classID) {
     });
 
     return $select;
+}
+
+function sessionOnChanges($delButton, $delDiv, $startButton) {
+    // Makes start button green        
+    $startButton.removeClass('btn-danger')
+        .addClass('btn-success');
+    $startButton.text('Show');
+
+    // Makes delete button disable + adds tooltip
+    $delDiv.attr({
+        'data-toggle'    : 'tooltip',
+        'data-placement' : 'top',
+        'title'          : 'Stop running session before deleting course'
+    }).tooltip();
+
+    $delButton.addClass('disabled')
+        .css('pointer-events','none');    
 }
 
 module.exports = ClassPage;

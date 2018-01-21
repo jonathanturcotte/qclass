@@ -1,8 +1,8 @@
 var ModalWindow = require('../components/modalwindow');
 
-var SessionManager = function () {
+var SessionManager = function (callback) {
     this.sessions = [];
-    refreshSessions.call(this);    
+    refreshSessions.call(this, callback);    
 };
 
 /**
@@ -130,7 +130,9 @@ SessionManager.prototype.showSession = function (course) {
 
 // Check if the the given course has a session running
 SessionManager.prototype.isCourseRunning = function (course) {
-    var session = getSession(course, this.sessions);
+    var session;
+    if(course) 
+        session = getSession(course, this.sessions);
     return !!session;
 };
 
@@ -293,7 +295,7 @@ function sessionOffChanges(id) {
 }
 
 // Refreshes all sesssions
-function refreshSessions() {
+function refreshSessions(callback) {
      //Check for running sessions on the server
      $.get({
         url: '/professor/refresh-sessions'
@@ -302,6 +304,7 @@ function refreshSessions() {
         refreshModals.call(this,data);
         // Refresh all toastr notifications
         refreshToastr.call(this);
+        callback();
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         console.log("Error refreshing sessions - " + status + " - " + errorThrown);
