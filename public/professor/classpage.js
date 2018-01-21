@@ -34,8 +34,9 @@ var ClassPage = function() {
     this.adminManager   = new AdminManager();
     this.courseManager  = new CourseManager();
     this.pageBuildFlag  = false;
-    this.sessionManager = new SessionManager(function() {
-
+    this.sessionManager = new SessionManager();
+    
+    this.sessionManager.refreshSessions.call(this.sessionManager, function() {
         if (this.pageBuildFlag) {
             if(this.sessionManager.isCourseRunning(this.course)) {
                 var $delButton    = $('.class-delete-button'),
@@ -45,7 +46,7 @@ var ClassPage = function() {
             } 
         }
     }.bind(this));
-};
+}
 
 /**
  * Display's a course page given the course object

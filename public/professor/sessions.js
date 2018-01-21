@@ -1,8 +1,7 @@
 var ModalWindow = require('../components/modalwindow');
 
 var SessionManager = function (callback) {
-    this.sessions = [];
-    refreshSessions.call(this, callback);    
+    this.sessions = [];   
 };
 
 /**
@@ -135,6 +134,31 @@ SessionManager.prototype.isCourseRunning = function (course) {
         session = getSession(course, this.sessions);
     return !!session;
 };
+
+// Refreshes all sesssions
+SessionManager.prototype.refreshSessions = function (callback) {
+    //Check for running sessions on the server
+    $.get({
+        url: '/professor/refresh-sessions'
+    }).done(function(data, status, xhr) {
+        // Reinitalizes all of the session modals
+        refreshModals.call(this,data);
+        // Refresh all toastr notifications
+        refreshToastr.call(this);
+        callback();
+    }.bind(this))
+    .fail(function(xhr, status, errorThrown) {
+        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
+
+        var options = {
+            'timeOut': '0',
+            'extendedTimeOut': '0',
+            'toastClass': 'toast toast-session-error'
+        };
+
+        toastr.error('Please refresh page', 'Error connecting to server', options);
+    });
+}
 
 ///////////////////////
 // Private Functions //
@@ -292,31 +316,6 @@ function sessionOffChanges(id) {
             .addClass('btn-danger')
             .text('Start');
     }
-}
-
-// Refreshes all sesssions
-function refreshSessions(callback) {
-     //Check for running sessions on the server
-     $.get({
-        url: '/professor/refresh-sessions'
-    }).done(function(data, status, xhr) {
-        // Reinitalizes all of the session modals
-        refreshModals.call(this,data);
-        // Refresh all toastr notifications
-        refreshToastr.call(this);
-        callback();
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
-
-        var options = {
-            'timeOut': '0',
-            'extendedTimeOut': '0',
-            'toastClass': 'toast toast-session-error'
-        };
-
-        toastr.error('Please refresh page', 'Error connecting to server', options);
-    });
 }
 
 // Refresh all session modals
