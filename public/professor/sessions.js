@@ -63,7 +63,7 @@ SessionManager.prototype.endSession = function(course){
             $timerText      = session.modal.$window.find('.start-modal-timer');
 
         // Tell the server to end the session
-        session.modal.$finishButton.addClass('disabled');
+        session.modal.$finishButton.prop('disabled', true);
         $timerText.countdown('stop');
         session.modal.$body.spin();
         

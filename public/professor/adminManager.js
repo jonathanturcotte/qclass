@@ -188,8 +188,8 @@ function openConfirmRemovalModal (netID, course) {
         .prependTo(confirmModal.$footer);
 
     confirmModal.$deleteButton.click(function() {
-        confirmModal.$deleteButton.attr('disabled', 'disabled');
-        confirmModal.$closeButton.attr('disabled', 'disabled');
+        confirmModal.$deleteButton.prop('disabled', true);
+        confirmModal.$closeButton.prop('disabled', true);
         removeAdmin.call(this, netID, course, confirmModal);
     }.bind(this));
 
@@ -199,7 +199,7 @@ function openConfirmRemovalModal (netID, course) {
 }
 
 function removeAdmin (netID, course, confirmModal) {
-    confirmModal.$deleteButton.attr('disabled', 'disabled');
+    confirmModal.$deleteButton.prop('disabled', true);
 
     $.ajax({
         url: '/professor/class/' + course.cID + '/admins/remove/' + netID,
@@ -213,7 +213,7 @@ function removeAdmin (netID, course, confirmModal) {
         // Remove delete button since operation is over, change close text and enable
         confirmModal.$deleteButton.remove();
         confirmModal.$closeButton.text('OK');
-        confirmModal.$closeButton.attr('disabled', false);
+        confirmModal.$closeButton.prop('disabled', false);
 
         // Update table on first modal
         updateTable.call(this, course);
