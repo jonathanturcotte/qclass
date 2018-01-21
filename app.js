@@ -10,6 +10,7 @@ var express      = require('express'),
     helmet       = require('helmet'),
     csv          = require('express-csv'),
     auth         = require('./api/auth'),
+    sessions     = require('./api/data/attendanceSessions'),
 
     keyPath      = '/etc/letsencrypt/live/qclass.ca/privkey.pem',
     certPath     = '/etc/letsencrypt/live/qclass.ca/fullchain.pem',
@@ -95,5 +96,8 @@ app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.json(err);
 });
+
+// Reset the sessions upon server startup
+sessions.sessionRecovery();
 
 module.exports = app;
