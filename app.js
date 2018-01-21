@@ -98,6 +98,6 @@ app.use(function(err, req, res, next) {
 });
 
 // Reset the sessions upon server startup
-sessions.serverStartup();
+sessions.sessionRecovery();
 
 module.exports = app;

@@ -12,7 +12,7 @@ var sessions = [];
 
 // Manages running sessions in the db: 
 // closes expired sessions, adds running sessions to array
-exports.serverStartup = function() {
+exports.sessionRecovery = function() {
     db.getAllRunningSessions(function (err, results, fields) {
         if (err)
             console.error('Error - ' + err);
