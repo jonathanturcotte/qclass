@@ -308,6 +308,14 @@ function refreshSessions(callback) {
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
         console.log("Error refreshing sessions - " + status + " - " + errorThrown);
+
+        var options = {
+            'timeOut': '0',
+            'extendedTimeOut': '0',
+            'toastClass': 'toast toast-session-error'
+        };
+
+        toastr.error('Please refresh page', 'Error connecting to server', options);
     });
 }
 
