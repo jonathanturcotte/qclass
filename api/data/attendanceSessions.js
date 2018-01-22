@@ -25,14 +25,22 @@ exports.sessionRecovery = function() {
                     timeRemaining = endTime - currentTime,
                     timeout;
                 // Check if session is timed out
-                if (currentTime > endTime)
-                    db.stopAttendance(session.cID, session.attTime);
+                if (currentTime > endTime) {
+                    console.log('Found timed out session for class' + session.cID + 'with start time ' + session.attTime + ':');
+                    db.stopAttendance(session.cID, session.attTime, function (err) {
+                        if (err)
+                            console.error('Could not terminate the expired session');
+                        else
+                            console.log('Successfully terminated the expired session');
+                    });
+                }
                 else {
                     timeout = setTimeout(_stopClass, timeRemaining, session.cID, session.attTime, false, function(result) {
                         if (!result.success)
                             console.error('Error timing out session: ' + result.err.message);
                     });
                     sessions.push({ classID: session.cID, checkInCode: session.checkInCode, time: session.attTime, timeout: timeout });
+                    console.log('Recovered active session for class' + session.cID + 'with start time ' + session.attTime);
                 }
             }
         }
