@@ -156,7 +156,7 @@ SessionManager.prototype.refreshSessions = function (callback) {
             'toastClass': 'toast toast-session-error'
         };
 
-        toastr.error('Please refresh page', 'Error connecting to server', options);
+        toastr.error('Check internet connection', 'Error connecting to server', options);
     });
 }
 
