@@ -1,8 +1,7 @@
 var ModalWindow = require('../components/modalwindow');
 
-var SessionManager = function () {
-    this.sessions = [];
-    refreshSessions.call(this);    
+var SessionManager = function (callback) {
+    this.sessions = [];   
 };
 
 /**
@@ -130,9 +129,36 @@ SessionManager.prototype.showSession = function (course) {
 
 // Check if the the given course has a session running
 SessionManager.prototype.isCourseRunning = function (course) {
-    var session = getSession(course, this.sessions);
+    var session;
+    if(course) 
+        session = getSession(course, this.sessions);
     return !!session;
 };
+
+// Refreshes all sesssions
+SessionManager.prototype.refreshSessions = function (callback) {
+    //Check for running sessions on the server
+    $.get({
+        url: '/professor/refresh-sessions'
+    }).done(function(data, status, xhr) {
+        // Reinitalizes all of the session modals
+        refreshModals.call(this,data);
+        // Refresh all toastr notifications
+        refreshToastr.call(this);
+        callback();
+    }.bind(this))
+    .fail(function(xhr, status, errorThrown) {
+        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
+
+        var options = {
+            'timeOut': '0',
+            'extendedTimeOut': '0',
+            'toastClass': 'toast toast-session-error'
+        };
+
+        toastr.error('Check internet connection', 'Error connecting to server', options);
+    });
+}
 
 ///////////////////////
 // Private Functions //
@@ -290,22 +316,6 @@ function sessionOffChanges(id) {
             .addClass('btn-danger')
             .text('Start');
     }
-}
-
-// Refreshes all sesssions
-function refreshSessions() {
-     //Check for running sessions on the server
-     $.get({
-        url: '/professor/refresh-sessions'
-    }).done(function(data, status, xhr) {
-        // Reinitalizes all of the session modals
-        refreshModals.call(this,data);
-        // Refresh all toastr notifications
-        refreshToastr.call(this);
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
-    });
 }
 
 // Refresh all session modals
