@@ -96,7 +96,7 @@ router.post('/class/add', function(req, res, next) {
 router.put('/class/editName/:classID', function(req, res, next) {
     var name = req.body.name;
 
-    if (name.length < 3 || name.length > 100 || !regex.class.name.test(name))
+    if (name.length < 1 || name.length > 100 || !regex.class.name.test(name))
         return routeHelper.sendError(res, null, 'Invalid class name', 400);
 
     db.editClassName(req.user.netID, req.params.classID, name, function(err) {
@@ -116,11 +116,18 @@ router.put('/class/editCode/:classID', function(req, res, next) {
     if (!regex.class.code.test(code))
         return routeHelper.sendError(res, null, 'Invalid code format', 400);
 
-    db.editClassCode(req.user.netID, req.params.classID, code, function(err) {
-        if (err)
-            return routeHelper.sendError(res, err, 'Error editing class code');
-        res.status(204).send('');
-    });
+    db.getTeachesClasses(req.user.netID, function(err, results, fields) {
+        if (err) return routeHelper.sendError(res, err);
+        for (var i = 0; i < results.length; i++) {
+            if (results[i].cCode === code)
+                return routeHelper.sendError(res, null, `User already teaches a course with the course code ${code}`, 400);
+        }
+        db.editClassCode(req.user.netID, req.params.classID, code, function(err) {
+            if (err) 
+                return routeHelper.sendError(res, err, 'Error editing class code');
+            res.status(204).send('');
+        });
+    });    
 });
 
 // Add a new administrator
