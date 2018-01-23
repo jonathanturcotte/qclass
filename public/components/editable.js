@@ -75,7 +75,8 @@ function handleKeypress (e) {
 
 function submitChanges () {
     var newVal = this.$el.text();
-
+    
+    newVal = newVal.trim();
     // Only submit if there's actually been changes.
     // Prevents submitting on ESC keypress.
     if (newVal !== this.resetValue){
