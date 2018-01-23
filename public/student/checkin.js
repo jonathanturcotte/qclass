@@ -77,10 +77,10 @@ function success(data, status, xhr) {
 }
 
 function failure(xhr, status, errorThrown) {
-    if (xhr.status && xhr.status === 409) { // Conflict - already signed in
+    if (xhr.status && xhr.status === 409) // Conflict - already signed in
         this.displayAlert('Failed: Already logged in', true);
-    }
-    this.displayAlert('Failed' + (xhr.responseText ? xhr.responseText : '!'), true); // Generic fail message, adds responseText if exists
+    else
+        this.displayAlert('Failed! ' + (xhr.responseText ? xhr.responseText : ''), true); 
 }
 
 module.exports = CheckIn;

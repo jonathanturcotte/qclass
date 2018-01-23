@@ -28,7 +28,6 @@ var express      = require('express'),
     student      = require('./routes/student'),
     general      = require('./routes/general'),
     db           = require('./api/db'),
-    io           = require('./api/socket'),
 
     // Create the app and servers
     app          = express(),
@@ -54,9 +53,6 @@ app.use(helmet({
         }
     }
 }));
-
-// Initialize the socketIO
-app.io = io.initialize();
 
 // Ensure that all traffic is being routed through https
 app.all('*', function (req, res, next) {
