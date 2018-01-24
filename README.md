@@ -37,7 +37,7 @@ Currently valid netIDs are:
 
 ### Running on the Linux AWS
 #### Location
-The project is located on the AWS server under `/opt/Q-Clicker-Web`
+The project is located on the AWS server under `/opt/qclass`
 
 #### General
 There is an easy start script, `startServer.sh`, that will pull any updates, update the database, webpack and uglify the frontend js, and start the server. It starts in the foreground, TODO is have it start it in the background. To run the script:
