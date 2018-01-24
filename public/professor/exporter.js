@@ -73,16 +73,20 @@ function exportClick(course, modal, $exportButton, $fileName, $fileType) {
     modal.$body
         .spin()
         .addClass('spin-min-height');
-    $.get({
+    ci.ajax({
+        method: 'GET',
         url: '/professor/' + course.cID + '/exportAttendance',
-        data: {fileName: $fileName.val(), fileType: $fileType.val()}
-        }).done(function (data, status, xhr) {
+        data: { fileName: $fileName.val(), fileType: $fileType.val() },
+        done: function (data, status, xhr) {
             exportSuccess(data, status, xhr, $fileType, $fileName, modal);
-        }).fail(function(xhr, status, errorThrown) {
+        },
+        fail: function(xhr, status, errorThrown) {
             modal.error("Error", xhr.responseText);
-        }).always(function(a, status, b) {
+        },
+        always: function(a, status, b) {
             modal.$body.spin(false);
-        });   
+        }
+    });   
 }
 
 function exportSuccess(data, status, xhr, $fileType, $fileName, modal) {

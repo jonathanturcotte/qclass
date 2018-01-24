@@ -78,24 +78,24 @@ function tryRemoveStudent($deleteButton, modal, student) {
 }
 
 function removeStudent($deleteButton, modal, student) {
-    $.ajax({
+    ci.ajax({
         url: 'professor/class/' + this.course.cID + '/remove-student/' + student.netID,
-        type: 'DELETE'
-    })
-    .done(function(data, status, xhr) {
-        modal.$title.text('Student Removed');
-        modal.$header.addClass('modal-header-success');
-        modal.$body.empty().append($('<p>', { text: student.fName + ' was removed!' }));
-        window.app.classPage.refreshTables();
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        modal.$title.text('Remove Student Failed');
-        modal.$header.addClass('modal-header-danger');
-        modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID }));
-    }.bind(this))
-    .always(function(a, status, b) {
-        $deleteButton.remove();
-        modal.$closeButton.text('Close');
+        type: 'DELETE',
+        done: function(data, status, xhr) {
+            modal.$title.text('Student Removed');
+            modal.$header.addClass('modal-header-success');
+            modal.$body.empty().append($('<p>', { text: student.fName + ' was removed!' }));
+            window.app.classPage.refreshTables();
+        }.bind(this),
+        fail: function(xhr, status, errorThrown) {
+            modal.$title.text('Remove Student Failed');
+            modal.$header.addClass('modal-header-danger');
+            modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID }));
+        }.bind(this),
+        always: function(a, status, b) {
+            $deleteButton.remove();
+            modal.$closeButton.text('Close');
+        }
     });
 }
 

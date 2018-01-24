@@ -20,25 +20,28 @@ SessionManager.prototype.startSession = function (course, duration) {
         session.modal.$body.spin()
             .addClass('spin-min-height');
 
-        $.post({
+        ci.ajax({
+            method: 'method',
             url: '/professor/class/start/' + course.cID,
             data: { duration: duration },
-            dataType: 'json'
-        }).done(function(data, status, xhr) {
-            sessionOnChanges(course.cID);
-            // This is a valid session, so append it's information to the session
-            $.extend(session, data);
-            this.sessions.push(session);
-            buildModal.call(this, session);
-            this.showSession(course);
-        }.bind(this))
-        .fail(function(xhr, status, errorThrown) {
-            if (xhr.status === 409)
-                session.modal.error('Error - Already Running', 'A session is already running for ' + course.cCode);
-            else
-                session.modal.error('Error', 'Error starting attendance session');
-        }).always(function(a, status, b) {
-            session.modal.$body.spin(false);
+            dataType: 'json',
+            done: function(data, status, xhr) {
+                sessionOnChanges(course.cID);
+                // This is a valid session, so append it's information to the session
+                $.extend(session, data);
+                this.sessions.push(session);
+                buildModal.call(this, session);
+                this.showSession(course);
+            }.bind(this),
+            fail: function(xhr, status, errorThrown) {
+                if (xhr.status === 409)
+                    session.modal.error('Error - Already Running', 'A session is already running for ' + course.cCode);
+                else
+                    session.modal.error('Error', 'Error starting attendance session');
+            },
+            always: function(a, status, b) {
+                session.modal.$body.spin(false);
+            }
         });
 
         // Set a 30-day cookie to remember the professor's latest duration choice
@@ -66,29 +69,32 @@ SessionManager.prototype.endSession = function(course){
         $timerText.countdown('stop');
         session.modal.$body.spin();
         
-        $.post({
-            url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime
-        }).done(function(data, status, xhr) {
-            // On success, show completion
-            displaySessionEnded.call(this, session);
-            // Remove session from session manager
-            this.sessions = _.without(this.sessions, session);
-        }.bind(this))
-        .fail(function(xhr, status, errorThrown) {
-            // On failure, display the error
-            var text = 'Error ending session';
-            if (xhr.responseText)
-                text += ': ' + xhr.responseText;
-            else
-                text += '!';
-
-            $timerContainer.empty()
-                .append($('<div>', { class: 'text-danger' })
-                .html(text));
-        }).always(function(a, status, b) {
-            // Remove the finish button, remove the hide button
-            // Make the modal closeable
-            session.modal.$body.spin(false);           
+        ci.ajax({
+            method: 'POST',
+            url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime,
+            done: function(data, status, xhr) {
+                // On success, show completion
+                displaySessionEnded.call(this, session);
+                // Remove session from session manager
+                this.sessions = _.without(this.sessions, session);
+            }.bind(this),
+            fail: function(xhr, status, errorThrown) {
+                // On failure, display the error
+                var text = 'Error ending session';
+                if (xhr.responseText)
+                    text += ': ' + xhr.responseText;
+                else
+                    text += '!';
+    
+                $timerContainer.empty()
+                    .append($('<div>', { class: 'text-danger' })
+                    .html(text));
+            },
+            always: function(a, status, b) {
+                // Remove the finish button, remove the hide button
+                // Make the modal closeable
+                session.modal.$body.spin(false);           
+            }
         });
     }
 };
@@ -138,27 +144,18 @@ SessionManager.prototype.isCourseRunning = function (course) {
 // Refreshes all sesssions
 SessionManager.prototype.refreshSessions = function (callback) {
     //Check for running sessions on the server
-    $.get({
-        url: '/professor/refresh-sessions'
-    }).done(function(data, status, xhr) {
-        // Reinitalizes all of the session modals
-        refreshModals.call(this,data);
-        // Refresh all toastr notifications
-        refreshToastr.call(this);
-        callback();
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        console.log("Error refreshing sessions - " + status + " - " + errorThrown);
-
-        var options = {
-            'timeOut': '0',
-            'extendedTimeOut': '0',
-            'toastClass': 'toast toast-session-error'
-        };
-
-        toastr.error('Check internet connection', 'Error connecting to server', options);
+    ci.ajax({
+        method: 'GET',
+        url: '/professor/refresh-sessions',
+        done: function(data, status, xhr) {
+            // Reinitalizes all of the session modals
+            refreshModals.call(this,data);
+            // Refresh all toastr notifications
+            refreshToastr.call(this);
+            callback();
+        }.bind(this)
     });
-}
+};
 
 ///////////////////////
 // Private Functions //

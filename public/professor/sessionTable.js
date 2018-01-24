@@ -92,24 +92,24 @@ function tryRemoveSession($deleteButton, modal, session) {
 }
 
 function removeSession($deleteButton, modal, session) {
-    $.ajax({
+    ci.ajax({
         url: 'professor/class/' + this.course.cID + '/remove-session/' + session.time,
-        type: 'DELETE'
-    })
-    .done(function(data, status, xhr) {
-        modal.$title.text('Session Removed');
-        modal.$header.addClass('modal-header-success');
-        modal.$body.empty().append($('<p>', { text: 'Session run on ' + session.date + ' was removed!' }));
-        window.app.classPage.refreshTables();
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        modal.$title.text('Remove Session Failed');
-        modal.$header.addClass('modal-header-danger');
-        modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing the session' }));
-    }.bind(this))
-    .always(function(a, status, b) {
-        $deleteButton.remove();
-        modal.$closeButton.text('Close');
+        type: 'DELETE',
+        done: function(data, status, xhr) {
+            modal.$title.text('Session Removed');
+            modal.$header.addClass('modal-header-success');
+            modal.$body.empty().append($('<p>', { text: 'Session run on ' + session.date + ' was removed!' }));
+            window.app.classPage.refreshTables();
+        }.bind(this),
+        fail: function(xhr, status, errorThrown) {
+            modal.$title.text('Remove Session Failed');
+            modal.$header.addClass('modal-header-danger');
+            modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing the session' }));
+        }.bind(this),
+        always: function(a, status, b) {
+            $deleteButton.remove();
+            modal.$closeButton.text('Close');
+        }
     });
 }
 
