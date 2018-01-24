@@ -124,9 +124,9 @@ function openAttendanceModal(date, sessionStudents) {
     
     var $table = new Table({ 
         height: 250,
-        width: 460,
+        width: 461,
         columns: [
-            ['NetID', 80],
+            ['NetID', 81],
             ['Student #', 90],
             ['First Name', 100],
             ['Last Name', 100],
