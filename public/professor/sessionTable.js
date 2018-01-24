@@ -8,15 +8,15 @@ var ModalWindow = require('../components/modalwindow'),
  */
 var SessionTable = function(course, $appendTarget) {
     Table.call(this, {
-        classList: ['session-table'], 
-        height: 300, 
+        classList: ['session-table'],
+        height: 300,
         width: 399,
         columns: [
-            ['Date', 140], 
-            ['Attendance', 96], 
-            ['Rate', 68], 
+            ['Date', 140],
+            ['Attendance', 96],
+            ['Rate', 68],
             ['Actions', 95]
-        ], 
+        ],
         $appendTarget: $appendTarget
     });
     this.course = course;
@@ -39,8 +39,8 @@ SessionTable.prototype.update = function (data) {
     // are at the top of the table
     for (var i in data.sessions) {
         var session = data.sessions[i];
-        
-        // Create main row 
+
+        // Create main row
         var $date = $('<td>', { title: session.date.toString(), text: session.formattedDate }),
             $expandButton = $('<button>', { class: 'btn btn-default btn-sm', style: 'margin-right: 3px;', title: 'Expand' })
                 .append($('<i>', { class: 'fas fa-external-link-alt' })
@@ -56,14 +56,14 @@ SessionTable.prototype.update = function (data) {
         // Make the expand button only clickable if there actually was attendance
         if (session.attendance !== 0)
             $expandButton.click(openAttendanceModal.bind(this, session.formattedDate, session.students));
-        else 
+        else
             $expandButton.prop('disabled', true);
 
         // Add new row to table
         tableData.unshift([
-            $date, 
-            session.attendanceFormatted, 
-            session.attendancePercentFormatted, 
+            $date,
+            session.attendanceFormatted,
+            session.attendancePercentFormatted,
             $actions
         ]);
     }
@@ -94,7 +94,7 @@ function tryRemoveSession($deleteButton, modal, session) {
 function removeSession($deleteButton, modal, session) {
     ci.ajax({
         url: 'professor/class/' + this.course.cID + '/remove-session/' + session.time,
-        type: 'DELETE',
+        method: 'DELETE',
         done: function(data, status, xhr) {
             modal.$title.text('Session Removed');
             modal.$header.addClass('modal-header-success');
@@ -115,13 +115,13 @@ function removeSession($deleteButton, modal, session) {
 
 function openAttendanceModal(date, sessionStudents) {
     var modal    = new ModalWindow({ id: 'attendance-modal', title: 'Attendance Session' });
-    
-    modal.$body.append($('<h5>', { 
-        text: date, 
-        class: 'attendance-modal-date table-modal-bodytitle' 
+
+    modal.$body.append($('<h5>', {
+        text: date,
+        class: 'attendance-modal-date table-modal-bodytitle'
     }));
     modal.$body.addClass('table-modal-body');
-    
+
     var $table = $('<table>', { class: 'attendance-modal-table centered-table table-bordered' })
         .append($('<thead>')
             .append($('<tr>')
@@ -130,7 +130,7 @@ function openAttendanceModal(date, sessionStudents) {
                 .append($('<th>', { text: 'First Name' }))
                 .append($('<th>', { text: 'Last Name' }))
                 .append($('<th>', { text: 'Attended' }))));
-    
+
     // Create and fill the tbody with the students who attended
     var $tbody = $('<tbody>').appendTo($table);
     for (var i in sessionStudents) {

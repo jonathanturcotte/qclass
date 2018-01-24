@@ -24,7 +24,7 @@ CI.prototype.ajax = function (options) {
 
     $.ajax(args).done(function(data, status, xhr){
         // Check if the server wants us to redirect
-        if (data.redirect)
+        if (data && data.redirect)
             window.location.href = data.redirect;
         else
             options.done(data, status, xhr);

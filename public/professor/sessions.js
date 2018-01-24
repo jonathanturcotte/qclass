@@ -1,14 +1,14 @@
 var ModalWindow = require('../components/modalwindow');
 
 var SessionManager = function (callback) {
-    this.sessions = [];   
+    this.sessions = [];
 };
 
 /**
  * Creates the attendance modal window, makes the call
  * to the server to start a session.
- * @param {*} course 
- * @param {number} duration 
+ * @param {*} course
+ * @param {number} duration
  */
 SessionManager.prototype.startSession = function (course, duration) {
     // If this session already exists, just show it
@@ -21,7 +21,7 @@ SessionManager.prototype.startSession = function (course, duration) {
             .addClass('spin-min-height');
 
         ci.ajax({
-            method: 'method',
+            method: 'POST',
             url: '/professor/class/start/' + course.cID,
             data: { duration: duration },
             dataType: 'json',
@@ -68,7 +68,7 @@ SessionManager.prototype.endSession = function(course){
         session.modal.$finishButton.prop('disabled', true);
         $timerText.countdown('stop');
         session.modal.$body.spin();
-        
+
         ci.ajax({
             method: 'POST',
             url: 'professor/class/stop/' + session.course.cID + '/' + session.startTime,
@@ -85,7 +85,7 @@ SessionManager.prototype.endSession = function(course){
                     text += ': ' + xhr.responseText;
                 else
                     text += '!';
-    
+
                 $timerContainer.empty()
                     .append($('<div>', { class: 'text-danger' })
                     .html(text));
@@ -93,7 +93,7 @@ SessionManager.prototype.endSession = function(course){
             always: function(a, status, b) {
                 // Remove the finish button, remove the hide button
                 // Make the modal closeable
-                session.modal.$body.spin(false);           
+                session.modal.$body.spin(false);
             }
         });
     }
@@ -126,7 +126,7 @@ SessionManager.prototype.showSession = function (course) {
     // Get the session associated with the course
     var session = getSession(course, this.sessions);
 
-    if (session) {      
+    if (session) {
         // Close the notification if it's open, then show the modal
         removeToastNotification(course.cID);
         session.modal.show();
@@ -136,7 +136,7 @@ SessionManager.prototype.showSession = function (course) {
 // Check if the the given course has a session running
 SessionManager.prototype.isCourseRunning = function (course) {
     var session;
-    if(course) 
+    if(course)
         session = getSession(course, this.sessions);
     return !!session;
 };
@@ -201,7 +201,7 @@ function buildModal(session) {
 function displaySessionEnded(session) {
     // Display the modal if it's currently hidden
     session.modal.show();
-    
+
     var $timerContainer = session.modal.$window.find('.start-modal-timer-container');
 
     removeToastNotification(session.course.cID);
@@ -292,7 +292,7 @@ function sessionOnChanges(id) {
     }
 }
 
-// Make changes to class page for when no session is running 
+// Make changes to class page for when no session is running
 function sessionOffChanges(id) {
     if (window.app.classPage.course.cID === id) {
         var $delButton    = $('.class-delete-button'),

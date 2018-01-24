@@ -3,16 +3,16 @@ var Table       = require('../components/table'),
 
 var StudentTable = function (course, $appendTarget) {
     Table.call(this, {
-        classList: ['student-table'], 
-        height: 300, 
-        width: 485, 
+        classList: ['student-table'],
+        height: 300,
+        width: 485,
         columns: [
-            ['NetID', 67], 
-            ['Number', 80], 
-            ['First Name', 115], 
+            ['NetID', 67],
+            ['Number', 80],
+            ['First Name', 115],
             ['Last Name', 140],
             ['Actions', 95]
-        ], 
+        ],
         $appendTarget: $appendTarget
     });
     this.course = course;
@@ -31,13 +31,13 @@ StudentTable.prototype.update = function (data) {
     // Add a student row for each enrolled student
     for (var i = 0; i < enrolled.length; i++) {
         var student       = students[enrolled[i].sNetID],
-            $expandButton = $('<button>', { 
-                title: 'Expand', 
+            $expandButton = $('<button>', {
+                title: 'Expand',
                 class: 'btn btn-default btn-sm',
                 style: 'margin-right: 3px;'
             }).append($('<i>', { class: 'fas fa-external-link-alt' })
                     .attr('aria-hidden', 'true'))
-                .click(expandStudent.bind(this, student)),      
+                .click(expandStudent.bind(this, student)),
             $deleteButton = $('<button>', { title: 'Delete', class: 'btn btn-default btn-sm' })
                 .append($('<i>', { class: 'fas fa-times' })
                         .attr('aria-hidden', 'true'))
@@ -61,7 +61,7 @@ StudentTable.prototype.update = function (data) {
 function openDeleteModal(student) {
     var modal         = new ModalWindow({ title: 'Remove ' + student.fName + '?' }),
         $deleteButton = $('<button>', { text: 'Delete', class: 'btn btn-danger' });
-            
+
     $deleteButton.click(tryRemoveStudent.bind(this, $deleteButton, modal, student));
 
     modal.$body.append($('<p>', { text: 'Are you sure you want to remove ' + student.fName + ' ' + student.lName +
@@ -80,7 +80,7 @@ function tryRemoveStudent($deleteButton, modal, student) {
 function removeStudent($deleteButton, modal, student) {
     ci.ajax({
         url: 'professor/class/' + this.course.cID + '/remove-student/' + student.netID,
-        type: 'DELETE',
+        method: 'DELETE',
         done: function(data, status, xhr) {
             modal.$title.text('Student Removed');
             modal.$header.addClass('modal-header-success');
@@ -108,15 +108,15 @@ function expandStudent(student) {
 
     // Title
     modal.$body.append($('<h5>', {
-        text: student.fName + ' ' + student.lName + ' (' + student.stdNum + ', ' + student.netID + ')', 
-        class: 'table-modal-bodytitle' 
+        text: student.fName + ' ' + student.lName + ' (' + student.stdNum + ', ' + student.netID + ')',
+        class: 'table-modal-bodytitle'
     }));
 
     // Total percent attendance of the student
     var percentAttendance = 0;
     if (sessionCount !== 0)
         percentAttendance = student.totalAttendance / sessionCount * 100;
-    modal.$body.append($('<p>', { 
+    modal.$body.append($('<p>', {
         style: 'text-align: center;',
         text: 'Total attendance: ' + student.totalAttendance + '/' + sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
     }));
