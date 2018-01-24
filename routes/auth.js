@@ -1,15 +1,11 @@
 module.exports = function (app, passport){
     app.get('/login',
-        passport.authenticate('saml', {successRedirect: '/', failureRedirect: '/login/fail'})
+        passport.authenticate('saml', {successRedirect: '/', failureRedirect: '/login'})
     );
 
     app.post('/login/callback',
-        passport.authenticate('saml', { successRedirect: '/', failureRedirect: '/login/fail' })
+        passport.authenticate('saml', { successRedirect: '/', failureRedirect: '/login' })
     );
-
-    app.get('/login/fail', function(req, res) {
-        res.send(401, 'Login failed');
-    });
 
     // Enforce authentication for all other requests
     // Every request from this point on will require authentication
@@ -29,10 +25,12 @@ module.exports = function (app, passport){
         //TODO: Use real logging function when implemented
         console.log(req.connection.remoteAddress + ": Logging out");
         console.log(req.user);
-        passportStrat.logout(req, function (err, request){
+        passport._strategy('saml').logout(req, function (err, request){
             if(!err) {
                 req.logout();
                 res.redirect(request);
+            } else {
+                console.log("Error in logout: " + err);
             }
         })
     });
