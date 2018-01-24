@@ -122,25 +122,28 @@ function expandStudent(student) {
     }));
 
     // Table
-    var $table = $('<table>', { class: 'student-modal-table centered-table table-bordered' })
-        .append($('<thead>')
-            .append($('<tr>')
-                .append($('<th>', { text: 'Date' }))
-                .append($('<th>', { text: 'Attendance' }))
-                .append($('<th>', { text: 'Rate' }))));
+    var $table = new Table({ 
+        height: 250,
+        width: 460,
+        columns: [
+            ['Date', 230],
+            ['Attendance', 115],
+            ['Rate', 115]
+        ],
+        $appendTarget: modal.$body
+    });
 
-    var $tbody = $('<tbody>').appendTo($table);
+    var tableData = [];
     for (var i in student.sessions) {
         var session = sessions[student.sessions[i]];
         if (session.students[student.netID].attended) {
-            $tbody.append($('<tr>')
-                .append($('<td>').text(sessions[student.sessions[i]].formattedDate))
-                .append($('<td>').text(sessions[student.sessions[i]].attendanceFormatted))
-                .append($('<td>').text(sessions[student.sessions[i]].attendancePercentFormatted)));
+            tableData.push([
+                sessions[student.sessions[i]].formattedDate,
+                sessions[student.sessions[i]].attendanceFormatted,
+                sessions[student.sessions[i]].attendancePercentFormatted]);  
         }
     }
-
-    modal.$body.append($table);
+    $table.fill(tableData);
     modal.show();
 }
 
