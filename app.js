@@ -55,12 +55,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Force browsers not to store our webpage, even on back-button press
-app.use(function (req, res, next) {
-    res.setHeader('Cache-Control', 'private, no-cache, no-store, max-age=0');
-    next();
-});
-
 // Always use the authentication middleware before considering any other routes
 require('./routes/auth.js')(app, passport);
 
