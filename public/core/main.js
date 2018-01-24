@@ -1,7 +1,8 @@
-var NavBar      = require('./components/navbar'),
-    ClassList   = require('./professor/classlist'),
-    ClassPage   = require('./professor/classpage'),
-    CheckIn     = require('./student/checkin');
+var NavBar      = require('../components/navbar'),
+    ClassList   = require('../professor/classlist'),
+    ClassPage   = require('../professor/classpage'),
+    CheckIn     = require('../student/checkin')
+    CI          = require('./ci');
 
 SITE_NAME = "Q-Class";
 
@@ -23,12 +24,12 @@ SignInApp.prototype.init = function () {
  * Check if this is netID belongs to a prof
  */
 SignInApp.prototype.getUserInfo = function () {
-    // TODO: Decide what should happen if this fails.
-    // Right now we just sign out
-    $.get('/user-info')
-        .done(function (info) {
-            info.isProf ? this.buildProfDOM() : this.buildStudentDOM(); // jshint ignore:line
-        }.bind(this)).fail(this.signOut);
+    ci.ajax({
+        method: 'GET',
+        url: '/user-info',
+        done: function (data) { data.isProf ? this.buildProfDOM() : this.buildStudentDOM(); }.bind(this),
+        fail: this.signOut
+    });
 };
 
 /**
@@ -89,6 +90,7 @@ function initToastNotifications () {
 
 // When the page is loaded, create our main ui object
 $(function () {
+    window.ci  = new CI();
     window.app = new SignInApp();
     window.app.init();
 });

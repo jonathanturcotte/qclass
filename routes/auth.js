@@ -10,10 +10,6 @@ module.exports = function (app, passport){
     // Enforce authentication for the main page
     // We only need to use res.redirect here
     app.all('/', function(req, res, next){
-        // Set no-cache headers on our website root, to prevent users from getting
-        // a stale page when they sign-out and then hit back
-        res.setHeader('Cache-Control', 'private, no-cache, no-store, max-age=0');
-
         if (!req.isAuthenticated()){
             //TODO: Use real logging function when implemented
             console.log(req.connection.remoteAddress + ": Not logged in, redirecting to SSO");
