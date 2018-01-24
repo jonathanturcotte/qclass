@@ -122,31 +122,32 @@ function openAttendanceModal(date, sessionStudents) {
     }));
     modal.$body.addClass('table-modal-body');
     
-    var $table = $('<table>', { class: 'attendance-modal-table centered-table table-bordered' })
-        .append($('<thead>')
-            .append($('<tr>')
-                .append($('<th>', { text: 'NetID' }))
-                .append($('<th>', { text: 'Student #' }))
-                .append($('<th>', { text: 'First Name' }))
-                .append($('<th>', { text: 'Last Name' }))
-                .append($('<th>', { text: 'Attended' }))));
-    
+    var $table = new Table({ 
+        height: 250,
+        width: 460,
+        columns: [
+            ['NetID', 80],
+            ['Student #', 90],
+            ['First Name', 100],
+            ['Last Name', 100],
+            ['Attended', 90]
+        ],
+        $appendTarget: modal.$body
+    });
+      
     // Create and fill the tbody with the students who attended
-    var $tbody = $('<tbody>').appendTo($table);
+    var tableData = [];
     for (var i in sessionStudents) {
         var student      = this.data.students[sessionStudents[i].netID],
-            attendedText = sessionStudents[i].attended ? '\u2714' : '\u2716',
-            $tr          = $('<tr>')
-                .append($('<td>', { text: student.netID }))
-                .append($('<td>', { text: student.stdNum }))
-                .append($('<td>', { text: student.fName }))
-                .append($('<td>', { text: student.lName }))
-                .append($('<td>', { text: attendedText }));
-
-        $tbody.append($tr);
+            attendedText = sessionStudents[i].attended ? '\u2714' : '\u2716'
+        tableData.push([
+                student.netID,
+                student.stdNum,
+                student.fName,
+                student.lName, 
+                attendedText]);
     }
-
-    modal.$body.append($table);
+    $table.fill(tableData);
     modal.show();
 }
 
