@@ -11,6 +11,7 @@ var express       = require('express'),
     csv           = require('express-csv'),
     session       = require('express-session'),
     passport      = require('passport'),
+    checkins      = require('./api/data/attendanceSessions'),
 
     // Require our configuration options
     config        = require('./config.js'),
@@ -29,7 +30,6 @@ var express       = require('express'),
     professor    = require('./routes/professor'),
     student      = require('./routes/student'),
     db           = require('./api/db'),
-    io           = require('./api/socket'),
 
     // Create the app and servers
     app          = express(),
@@ -84,5 +84,8 @@ app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.json(err);
 });
+
+// Reset the attendance sessions upon server startup
+checkins.sessionRecovery();
 
 module.exports = app;
