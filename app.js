@@ -62,8 +62,6 @@ app.all('*', function (req, res, next) {
         res.redirect('https://' + req.hostname + req.url);
 });
 
-// TODO: Add favicon
-app.use(favicon(path.join(__dirname, 'public', 'images', 'QC.png')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
