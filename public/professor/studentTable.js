@@ -7,10 +7,10 @@ var StudentTable = function (course, $appendTarget) {
         height: 300,
         width: 485,
         columns: [
-            ['NetID', 67],
-            ['Number', 80],
-            ['First Name', 115],
-            ['Last Name', 140],
+            ['NetID', 82], 
+            ['Number', 82], 
+            ['First Name', 113], 
+            ['Last Name', 113],
             ['Actions', 95]
         ],
         $appendTarget: $appendTarget

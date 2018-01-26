@@ -40,7 +40,7 @@ function buildNavbar (showProf) {
     this._$element.empty();
 
     // Create the basic structure
-    var $siteName = $('<a>', { class: "navbar-brand noselect", href: "#", text: document.title }),
+    var $siteLogo = $('<img>', { class: "navbar-brand navbar-logo", title: document.title }).attr("src", "/images/qclass_full_noborder.png"),
         $linkDiv  = $('<div>', { id: "navbar", class: "justify-content-end" }),
         $linkList = $('<ul>', { class: "nav navbar-nav navbar-right" });
 
@@ -61,7 +61,7 @@ function buildNavbar (showProf) {
 
     // Add everything together
     $linkList.appendTo($linkDiv);
-    this._$element.append($siteName).append($linkDiv);
+    this._$element.append($siteLogo).append($linkDiv);
 }
 
 module.exports = NavBar;

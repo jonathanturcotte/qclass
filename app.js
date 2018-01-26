@@ -42,7 +42,6 @@ require('./sso/auth.js')(passport, config);
 // Use Helmet to help cover some common header security issues
 app.use(helmet(config.helmet));
 
-app.use(favicon(path.join(__dirname, 'public', 'images', 'QC.png')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

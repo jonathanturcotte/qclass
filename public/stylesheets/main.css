@@ -23,6 +23,11 @@ body {
     padding: 0;
 }
 
+.navbar-logo {
+    padding: 0px;
+    height: 40px;
+}
+
 /* Sidebar/Classlist */
 .sidebar {
     min-height: calc(100vh - 56px);
