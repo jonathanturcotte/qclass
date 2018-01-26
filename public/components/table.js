@@ -80,7 +80,7 @@ Table.prototype.fill = function (data) {
             } else {
                 $tr.append($('<td>', { 
                     text: row[i], 
-                    style: formatColumnWidth(this.columns[i][1]) 
+                    style: formatColumnWidth(this.columns[i][1]) + ' word-break: break-all;' 
                 }));
             }
         }

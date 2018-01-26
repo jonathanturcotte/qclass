@@ -10,10 +10,10 @@ var SessionTable = function(course, $appendTarget) {
     Table.call(this, {
         classList: ['session-table'], 
         height: 300, 
-        width: 399,
+        width: 425,
         columns: [
-            ['Date', 140], 
-            ['Attendance', 96], 
+            ['Date', 156], 
+            ['Attendance', 106], 
             ['Rate', 68], 
             ['Actions', 95]
         ], 
@@ -124,9 +124,9 @@ function openAttendanceModal(date, sessionStudents) {
     
     var $table = new Table({ 
         height: 250,
-        width: 460,
+        width: 461,
         columns: [
-            ['NetID', 80],
+            ['NetID', 81],
             ['Student #', 90],
             ['First Name', 100],
             ['Last Name', 100],

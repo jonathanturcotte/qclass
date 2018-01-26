@@ -34,8 +34,8 @@ AdminManager.prototype.manageAdmins = function (course) {
         height: 250,
         width: 468,
         columns: [
-            ['NetID', 67],
-            ['Name', 326],
+            ['NetID', 82],
+            ['Name', 311],
             ['Actions', 75]
         ],
         $appendTarget: this.$tableDiv
