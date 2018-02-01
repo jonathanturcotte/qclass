@@ -1,6 +1,8 @@
-var CheckIn = function () {
-    this._$element = $('.student-checkin');
+var CheckIn = function ($appendTarget) {
+    this._$element = $('<div>', { class: 'student-checkin' });
+    this._$element.appendTo($('body'));
     build.call(this);
+    this._$element.appendTo($appendTarget);
 };
 
 ///////////////////////
@@ -8,8 +10,10 @@ var CheckIn = function () {
 ///////////////////////
 
 function build() {
-    var $labelDiv = $('<div>', { class: "student-label-div" }),
-        $inputDiv = $('<div>', { class: "student-input-div" });
+    var $checkinBox = $('<div>', { class: 'student-checkin-box' }),
+        $labelDiv   = $('<div>', { class: "student-label-div" }),
+        $inputDiv   = $('<div>', { class: 'student-input-div' }),
+        $form       = $('<div>', { class: 'student-checkin-form' });
 
     $('<label>', {
         class: "student-label",
@@ -18,7 +22,7 @@ function build() {
     
     // Hidden alert for success or failure messages
     this.$alert = $('<div>', { class: 'alert-container collapse' })
-        .appendTo(this._$element);
+        .appendTo($checkinBox);
 
     // Text field
     this.$input = $('<input>', {
@@ -56,9 +60,13 @@ function build() {
         }
     }.bind(this));
 
-    $labelDiv.appendTo(this._$element);
-    $inputDiv.appendTo(this._$element);
-    this.$button.appendTo(this._$element);
+    $form
+        .append($labelDiv)
+        .append($inputDiv)
+        .append(this.$button)
+        .appendTo($checkinBox);
+
+    $checkinBox.appendTo(this._$element);
 
     // Functions
 
