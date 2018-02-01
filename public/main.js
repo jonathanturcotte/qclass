@@ -55,9 +55,8 @@ SignInApp.prototype.buildStudentDOM = function () {
     var $container = $('.main-container');
     $container.empty();
 
-    $('<div>', { class: "student-checkin" }).appendTo($container);
     this.navbar.buildStudentNavbar();
-    this.studentCheckin = new CheckIn();
+    this.studentCheckin = new CheckIn($container);
 };
 
 /**
