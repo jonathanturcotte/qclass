@@ -9,17 +9,10 @@ var express            = require('express'),
     RouteError         = require('../models/routeError');
 
 // Authenticate every request to the professor API against the DB
-// If successful, req.user will gain the firstName and lastName of the prof
 router.use(function(req, res, next) {
     db.profExists(req.user.netID, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied professor netID is not registered', 403);
-
-        req.user.firstName = results[0].fName;
-        req.user.lastName  = results[0].lName;
-
-        // TODO: Redirect to the SSO login page
-
         next();
     });
 });

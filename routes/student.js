@@ -5,16 +5,10 @@ var express            = require('express'),
     attendanceSessions = require('../api/data/attendanceSessions');
 
 // Authenticate every request to the professor API against the DB
-// If successful, req.user will gain the studentNumber, firstName and lastName of the student
 router.use(function(req, res, next) {
     db.studentExists(req.user.netID, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error checking netID');
         if (results.length === 0) return routeHelper.sendError(res, null, 'Supplied student netID is not registered', 403);
-        
-        req.user.studentNumber = results[0].stdNum;
-        req.user.firstName     = results[0].fName;
-        req.user.lastName      = results[0].lName;
-        
         next();
     });
 });
@@ -24,7 +18,7 @@ router.get('/info', function(req, res, next) {
     res.json(req.user);
 });
 
-// Student sign in 
+// Student sign in
 router.post('/sign-in/:code', function(req, res, next) {
     var code = req.params.code,
         session;
@@ -47,18 +41,18 @@ router.post('/sign-in/:code', function(req, res, next) {
                     return routeHelper.sendError(res, err, 'Already signed in', 409);
                 else
                     return routeHelper.sendError(res, err, 'Error recording attendance');
-            } 
+            }
             res.send('Success');
         });
     });
 });
 
-// GET all classes associated with a specific student 
+// GET all classes associated with a specific student
 router.get('/classes', function(req, res, next) {
     db.getEnrolledClasses(req.user.netID, function(err, results, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error getting classes');
         res.json(results);
-    }); 
+    });
 });
 
 module.exports = router;
