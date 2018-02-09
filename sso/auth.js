@@ -27,17 +27,30 @@ module.exports = function (passport, config) {
         // Construct the user from the profile information
         var user = {
             // Stubbed for testing
-            netID        : '1pvb69',
+            netID        : '11jlt10',
             studentNum   : '10048466',
             //netID      : profile['email'].split('@')[0], // NetID
             //studentNum : profile[''],                    // Student number
             fName        : profile['urn:oid:2.5.4.42'],    // First name
             lName        : profile['urn:oid:2.5.4.4'],     // Last name
             email        : profile['email'],               // Email
-            isProf       : true,                           // isProfessor
+            isProf       : false,                          // isProfessor
             nameID       : profile['nameID'],              // NameID - needed for logout
             nameIDFormat : profile['nameIDFormat']         // NameIDFormat - needed for logout
         };
+
+        // ONLY FOR DEMO PURPOSES
+        if(user.fName === 'Jonathan' && user.lName === 'Turcotte'){
+            //user.netID = '12hdm';
+            user.netID  = '1pvb69';
+            user.isProf = true;
+        }
+
+        if (user.fName === 'Curtis' && user.lName === 'Demerah'){
+            //user.netID = '12hdm';
+            user.netID  = '1pvb69';
+            user.isProf = true;
+        }
 
         // Check user against the database
         validateUser(user, function (err) {
