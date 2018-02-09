@@ -67,7 +67,7 @@ exports.getStudent = function (netID, callback) {
 };
 
 exports.updateStudent = function (netID, stdNum, fName, lName, callback) {
-    runQuery('UPDATE student SET stdNum = ?, fName = ?, lName = ? WHERE pNetID = ?', [stdNum, fName, lName, netID], callback);
+    runQuery('UPDATE student SET stdNum = ?, fName = ?, lName = ? WHERE sNetID = ?', [stdNum, fName, lName, netID], callback);
 };
 
 /**
