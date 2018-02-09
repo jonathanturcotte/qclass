@@ -6,10 +6,10 @@ var express       = require('express'),
     favicon       = require('serve-favicon'),
     logger        = require('morgan'),
     cookieParser  = require('cookie-parser'),
+    cookieSession = require('cookie-session'),
     bodyParser    = require('body-parser'),
     helmet        = require('helmet'),
     csv           = require('express-csv'),
-    session       = require('express-session'),
     passport      = require('passport'),
     checkins      = require('./api/data/attendanceSessions'),
 
@@ -46,10 +46,8 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(session({
-    secret: 'Whocansaywherethewindblows',
-    resave: true,
-    saveUninitialized: true
+app.use(cookieSession({
+    secret: 'Whocansaywherethewindblows'
 }));
 app.use(passport.initialize());
 app.use(passport.session());
