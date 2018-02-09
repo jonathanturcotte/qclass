@@ -63,7 +63,7 @@ exports.addStudent = function (netID, stdNum, fName, lName, callback) {
 };
 
 exports.getStudent = function (netID, callback) {
-    runQuery('SELECT * FROM student WHERE pNetID = ?', [netID], callback);
+    runQuery('SELECT * FROM student WHERE sNetID = ?', [netID], callback);
 };
 
 exports.updateStudent = function (netID, stdNum, fName, lName, callback) {
