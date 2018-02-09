@@ -18,8 +18,8 @@ module.exports = function (passport, config) {
         logoutCallbackUrl : config.sso.logoutCallback,                   // Logout callback
         issuer            : config.sso.issuer,                           // The identifier for our SP
         identifierFormat  : '',                                          // The requested format, for ITS we don't need it
-        cert              : fs.readFileSync(config.sso.idpCert, 'utf8'), // X509 cert for the idp, needs to be all on one line
-        decryptionPvk     : fs.readFileSync(config.ssl.key, 'utf8')      // Our SSL private key
+        cert              : config.sso.idpCert,                          // X509 cert for the idp, needs to be all on one line
+        decryptionPvk     : config.ssl.key                               // Our SSL private key
     }, function (profile, done){
         //TODO: Use actual logging functionality when it's available
         console.log("Logged in as: " + profile['email']);

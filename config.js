@@ -1,8 +1,11 @@
+var fs     = require('fs'),
+    sslDir = '/etc/letsencrypt/live/qclass.ca/';
+
 module.exports = {
     ssl: {
-        key       : '/etc/letsencrypt/live/qclass.ca/privkey.pem',
-        cert      : '/etc/letsencrypt/live/qclass.ca/cert.pem',
-        fullchain : '/etc/letsencrypt/live/qclass.ca/fullchain.pem'
+        key       : fs.readFileSync(fs.existsSync(sslDir + 'privkey.pem')   ? sslDir + 'privkey.pem'   : 'app.key', 'utf8'),
+        cert      : fs.readFileSync(fs.existsSync(sslDir + 'cert.pem')      ? sslDir + 'cert.pem'      : 'app.crt', 'utf8'),
+        fullchain : fs.readFileSync(fs.existsSync(sslDir + 'fullchain.pem') ? sslDir + 'fullchain.pem' : 'app.crt', 'utf8')
     },
     sso: {
         loginURL       : 'https://idptest.queensu.ca/idp/profile/SAML2/Redirect/SSO',
@@ -10,7 +13,7 @@ module.exports = {
         logoutURL      : 'https://idptest.queensu.ca/idp/profile/Logout',
         logoutCallback : 'https://qclass.ca/logout/callback',
         issuer         : 'https://qclass.ca',
-        idpCert        : 'sso/idp.crt',
+        idpCert        : fs.readFileSync('sso/idp.crt', 'utf8')
     },
     helmet: {
         referrerPolicy: { policy: 'no-referrer' },

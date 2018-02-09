@@ -20,8 +20,8 @@ var express       = require('express'),
     // before falling back to our unsigned ones. This is so that
     // we can continue developing locally without having to change anything.
     sslOptions = {
-        key:  fs.readFileSync(fs.existsSync(config.ssl.key)       ? config.ssl.key       : 'app.key'),
-        cert: fs.readFileSync(fs.existsSync(config.ssl.fullchain) ? config.ssl.fullchain : 'app.crt')
+        key:  config.ssl.key,
+        cert: config.ssl.fullchain
     },
 
     // Require our routes and APIs
@@ -61,7 +61,7 @@ app.use(function (req, res, next) {
 });
 
 // Always use the authentication middleware before considering any other routes
-require('./routes/auth.js')(app, passport);
+require('./routes/auth.js')(app, config, passport);
 
 // Serve the static pages
 app.use(express.static(path.join(__dirname, 'public')));

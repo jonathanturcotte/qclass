@@ -1,4 +1,4 @@
-module.exports = function (app, passport){
+module.exports = function (app, config, passport){
     app.get('/login',
         passport.authenticate('saml', {successRedirect: '/', failureRedirect: '/login'})
     );
@@ -6,6 +6,11 @@ module.exports = function (app, passport){
     app.post('/login/callback',
         passport.authenticate('saml', { successRedirect: '/', failureRedirect: '/login' })
     );
+
+    app.get('/Shibboleth.sso/Metadata', function (req, res) {
+        res.type('application/samlmetadata+xml');
+        res.send(passport._strategy('saml').generateServiceProviderMetadata(config.ssl.cert));
+    });
 
     // Enforce authentication for the main page
     // We only need to use res.redirect here
