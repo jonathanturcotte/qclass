@@ -193,10 +193,7 @@ function build () {
 
     // Initialize the tableUpdater and fill the tables
     this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
-    this.tableUpdater.updateTables(function() {
-        $sessionTotal.text("Total: " + this.app.classPage.sessionTable.data.sessionCount + " sessions");
-        $studentTotal.text("Total: " + this.app.classPage.studentTable.data.studentCount + " students");
-    });
+    this.tableUpdater.updateTables();
 
    
 
@@ -209,7 +206,7 @@ function build () {
  * using the pre-defined durationOptions array
  */
 function getDurationSelect(classID) {
-    var $select = $('<select>', { class: 'class-duration-select' }),
+    var $select = $('<select>', { class: 'class-duration-select custom-select' }),
         prevChoiceCookie = Cookies.get('last-duration-' + classID),
         prevChoice = null;
 
@@ -252,5 +249,7 @@ function sessionOnChanges($delButton, $delDiv, $startButton) {
     $delButton.addClass('disabled')
         .css('pointer-events','none');    
 }
+
+
 
 module.exports = ClassPage;
