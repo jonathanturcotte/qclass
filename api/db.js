@@ -254,7 +254,7 @@ exports.getSessionAttInfo = function(classID, callback) {
                     AND sess.attTime = a.attTime
                 LEFT JOIN student s
                     ON a.sNetID = s.sNetID
-        ORDER BY sess.attTime`;
+        ORDER BY sess.attTime, a.attended DESC, s.lName`;
     runQuery(query, [classID], callback);
 };
 

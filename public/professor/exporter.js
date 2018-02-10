@@ -131,18 +131,22 @@ function saveData (data, fileName) {
 }
 
 function createSheets(data, fileType) {
-    var overallInfo = [],
-        sessionInfo = [],
-        wb     = { SheetNames:[], Sheets:{} };
+    var overallInfo       = [],
+        sessionInfo       = [],
+        wb                = { SheetNames:[], Sheets:{} },
+        sortedOverallInfo;
+      
     
     for(var i = 0; i < data[0].length; i++) 
         overallInfo[i] = data[0][i];
+
+    sortedOverallInfo = _.sortBy(overallInfo, 'Last Name');
 
     for(i = 0; i < data[1].length; i++)
         sessionInfo[i] = data[1][i];
     
     // cover to xlsx sheets
-    var sheet1 = XLSX.utils.json_to_sheet(overallInfo, { header: [ "NetID",
+    var sheet1 = XLSX.utils.json_to_sheet(sortedOverallInfo, { header: [ "NetID",
                                                          "Student #",
                                                          "First Name",
                                                          "Last Name",
