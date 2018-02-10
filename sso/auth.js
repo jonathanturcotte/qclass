@@ -1,6 +1,7 @@
 var SamlStrategy = require('passport-saml').Strategy,
     fs           = require('fs'),
-    db           = require('../api/db');
+    db           = require('../api/db'),
+    EnrollStudent = require('../models/enrollStudent');
 
 module.exports = function (passport, config) {
     passport.serializeUser(function(user, done){
@@ -21,44 +22,90 @@ module.exports = function (passport, config) {
         cert              : config.sso.idpCert,                          // X509 cert for the idp, needs to be all on one line
         decryptionPvk     : config.ssl.key                               // Our SSL private key
     }, function (profile, done){
-        //TODO: Use actual logging functionality when it's available
-        console.log("Logged in as: " + profile['email']);
+        var fName   = profile['urn:oid:2.5.4.42'],
+            lName   = profile['urn:oid:2.5.4.4'],
+            stdNum  = genRandomStdNum(),
+            shouldContinue = true,
+            user = {
+                netID        : '',
+                studentNum   : stdNum,
+                fName        : fName,                  // First name
+                lName        : lName,                  // Last name
+                email        : profile['email'],       // Email
+                isProf       : false,                  // isProfessor
+                nameID       : profile['nameID'],      // NameID - needed for logout
+                nameIDFormat : profile['nameIDFormat'] // NameIDFormat - needed for logout
+            };
 
-        // Construct the user from the profile information
-        var user = {
-            // Stubbed for testing
-            netID        : '11jlt10',
-            studentNum   : '10048466',
-            //netID      : profile['email'].split('@')[0], // NetID
-            //studentNum : profile[''],                    // Student number
-            fName        : profile['urn:oid:2.5.4.42'],    // First name
-            lName        : profile['urn:oid:2.5.4.4'],     // Last name
-            email        : profile['email'],               // Email
-            isProf       : false,                          // isProfessor
-            nameID       : profile['nameID'],              // NameID - needed for logout
-            nameIDFormat : profile['nameIDFormat']         // NameIDFormat - needed for logout
-        };
-
-        // ONLY FOR DEMO PURPOSES
         if(user.fName === 'Jonathan' && user.lName === 'Turcotte'){
             //user.netID = '12hdm';
             user.netID  = '1pvb69';
             user.isProf = true;
+            shouldContinue = false;
         }
 
         if (user.fName === 'Curtis' && user.lName === 'Demerah'){
             //user.netID = '12hdm';
             user.netID  = '1pvb69';
             user.isProf = true;
+            shouldContinue = false;
         }
 
-        // Check user against the database
-        validateUser(user, function (err) {
-            if (err) return done(err);
-            return done(null, user);
-        });
+        async.whilst(
+            function () { return shouldContinue; },
+            function (callback) {
+                // Ensure generated netID isn't jon or curtis
+                do {
+                    user.netID = genRandomNetID(fName, lName);
+                } while (user.netID === '11jlt10' || user.netID === '12cjd2');
+
+                // Check if netID exists
+                db.studentExists(user.netID, function (err, results) {
+                    if (err) return callback(err);
+                    if (results.length === 0) {
+                        db.addStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results) {
+                            if (err) return callback(err);
+
+                            db.enroll('boo49eb2-0630-4382-98b5-moofd40627b8', new EnrollStudent([{
+                                netID:     user.netID,
+                                stdNum:    user.stdNum,
+                                firstName: user.firstName,
+                                lastName:  user.lastName
+                            }]), function (err, results) {
+                                if (err) return callback(err);
+                                shouldContinue = false;
+                                callback();
+                            });
+                        });
+                    } else return callback();
+                }) 
+            },
+            function (err) {
+                if (err) return done(err);
+
+                // Check user against the database
+                validateUser(user, function (err) {
+                    if (err) return done(err);
+                    return done(null, user);
+                });
+            }
+        );
     }));
 };
+
+/** Random digit (0-9) */
+function genRandomDigit() {
+    return Math.floor(Math.random() * 10); 
+}
+
+function genRandomNetID(firstName, lastName) {
+    return '' + genRandomDigit() + genRandomDigit() + firstName[0] || 'a' + lastName[0] || 'a' + genRandomDigit();
+}
+
+function genRandomStdNum() {
+    var max = 99999999, min = 10000000;
+    return '' + Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 function validateUser(user, callback) {
     if (user.isProf) {
