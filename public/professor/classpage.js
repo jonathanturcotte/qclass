@@ -79,25 +79,27 @@ ClassPage.prototype.refreshTables = function () {
  * Builds the classpage, adds it to the DOM
  */
 function build () {
-    var $topDiv      = $('<div>', { class: 'class-top-div row' }),
-        $titleDiv    = $('<div>', { class: 'class-title-div col-auto' }),
-        $nameDiv     = $('<div>'),
-        $codeDiv     = $('<div>'),
-        $optionsDiv  = $('<div>', { class: 'class-options-div col' }),
-        $adminButton = $('<button>', { text: 'Edit Administrators', class: 'class-admin-button btn btn-danger btn-square btn-xl' }),
-        $delDiv      = $('<div>', { class: "del-button-div", style: "display: inline-block" }),
-        $delButton   = $('<button>', { text: 'Delete Course', class: 'class-delete-button btn btn-danger btn-square btn-x1' }),
-        $titleCode   = $('<h2>', { class: 'class-title-code title-field', text: this.course.cCode }),
-        $titleName   = $('<h3>', { class: 'class-title-name title-field', text: this.course.cName }),
-        $attDiv      = $('<div>', { class: 'class-attendance-div' }),
-        $attDivLeft  = $('<div>', { class: 'class-attendance-div-left'}),
-        $attDivRight = $('<div>', { class: 'class-attendance-div-right'}),
-        $startButton = $('<button>', { class: 'btn btn-circle btn-danger btn-xl start-button', text: 'Start'}),
-        $tableRow    = $('<div>', { class: 'class-content row' }),
-        $tableCol1   = $('<div>', { class: 'class-table-column-div col' }),
-        $tableCol2   = $('<div>', { class: 'class-table-column-div col' }),
-        $sessionDiv  = $('<div>', { class: 'table-div' }),
-        $studentDiv  = $('<div>', { class: 'table-div' });
+    var $topDiv       = $('<div>', { class: 'class-top-div row' }),
+        $titleDiv     = $('<div>', { class: 'class-title-div col-auto' }),
+        $nameDiv      = $('<div>'),
+        $codeDiv      = $('<div>'),
+        $optionsDiv   = $('<div>', { class: 'class-options-div col' }),
+        $adminButton  = $('<button>', { text: 'Edit Administrators', class: 'class-admin-button btn btn-danger btn-square btn-xl' }),
+        $delDiv       = $('<div>', { class: "del-button-div", style: "display: inline-block" }),
+        $delButton    = $('<button>', { text: 'Delete Course', class: 'class-delete-button btn btn-danger btn-square btn-x1' }),
+        $titleCode    = $('<h2>', { class: 'class-title-code title-field', text: this.course.cCode }),
+        $titleName    = $('<h3>', { class: 'class-title-name title-field', text: this.course.cName }),
+        $attDiv       = $('<div>', { class: 'class-attendance-div' }),
+        $attDivLeft   = $('<div>', { class: 'class-attendance-div-left'}),
+        $attDivRight  = $('<div>', { class: 'class-attendance-div-right'}),
+        $startButton  = $('<button>', { class: 'btn btn-circle btn-danger btn-xl start-button', text: 'Start'}),
+        $tableRow     = $('<div>', { class: 'class-content row' }),
+        $tableCol1    = $('<div>', { class: 'class-table-column-div col' }),
+        $tableCol2    = $('<div>', { class: 'class-table-column-div col' }),
+        $sessionDiv   = $('<div>', { class: 'table-div' }),
+        $studentDiv   = $('<div>', { class: 'table-div' }),
+        $studentTotal = $('<div>', { class: 'btn btn-light disabled total-student', style: 'display: block; margin-right: 20px; margin-top: -6px', text: "Total:"} ),
+        $sessionTotal = $('<div>', { class: 'btn btn-light disabled total-session', style: 'display: block; margin-right: 20px; margin-top: -6px', text: "Total:"} );
         
     this.$element
         .append($topDiv
@@ -154,6 +156,10 @@ function build () {
 
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
+
+    $sessionTotal
+        .appendTo($sessionDiv);
+
     $('<div>', { class: "exp-button-div", style: "display: inline-block; margin-top: 10px" })
         .append($('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
             .click(this.exporter.createExportModal.bind(this, this.course)))
@@ -161,6 +167,9 @@ function build () {
 
     // The student table and associated buttons
     this.studentTable = new StudentTable(this.course, $studentDiv);
+
+    $studentTotal
+        .appendTo($studentDiv);
 
     $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
         .click(this.importer.createImportModal.bind(this, this.course))
@@ -172,7 +181,15 @@ function build () {
 
     // Initialize the tableUpdater and fill the tables
     this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
-    this.tableUpdater.updateTables();
+    this.tableUpdater.updateTables(function() {
+        $sessionTotal.text("Total: " + this.app.classPage.sessionTable.data.sessionCount + " sessions");
+        $studentTotal.text("Total: " + this.app.classPage.studentTable.data.studentCount + " students");
+    });
+
+   
+
+
+
 }
 
 /**

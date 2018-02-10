@@ -70,6 +70,7 @@ SessionTable.prototype.update = function (data) {
 
     // Fill table with formatted data
     this.fill(tableData);
+    updateCount(data.sessionCount);
 };
 
 function openDeleteModal(session) {
@@ -179,6 +180,12 @@ function enableExport() {
 
     $exportButton.removeClass('disabled')
         .css('pointer-events', 'auto');
+}
+
+function updateCount(count) {
+    var $totalSession = $('.total-session');
+
+    $totalSession.text('Total: ' + count);
 }
 
 module.exports = SessionTable;

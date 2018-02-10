@@ -56,6 +56,7 @@ StudentTable.prototype.update = function (data) {
     }
 
     this.fill(tableData);
+    updateCount(data.studentCount);
 };
 
 function openDeleteModal(student) {
@@ -145,6 +146,12 @@ function expandStudent(student) {
     }
     $table.fill(tableData);
     modal.show();
+}
+
+function updateCount(count) {
+    var $totalStudent = $('.total-student');
+
+    $totalStudent.text('Total: ' + count);
 }
 
 module.exports = StudentTable;
