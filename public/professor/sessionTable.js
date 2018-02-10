@@ -43,10 +43,10 @@ SessionTable.prototype.update = function (data) {
         // Create main row
         var $date = $('<td>', { title: session.date.toString(), text: session.formattedDate }),
             $expandButton = $('<button>', { class: 'btn btn-default btn-sm', style: 'margin-right: 3px;', title: 'Expand' })
-                .append($('<i>', { class: 'fas fa-external-link-alt' })
+            .append($('<div>', { class: 'table-row-expand', text: '\u21f1' }) // Unicode arrow icon
                     .attr('aria-hidden', 'true')),
             $deleteButton = $('<button>', { class: 'btn btn-default btn-sm', title: 'Delete' })
-                .append($('<i>', { class: 'fas fa-times' })
+                .append($('<b>', { class: 'table-row-delete', text: '\u2715' }) // Unicode multiplication icon
                         .attr('aria-hidden', 'true'))
                 .click(openDeleteModal.bind(this, session)),
             $actions = $('<td>')

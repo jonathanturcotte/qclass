@@ -7,21 +7,20 @@ var TableUpdater = function (classID, sessionTable, studentTable) {
 TableUpdater.prototype.updateTables = function () {
     this.sessionTable.spin();
     this.studentTable.spin();
-    ci.ajax({
-        method: 'GET',
-        url: '/professor/' + this.classID + '/session-data',
-        done: function(data, status, xhr) {
+    $.get('/professor/' + this.classID + '/session-data')
+    .done(function(data, status, xhr) {
+        _.defer(function (data) {
             processData(data);
             annotateSessions(data.sessions);
-            this.sessionTable.update(data);
-            this.studentTable.update(data);
-        }.bind(this),
-        fail: function (xhr, status, errorThrown) {
-            toastr.error(status, 'Error getting attendance sessions: ');
-            this.sessionTable.error();
-            this.studentTable.error();
-        }.bind(this)
-    });
+            _.defer(this.sessionTable.update.bind(this.sessionTable, data));
+            _.defer(this.studentTable.update.bind(this.studentTable, data));
+        }.bind(this, data));
+    }.bind(this))
+    .fail(function (xhr, status, errorThrown) {
+        toastr.error(status, 'Error getting attendance sessions: ');
+        this.sessionTable.error();
+        this.studentTable.error();
+    }.bind(this));
 };
 
 /**
