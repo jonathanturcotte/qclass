@@ -206,7 +206,7 @@ function build () {
  * using the pre-defined durationOptions array
  */
 function getDurationSelect(classID) {
-    var $select = $('<select>', { class: 'class-duration-select' }),
+    var $select = $('<select>', { class: 'class-duration-select custom-select' }),
         prevChoiceCookie = Cookies.get('last-duration-' + classID),
         prevChoice = null;
 
@@ -249,5 +249,7 @@ function sessionOnChanges($delButton, $delDiv, $startButton) {
     $delButton.addClass('disabled')
         .css('pointer-events','none');    
 }
+
+
 
 module.exports = ClassPage;
