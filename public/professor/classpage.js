@@ -98,8 +98,10 @@ function build () {
         $tableCol2    = $('<div>', { class: 'class-table-column-div col' }),
         $sessionDiv   = $('<div>', { class: 'table-div' }),
         $studentDiv   = $('<div>', { class: 'table-div' }),
-        $studentTotal = $('<div>', { class: 'btn btn-light disabled total-student', style: 'display: block; margin-right: 20px; margin-top: -6px', text: "Total:"} ),
-        $sessionTotal = $('<div>', { class: 'btn btn-light disabled total-session', style: 'display: block; margin-right: 20px; margin-top: -6px', text: "Total:"} );
+        $studentTotal = $('<div>', { class: 'btn btn-light  btn-square btn-xl disabled total-student', style: 'margin-top: 10px; float: left;', text: "Total:"} ),
+        $sessionTotal = $('<div>', { class: 'btn btn-light  btn-square btn-xl disabled total-session', style: 'margin-top: 10px; float: left;', text: "Total:"} );
+        $sessBottom   = $('<div>');
+        $studentBottom= $('<div>');
         
     this.$element
         .append($topDiv
@@ -157,27 +159,37 @@ function build () {
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
 
+    $('<h5>', { text: 'Sessions', style: 'text-align: center'})
+        .prependTo($sessionDiv);
+
+    $sessBottom.appendTo($sessionDiv);
+
     $sessionTotal
-        .appendTo($sessionDiv);
+        .appendTo($sessBottom);
 
     $('<div>', { class: "exp-button-div", style: "display: inline-block; margin-top: 10px" })
         .append($('<button>', { class: 'class-export-button btn btn-danger btn-square btn-xl', text: 'Export Attendance' })
             .click(this.exporter.createExportModal.bind(this, this.course)))
-        .appendTo($sessionDiv);
+        .appendTo($sessBottom);
 
     // The student table and associated buttons
     this.studentTable = new StudentTable(this.course, $studentDiv);
 
+    $('<h5>', { text: 'Students', style: 'text-align: center'})
+        .prependTo($studentDiv);
+
+    $studentBottom.appendTo($studentDiv);
+    
     $studentTotal
-        .appendTo($studentDiv);
+        .appendTo($studentBottom);
 
-    $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl' })
+    $('<button>', { text: 'Import Classlist', class: 'class-import-button btn btn-danger btn-square btn-xl', style: 'inline-block' })
         .click(this.importer.createImportModal.bind(this, this.course))
-        .appendTo($studentDiv);
+        .appendTo($studentBottom);
 
-    $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl' })
+    $('<button>', { text: 'Add Student', class: 'class-addstudent-button btn btn-danger btn-square btn-xl', style: 'inline-block' })
         .click(this.importer.createAddStudentModal.bind(this, this.course))
-        .appendTo($studentDiv);
+        .appendTo($studentBottom);
 
     // Initialize the tableUpdater and fill the tables
     this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
