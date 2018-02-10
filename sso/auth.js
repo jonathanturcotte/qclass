@@ -1,6 +1,7 @@
 var SamlStrategy = require('passport-saml').Strategy,
     fs           = require('fs'),
     db           = require('../api/db'),
+    async        = require('async'),
     EnrollStudent = require('../models/enrollStudent');
 
 module.exports = function (passport, config) {
