@@ -260,22 +260,6 @@ exports.getAttendanceSessions = function(classID, callback) {
     runQuery(query, [classID], callback);
 };
 
-exports.aggregateInfo = function(classID, callback) {
-    var query =
-        `SELECT T1.sNetID, s.stdNum, s.fName, s.lName, COUNT(T2.attTime) AS attCount
-         FROM (SELECT *
-               FROM enrolled
-               WHERE enrolled.cID = ?) AS T1
-            LEFT JOIN (SELECT *
-                       FROM attendance NATURAL JOIN attendanceSession
-                       WHERE attendance.attended = 1) AS T2
-                ON T1.sNetID = T2.sNetID
-            LEFT JOIN student s
-                ON s.sNetID = T1.sNetID
-         GROUP BY sNetID`;
-    runQuery(query, [classID], callback);
-};
-
 exports.getNumSession = function(classID, callback) {
     var query =
         `SELECT *
@@ -297,6 +281,15 @@ exports.getSessionAttInfo = function(classID, callback) {
         ORDER BY sess.attTime`;
     runQuery(query, [classID], callback);
 };
+
+exports.getAttendanceTotals = function(classID, callback) {
+    var query =
+            `SELECT sNetID, stdNum, fName, lName, SUM(attended) AS attCount
+             FROM attendance NATURAL JOIN student
+             WHERE cID = ?
+             GROUP BY sNetID`;
+    runQuery(query, [classID], callback);
+}
 
 // Uses a transaction to perform multiple queries with rollback upon failure
 // Removes: enrollment, admin, session, attendance and course
