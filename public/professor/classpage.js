@@ -193,10 +193,7 @@ function build () {
 
     // Initialize the tableUpdater and fill the tables
     this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
-    this.tableUpdater.updateTables(function() {
-        $sessionTotal.text("Total: " + this.app.classPage.sessionTable.data.sessionCount + " sessions");
-        $studentTotal.text("Total: " + this.app.classPage.studentTable.data.studentCount + " students");
-    });
+    this.tableUpdater.updateTables();
 
    
 
