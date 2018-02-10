@@ -9,10 +9,12 @@ TableUpdater.prototype.updateTables = function () {
     this.studentTable.spin();
     $.get('/professor/' + this.classID + '/session-data')
     .done(function(data, status, xhr) {
-        processData(data);
-        annotateSessions(data.sessions);
-        this.sessionTable.update(data);
-        this.studentTable.update(data);
+        _.defer(function (data) {
+            processData(data);
+            annotateSessions(data.sessions);
+            _.defer(this.sessionTable.update.bind(this.sessionTable, data));
+            _.defer(this.studentTable.update.bind(this.studentTable, data));
+        }.bind(this, data));
     }.bind(this))
     .fail(function (xhr, status, errorThrown) {
         toastr.error(status, 'Error getting attendance sessions: ');

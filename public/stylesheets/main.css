@@ -342,6 +342,15 @@ body {
     margin-bottom: 20px;
 }
 
+.table-row-expand {
+    font-size: 1.00rem;
+    transform: rotate(90deg);
+}
+
+.table-row-delete {
+    font-size: 1.00rem;
+}
+
 .attendance-modal-table th, td {
     padding-right: 7px;
     padding-left: 7px;

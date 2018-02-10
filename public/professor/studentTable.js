@@ -35,11 +35,12 @@ StudentTable.prototype.update = function (data) {
                 title: 'Expand', 
                 class: 'btn btn-default btn-sm',
                 style: 'margin-right: 3px;'
-            }).append($('<i>', { class: 'fas fa-external-link-alt' })
+            })
+            .append($('<div>', { class: 'table-row-expand', text: '\u21f1' }) // Unicode arrow icon
                     .attr('aria-hidden', 'true'))
-                .click(expandStudent.bind(this, student)),      
+                .click(expandStudent.bind(this, student)),
             $deleteButton = $('<button>', { title: 'Delete', class: 'btn btn-default btn-sm' })
-                .append($('<i>', { class: 'fas fa-times' })
+                .append($('<b>', { class: 'table-row-delete', text: '\u2715' }) // Unicode multiplication icon
                         .attr('aria-hidden', 'true'))
                 .click(openDeleteModal.bind(this, student)),
             $actions      = $('<td>')
