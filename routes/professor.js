@@ -269,7 +269,7 @@ router.get('/:classID/session-data', function(req, res, next) {
 router.get('/:classID/exportAttendance', function(req, res, next) {
     var classID  = req.params.classID;
 
-    db.aggregateInfo(classID, function(err, attInfo, fields) {
+    db.getAttendanceTotals(classID, function(err, attInfo, fields) {
         if (err) return routeHelper.sendError(res, err, 'Error retrieving attendance information for ' + classID);
         if (attInfo.length === 0)
             return routeHelper.sendError(res, null, 'No Attendance Information for Course');
