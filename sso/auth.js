@@ -25,11 +25,10 @@ module.exports = function (passport, config) {
     }, function (profile, done){
         var fName   = profile['urn:oid:2.5.4.42'],
             lName   = profile['urn:oid:2.5.4.4'],
-            stdNum  = genRandomStdNum(),
             shouldContinue = true,
             user = {
                 netID        : '',
-                studentNum   : stdNum,
+                studentNum   : genRandomStdNum(),
                 fName        : fName,                  // First name
                 lName        : lName,                  // Last name
                 email        : profile['email'],       // Email
@@ -64,12 +63,12 @@ module.exports = function (passport, config) {
                 db.studentExists(user.netID, function (err, results) {
                     if (err) return callback(err);
                     if (results.length === 0) {
-                        db.addStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results) {
+                        db.addStudent(user.netID, user.studentNum, user.fName, user.lName, function (err, results) {
                             if (err) return callback(err);
 
                             db.enroll('boo49eb2-0630-4382-98b5-moofd40627b8', new EnrollStudent({
                                 netID:     user.netID,
-                                stdNum:    user.stdNum,
+                                stdNum:    user.studentNum,
                                 firstName: user.firstName,
                                 lastName:  user.lastName
                             }), function (err, results) {
