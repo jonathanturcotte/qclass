@@ -76,8 +76,10 @@ AdminManager.prototype.manageAdmins = function (course) {
 function updateTable (course) {
     this.table.$tbody.empty().spin();
 
-    $.get('/professor/class/' + course.cID + '/admins')
-        .done(function (data, status, xhr) {
+    ci.ajax({
+        url: '/professor/class/' + course.cID + '/admins',
+        method: 'GET',
+        done: function (data, status, xhr) {
             var tableData = [];
             for (var i = 0; i < data.length; i++) {
                 var $deleteButton = $('<button>', { title: 'Remove', class: 'btn btn-default btn-sm' })
@@ -96,12 +98,11 @@ function updateTable (course) {
                 ]);
             }
             this.table.fill(tableData);
-        }.bind(this))
-        .fail(function (data, status, xhr) {
+        }.bind(this),
+        fail: function (data, status, xhr) {
             this.table.error('Error getting admins');
-        }.bind(this))
-        .always(function(a, status, b) {
-        }.bind(this));
+        }.bind(this)
+    });
 }
 
 function addAdmin (course) {
@@ -117,37 +118,38 @@ function addAdmin (course) {
         this.$addButton.prop('disabled', true);
         this.$netIDField.prop('disabled', true);
 
-        $.post({
-            url: '/professor/class/' + course.cID + '/admins/add/' + netID
-        })
-        .done(function (data, status, xhr) {
-            showFormSuccess.call(this, 'Added ' + netID);
-            updateTable.call(this, course);
-        }.bind(this))
-        .fail(function (xhr, status, errorThrown) {
-            var msg,
-                shouldUpdate = true,
-                json = xhr.responseJSON;
-
-            if (!json || !json.errorCode)
-                msg = 'Error adding admin - ' + xhr.status;
-            else { 
-                msg = json.message;
-
-                // Don't update table if the error code is known to not affect the DB
-                if (json.errorCode > 1)
-                    shouldUpdate = false;
-            }
-            showFormError.call(this, msg);
-
-            if (shouldUpdate)
+        ci.ajax({
+            method: 'POST',
+            url: '/professor/class/' + course.cID + '/admins/add/' + netID,
+            done: function (data, status, xhr) {
+                showFormSuccess.call(this, 'Added ' + netID);
                 updateTable.call(this, course);
-        }.bind(this))
-        .always(function (a, status, b) {
-            // Re-enable form
-            this.$addButton.prop('disabled', false);
-            this.$netIDField.prop('disabled', false);
-        }.bind(this));
+            }.bind(this),
+            fail: function (xhr, status, errorThrown) {
+                var msg,
+                    shouldUpdate = true,
+                    json = xhr.responseJSON;
+    
+                if (!json || !json.errorCode)
+                    msg = 'Error adding admin - ' + xhr.status;
+                else { 
+                    msg = json.message;
+    
+                    // Don't update table if the error code is known to not affect the DB
+                    if (json.errorCode > 1)
+                        shouldUpdate = false;
+                }
+                showFormError.call(this, msg);
+    
+                if (shouldUpdate)
+                    updateTable.call(this, course);
+            }.bind(this),
+            always: function (a, status, b) {
+                // Re-enable form
+                this.$addButton.prop('disabled', false);
+                this.$netIDField.prop('disabled', false);
+            }.bind(this)
+        });
     }
 }
 
@@ -201,23 +203,25 @@ function openConfirmRemovalModal (netID, course) {
 function removeAdmin (netID, course, confirmModal) {
     confirmModal.$deleteButton.prop('disabled', true);
 
-    $.ajax({
+    ci.ajax({
         url: '/professor/class/' + course.cID + '/admins/remove/' + netID,
-        method: 'DELETE'
-    })
-    .done(function (data, status, xhr) {
-        confirmModal.success(null, 'Successfully removed admin ' + netID);
-    }).fail(function (xhr, status, errorStatus) {
-        confirmModal.error(null, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
-    }).always(function (a, status, b) {
-        // Remove delete button since operation is over, change close text and enable
-        confirmModal.$deleteButton.remove();
-        confirmModal.$closeButton.text('OK');
-        confirmModal.$closeButton.prop('disabled', false);
-
-        // Update table on first modal
-        updateTable.call(this, course);
-    }.bind(this));
+        method: 'DELETE',
+        done: function (data, status, xhr) {
+            confirmModal.success(null, 'Successfully removed admin ' + netID);
+        },
+        fail: function (xhr, status, errorStatus) {
+            confirmModal.error(null, 'Error deleting admin ' + netID + (xhr.status ? ' - ' + xhr.status : ''));
+        },
+        always: function (a, status, b) {
+            // Remove delete button since operation is over, change close text and enable
+            confirmModal.$deleteButton.remove();
+            confirmModal.$closeButton.text('OK');
+            confirmModal.$closeButton.prop('disabled', false);
+    
+            // Update table on first modal
+            updateTable.call(this, course);
+        }.bind(this)
+    });
 }
 
 module.exports = AdminManager;

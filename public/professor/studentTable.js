@@ -3,16 +3,16 @@ var Table       = require('../components/table'),
 
 var StudentTable = function (course, $appendTarget) {
     Table.call(this, {
-        classList: ['student-table'], 
-        height: 300, 
-        width: 485, 
+        classList: ['student-table'],
+        height: 300,
+        width: 485,
         columns: [
             ['NetID', 82], 
             ['Number', 82], 
             ['First Name', 113], 
             ['Last Name', 113],
             ['Actions', 95]
-        ], 
+        ],
         $appendTarget: $appendTarget
     });
     this.course = course;
@@ -64,7 +64,7 @@ StudentTable.prototype.update = function (data) {
 function openDeleteModal(student) {
     var modal         = new ModalWindow({ title: 'Remove ' + student.fName + '?' }),
         $deleteButton = $('<button>', { text: 'Delete', class: 'btn btn-danger' });
-            
+
     $deleteButton.click(tryRemoveStudent.bind(this, $deleteButton, modal, student));
 
     modal.$body.append($('<p>', { text: 'Are you sure you want to remove ' + student.fName + ' ' + student.lName +
@@ -81,24 +81,24 @@ function tryRemoveStudent($deleteButton, modal, student) {
 }
 
 function removeStudent($deleteButton, modal, student) {
-    $.ajax({
+    ci.ajax({
         url: 'professor/class/' + this.course.cID + '/remove-student/' + student.netID,
-        type: 'DELETE'
-    })
-    .done(function(data, status, xhr) {
-        modal.$title.text('Student Removed');
-        modal.$header.addClass('modal-header-success');
-        modal.$body.empty().append($('<p>', { text: student.fName + ' was removed!' }));
-        window.app.classPage.refreshTables();
-    }.bind(this))
-    .fail(function(xhr, status, errorThrown) {
-        modal.$title.text('Remove Student Failed');
-        modal.$header.addClass('modal-header-danger');
-        modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID }));
-    }.bind(this))
-    .always(function(a, status, b) {
-        $deleteButton.remove();
-        modal.$closeButton.text('Close');
+        method: 'DELETE',
+        done: function(data, status, xhr) {
+            modal.$title.text('Student Removed');
+            modal.$header.addClass('modal-header-success');
+            modal.$body.empty().append($('<p>', { text: student.fName + ' was removed!' }));
+            window.app.classPage.refreshTables();
+        }.bind(this),
+        fail: function(xhr, status, errorThrown) {
+            modal.$title.text('Remove Student Failed');
+            modal.$header.addClass('modal-header-danger');
+            modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing ' + netID }));
+        }.bind(this),
+        always: function(a, status, b) {
+            $deleteButton.remove();
+            modal.$closeButton.text('Close');
+        }
     });
 }
 
@@ -112,8 +112,8 @@ function expandStudent(student) {
 
     // Title
     modal.$body.append($('<h5>', {
-        text: student.fName + ' ' + student.lName + ' (' + student.stdNum + ', ' + student.netID + ')', 
-        class: 'table-modal-bodytitle' 
+        text: student.fName + ' ' + student.lName + ' (' + student.stdNum + ', ' + student.netID + ')',
+        class: 'table-modal-bodytitle'
     }));
 
     modal.$body.append($informationLine);

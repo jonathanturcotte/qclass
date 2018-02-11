@@ -54,9 +54,12 @@ function build() {
             this.displayAlert('Code is too long', true);
         }
         else {
-            $.post({ url: '/student/sign-in/' + code })
-            .done(success.bind(this))
-            .fail(failure.bind(this));
+            ci.ajax({
+                method: 'POST',
+                url: '/student/sign-in/' + code,
+                done: success.bind(this),
+                fail: failure.bind(this)
+            });
         }
     }.bind(this));
 

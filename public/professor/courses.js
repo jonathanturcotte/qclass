@@ -72,17 +72,21 @@ CourseManager.prototype.createCourse = function () {
                 .spin()
                 .addClass('spin-min-height');
 
-            $.post({
+            ci.ajax({
+                method: 'POST',
                 url: '/professor/class/add',
                 data: { code: $cCodeInput.val(), name: $cNameInput.val() },
-                dataType: 'json'
-            }).done(function(data, status, xhr) {
-                modal.success("Success", $cCodeInput.val() + ' successfully added!');
-                window.app.classList.updateClasses();
-            }).fail(function(xhr, status, errorThrown) {
-                modal.error("Error", xhr.responseText);
-            }).always(function(a, status, b) {
-                modal.$body.spin(false);
+                dataType: 'json',
+                done: function(data, status, xhr) {
+                    modal.success("Success", $cCodeInput.val() + ' successfully added!');
+                    window.app.classList.updateClasses();
+                },
+                fail: function(xhr, status, errorThrown) {
+                    modal.error("Error", xhr.responseText);
+                },
+                always: function(a, status, b) {
+                    modal.$body.spin(false);
+                }
             });
         });
 
@@ -116,20 +120,20 @@ function removeCourse (course, sessions) {
         .spin()
         .addClass('spin-min-height');
 
-    $.ajax({
+    ci.ajax({
         url: '/professor/class/' + course.cID,
-        method: 'DELETE'
-    })
-    .done(function (data, status, xhr) {
-        this.modal.success('Success', course.cCode + ' successfully deleted!');
-        window.app.classList.updateClasses();
-    }.bind(this))
-    .fail(function (xhr, status, errorThrown) {
-        this.modal.error('Error', xhr.responseText);
-    }.bind(this))
-    .always(function(a, status, b) {
-        this.modal.$body.spin(false);
-    }.bind(this));
+        method: 'DELETE',
+        done: function (data, status, xhr) {
+            this.modal.success('Success', course.cCode + ' successfully deleted!');
+            window.app.classList.updateClasses();
+        }.bind(this),
+        fail: function (xhr, status, errorThrown) {
+            this.modal.error('Error', xhr.responseText);
+        }.bind(this),
+        always: function(a, status, b) {
+            this.modal.$body.spin(false);
+        }.bind(this)
+    });
 }
 
 function findErrors(cCode, cName) {

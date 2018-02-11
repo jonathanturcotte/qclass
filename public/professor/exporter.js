@@ -15,7 +15,7 @@ Exporter.prototype.createExportModal = function (course) {
     $exportButton = $('<button>', { type: 'submit', class: 'btn btn-primary',  text: 'Export', id: 'exportButton' });
     modal.$body
         .append($('<p>', {text: 'Specify output file name and type:'}))
-        
+
         .append($('<div>', { class: 'input-group', style: 'margin-bottom: 20px'})
             .append($fileName)
             .append($('<span>', { class: 'input-group-btn'})
@@ -25,8 +25,8 @@ Exporter.prototype.createExportModal = function (course) {
         // Message specific to xlsx
         .append($xlsxMessageDiv
             .prepend($('<strong>', {text: 'Note: '})));
-        
-        
+
+
         // TODO: Finish adding the include checkboxes for exporting only the
         // overall information, the individual information, or both
         /*
@@ -39,13 +39,13 @@ Exporter.prototype.createExportModal = function (course) {
                 .append($indivCheck)
                 .append($('<label>', {text: 'Individual Session Information', style: 'margin-left: 6px;'}))));
         */
-        
+
     modal.$footer
         .prepend($exportButton);
-    
+
     /*
     $fileType.change(function () {
-        if($fileType.val() === 'xlsx') 
+        if($fileType.val() === 'xlsx')
             $checkDiv.show();
         else
             $checkDiv.hide();
@@ -73,20 +73,24 @@ function exportClick(course, modal, $exportButton, $fileName, $fileType) {
     modal.$body
         .spin()
         .addClass('spin-min-height');
-    $.get({
+    ci.ajax({
+        method: 'GET',
         url: '/professor/' + course.cID + '/exportAttendance',
-        data: {fileName: $fileName.val(), fileType: $fileType.val()}
-        }).done(function (data, status, xhr) {
+        data: { fileName: $fileName.val(), fileType: $fileType.val() },
+        done: function (data, status, xhr) {
             exportSuccess(data, status, xhr, $fileType, $fileName, modal);
-        }).fail(function(xhr, status, errorThrown) {
+        },
+        fail: function(xhr, status, errorThrown) {
             modal.error("Error", xhr.responseText);
-        }).always(function(a, status, b) {
+        },
+        always: function(a, status, b) {
             modal.$body.spin(false);
-        });   
+        }
+    });
 }
 
 function exportSuccess(data, status, xhr, $fileType, $fileName, modal) {
-       
+
     // Need to write to workbook, only have sheet
     var workbook = createSheets(data, $fileType.val()),
         xlName,
@@ -99,7 +103,7 @@ function exportSuccess(data, status, xhr, $fileType, $fileName, modal) {
             xlName = $fileName.val() + ".csv";
         //set file data to csv
         fileData = workbook;
-        
+
     } else {
         /* bookType can be any supported output type */
         var wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
@@ -107,16 +111,16 @@ function exportSuccess(data, status, xhr, $fileType, $fileName, modal) {
         /* the saveAs call downloads a file on the local machine */
         if(!$fileName.val())
             xlName = "attendance.xlsx";
-        else 
+        else
             xlName = $fileName.val() + ".xlsx";
-       
+
     }
 
     var blob = new Blob([s2ab(fileData)], { type: "application/octet-stream" });
     saveData(blob, xlName);
 
-    modal.success("Success", "File Successfully Downloaded");
-    
+    modal.success("Export Attendance Information", "File ready for download");
+
 }
 
 function saveData (data, fileName) {
@@ -144,7 +148,7 @@ function createSheets(data, fileType) {
 
     for(i = 0; i < data[1].length; i++)
         sessionInfo[i] = data[1][i];
-    
+
     // cover to xlsx sheets
     var sheet1 = XLSX.utils.json_to_sheet(sortedOverallInfo, { header: [ "NetID",
                                                          "Student #",
@@ -152,10 +156,10 @@ function createSheets(data, fileType) {
                                                          "Last Name",
                                                          "Attendance (#)",
                                                          "Attendance (%)"] });
-    var sheet2 = XLSX.utils.json_to_sheet(sessionInfo, { header: ["NetID", 
-                                                         "Student #", 
-                                                         "First Name", 
-                                                         "Last Name"], 
+    var sheet2 = XLSX.utils.json_to_sheet(sessionInfo, { header: ["NetID",
+                                                         "Student #",
+                                                         "First Name",
+                                                         "Last Name"],
                                                 dateNF: 'dd"."mm"."yyyy'});
 
     if (fileType === 'csv') {
@@ -168,7 +172,7 @@ function createSheets(data, fileType) {
 
     } else {
         wb.SheetNames.push('Overall Att');
-        wb.Sheets['Overall Att'] = sheet1;     
+        wb.Sheets['Overall Att'] = sheet1;
         wb.SheetNames.push('Session Info');
         wb.Sheets['Session Info'] = sheet2;
         result = wb;
