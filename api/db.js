@@ -59,7 +59,7 @@ exports.updateProfessor = function (netID, fName, lName, callback) {
 };
 
 exports.addStudent = function (netID, stdNum, fName, lName, callback) {
-    runQuery('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES (?, ?, ?, ?)', [user.netID, user.stdNum, user,fName, user.lName], callback);
+    runQuery('INSERT INTO student (sNetID, stdNum, fName, lName) VALUES (?, ?, ?, ?)', [netID, stdNum, fName, lName], callback);
 };
 
 exports.getStudent = function (netID, callback) {
