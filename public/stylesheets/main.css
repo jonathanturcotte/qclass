@@ -93,10 +93,10 @@ body {
 }
 
 .classpage {
-    padding-top: 15px;
+    padding-top: 20px;
     padding-left: 30px;
     padding-right: 15px;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
     max-height: calc(100vh - 56px);
     min-height: calc(100vh - 56px);
     width: calc(100vw - 300px);
