@@ -38,18 +38,16 @@ module.exports = function (passport, config) {
             };
 
         if(user.fName === 'Jonathan' && user.lName === 'Turcotte'){
-            //user.netID = '12hdm';
-            user.netID  = '1pvb69';
+            user.netID = '12hdm';
             user.isProf = true;
             shouldContinue = false;
         }
 
-        if (user.fName === 'Curtis' && user.lName === 'Demerah'){
+        //if (user.fName === 'Curtis' && user.lName === 'Demerah'){
             //user.netID = '12hdm';
-            user.netID  = '1pvb69';
-            user.isProf = true;
-            shouldContinue = false;
-        }
+            //user.isProf = true;
+            //shouldContinue = false;
+        //}
 
         async.whilst(
             function () { return shouldContinue; },
@@ -73,9 +71,9 @@ module.exports = function (passport, config) {
                                 lastName:  user.lName
                             })], function (err, results) {
                                 if (err) return callback(err);
-                                db.getDemoRunningSessions_demo('boo49eb2-0630-4382-98b5-moofd40627b8', function(err, results) {
+                                db.getDemoRunningSession_demo('boo49eb2-0630-4382-98b5-moofd40627b8', function(err, results) {
                                     if (err) return callback(err);
-                                    if (results) {
+                                    if (results.length !== 0) {
                                         db.addStudentToSession_demo('boo49eb2-0630-4382-98b5-moofd40627b8', results[0].attTime, user.netID, function (err) {
                                             if (err) return callback(err);
                                             shouldContinue = false;
@@ -86,11 +84,11 @@ module.exports = function (passport, config) {
                                         callback();
                                     }
                                 });
-                               
+
                             });
                         });
                     } else return callback();
-                }) 
+                })
             },
             function (err) {
                 if (err) return done(err);
@@ -107,7 +105,7 @@ module.exports = function (passport, config) {
 
 /** Random digit (0-9) */
 function genRandomDigit() {
-    return Math.floor(Math.random() * 10); 
+    return Math.floor(Math.random() * 10);
 }
 
 function genRandomNetID(firstName, lastName) {
@@ -115,7 +113,7 @@ function genRandomNetID(firstName, lastName) {
 }
 
 function genRandomStdNum() {
-    var max = 99999999, 
+    var max = 99999999,
         min = 10000000,
         num = Math.floor(Math.random() * (max - min + 1)) + min;
     return '' + num;
