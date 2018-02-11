@@ -5,6 +5,10 @@ var TableUpdater = function (classID, sessionTable, studentTable) {
 };
 
 TableUpdater.prototype.updateTables = function () {
+    // Clear the tables first
+    this.sessionTable.clear();
+    this.studentTable.clear();
+
     this.sessionTable.spin();
     this.studentTable.spin();
     $.get('/professor/' + this.classID + '/session-data')
