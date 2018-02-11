@@ -67,12 +67,12 @@ module.exports = function (passport, config) {
                         db.addStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results) {
                             if (err) return callback(err);
 
-                            db.enroll('boo49eb2-0630-4382-98b5-moofd40627b8', new EnrollStudent([{
+                            db.enroll('boo49eb2-0630-4382-98b5-moofd40627b8', new EnrollStudent({
                                 netID:     user.netID,
                                 stdNum:    user.stdNum,
                                 firstName: user.firstName,
                                 lastName:  user.lastName
-                            }]), function (err, results) {
+                            }), function (err, results) {
                                 if (err) return callback(err);
                                 shouldContinue = false;
                                 callback();
