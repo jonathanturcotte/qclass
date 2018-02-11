@@ -100,7 +100,7 @@ function removeSession($deleteButton, modal, session) {
     .done(function(data, status, xhr) {
         modal.$title.text('Session Removed');
         modal.$header.addClass('modal-header-success');
-        modal.$body.empty().append($('<p>', { text: 'Session run on ' + session.date + ' was removed!' }));
+        modal.$body.empty().append($('<p>', { text: 'Session run on ' + session.formattedDate + ' was removed!' }));
         window.app.classPage.refreshTables();
     }.bind(this))
     .fail(function(xhr, status, errorThrown) {
