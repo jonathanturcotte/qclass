@@ -11,20 +11,23 @@ TableUpdater.prototype.updateTables = function () {
 
     this.sessionTable.spin();
     this.studentTable.spin();
-    $.get('/professor/' + this.classID + '/session-data')
-    .done(function(data, status, xhr) {
-        _.defer(function (data) {
-            processData(data);
-            annotateSessions(data.sessions);
-            _.defer(this.sessionTable.update.bind(this.sessionTable, data));
-            _.defer(this.studentTable.update.bind(this.studentTable, data));
-        }.bind(this, data));
-    }.bind(this))
-    .fail(function (xhr, status, errorThrown) {
-        toastr.error(status, 'Error getting attendance sessions: ');
-        this.sessionTable.error();
-        this.studentTable.error();
-    }.bind(this));
+    ci.ajax({
+        method: 'GET',
+        url: '/professor/' + this.classID + '/session-data',
+        done: function(data, status, xhr) {
+            _.defer(function (data) {
+                processData(data);
+                annotateSessions(data.sessions);
+                _.defer(this.sessionTable.update.bind(this.sessionTable, data));
+                _.defer(this.studentTable.update.bind(this.studentTable, data));
+            }.bind(this, data));
+        }.bind(this),
+        fail: function (xhr, status, errorThrown) {
+            toastr.error(status, 'Error getting attendance sessions: ');
+            this.sessionTable.error();
+            this.studentTable.error();
+        }.bind(this)
+    });
 };
 
 /**

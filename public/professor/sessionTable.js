@@ -95,7 +95,7 @@ function tryRemoveSession($deleteButton, modal, session) {
 function removeSession($deleteButton, modal, session) {
     ci.ajax({
         url: 'professor/class/' + this.course.cID + '/remove-session/' + session.time,
-        type: 'DELETE',
+        method: 'DELETE',
         done: function(data, status, xhr) {
             modal.$title.text('Session Removed');
             modal.$header.addClass('modal-header-success');
@@ -107,10 +107,11 @@ function removeSession($deleteButton, modal, session) {
             modal.$header.addClass('modal-header-danger');
             modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing the session' }));
         }.bind(this),
-        always: function(a, status, b) {
-        $deleteButton.remove();
-        modal.$closeButton.text('Close');
-    }});
+            always: function(a, status, b) {
+            $deleteButton.remove();
+            modal.$closeButton.text('Close');
+        }
+    });
 }
 
 function openAttendanceModal(date, sessionStudents) {
