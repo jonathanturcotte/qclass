@@ -103,9 +103,10 @@ function removeStudent($deleteButton, modal, student) {
 }
 
 function expandStudent(student) {
-    var modal        = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
-        sessions     = this.data.sessions,
-        sessionCount = Object.keys(sessions).length;
+    var modal            = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
+        sessions         = this.data.sessions,
+        sessionCount     = Object.keys(sessions).length,
+        $informationLine = $('<p>', { style: 'text-align: center;'});
 
     modal.$body.addClass('table-modal-body');
 
@@ -115,14 +116,7 @@ function expandStudent(student) {
         class: 'table-modal-bodytitle' 
     }));
 
-    // Total percent attendance of the student
-    var percentAttendance = 0;
-    if (sessionCount !== 0)
-        percentAttendance = student.totalAttendance / sessionCount * 100;
-    modal.$body.append($('<p>', { 
-        style: 'text-align: center;',
-        text: 'Total attendance: ' + student.totalAttendance + '/' + sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
-    }));
+    modal.$body.append($informationLine);
 
     // Table
     var $table = new Table({ 
@@ -138,7 +132,8 @@ function expandStudent(student) {
     });
 
     var tableData = [],
-        enrollAtTime;
+        enrolledAtTime,
+        enrolledAtTimeCount = 0;
     for (var i in sessions) {
         enrolledAtTime = sessions[i].students[student.netID];
         if (enrolledAtTime){
@@ -149,8 +144,14 @@ function expandStudent(student) {
                 sessions[i].attendanceFormatted,
                 sessions[i].attendancePercentFormatted,
                 attendedText]);
+
+            enrolledAtTimeCount++;
         }  
     }
+    var percentAttendance = 0;
+    if (enrolledAtTimeCount !== 0)
+        percentAttendance = student.totalAttendance / enrolledAtTimeCount * 100;
+    $informationLine.text('Total attendance: ' + student.totalAttendance + '/' + enrolledAtTimeCount + ' (' + percentAttendance.toFixed(1) + '%)')
     $table.fill(tableData);
     modal.show();
 }
