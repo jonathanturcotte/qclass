@@ -8,7 +8,7 @@
 
 ### RUN AS SUDO ###
 sudo git checkout demo
-sudo git pull origin master demo
+sudo git pull origin demo
 mysql -u root -ppassword < SISystem.sql
 npm run release
 npm start
