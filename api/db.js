@@ -239,8 +239,20 @@ exports.stopAttendance = function(classID, time, callback) {
 };
 
 exports.recordAttendance = function(netID, classID, time, callback) {
-    var query = 'UPDATE attendance SET attended = 1 WHERE sNetID = ? AND cID = ? AND attTime = ?';
-    runQuery(query, [netID, classID, time], callback);
+    var checkAttendanceQuery = 'SELECT * FROM attendance WHERE sNetID = ? AND cID = ? AND attTime = ?';
+    runQuery(checkAttendanceQuery, [netID, classID, time], function (err, results) {
+        if (err) return callback(err);
+
+        if (results.length === 0)
+            return callback(new Error('No attendance record found'));
+
+        // Let route know of conflict if user has already signed in
+        if (results[0].attended === 1)
+            return callback({ status: 409 });
+
+        var updateQuery = 'UPDATE attendance SET attended = 1 WHERE sNetID = ? AND cID = ? AND attTime = ?';
+        runQuery(updateQuery, [netID, classID, time], callback);
+    });
 };
 
 exports.getTeachesClasses = function(profID, callback) {
