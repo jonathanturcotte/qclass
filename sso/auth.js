@@ -1,6 +1,7 @@
 var SamlStrategy = require('passport-saml').Strategy,
     fs           = require('fs'),
     db           = require('../api/db'),
+    async        = require('async'),
     EnrollStudent = require('../models/enrollStudent');
 
 module.exports = function (passport, config) {
@@ -24,11 +25,10 @@ module.exports = function (passport, config) {
     }, function (profile, done){
         var fName   = profile['urn:oid:2.5.4.42'],
             lName   = profile['urn:oid:2.5.4.4'],
-            stdNum  = genRandomStdNum(),
             shouldContinue = true,
             user = {
                 netID        : '',
-                studentNum   : stdNum,
+                studentNum   : genRandomStdNum(),
                 fName        : fName,                  // First name
                 lName        : lName,                  // Last name
                 email        : profile['email'],       // Email
@@ -63,15 +63,15 @@ module.exports = function (passport, config) {
                 db.studentExists(user.netID, function (err, results) {
                     if (err) return callback(err);
                     if (results.length === 0) {
-                        db.addStudent(user.netID, user.stdNum, user.fName, user.lName, function (err, results) {
+                        db.addStudent(user.netID, user.studentNum, user.fName, user.lName, function (err, results) {
                             if (err) return callback(err);
 
-                            db.enroll('boo49eb2-0630-4382-98b5-moofd40627b8', new EnrollStudent([{
+                            db.enroll('boo49eb2-0630-4382-98b5-moofd40627b8', [new EnrollStudent({
                                 netID:     user.netID,
-                                stdNum:    user.stdNum,
-                                firstName: user.firstName,
-                                lastName:  user.lastName
-                            }]), function (err, results) {
+                                stdNum:    user.studentNum,
+                                firstName: user.fName,
+                                lastName:  user.lName
+                            })], function (err, results) {
                                 if (err) return callback(err);
                                 shouldContinue = false;
                                 callback();
@@ -99,12 +99,14 @@ function genRandomDigit() {
 }
 
 function genRandomNetID(firstName, lastName) {
-    return '' + genRandomDigit() + genRandomDigit() + firstName[0] || 'a' + lastName[0] || 'a' + genRandomDigit();
+    return '' + genRandomDigit() + genRandomDigit() + (firstName || 'a')[0].toLowerCase() + (lastName || 'a')[0].toLowerCase() + genRandomDigit();
 }
 
 function genRandomStdNum() {
-    var max = 99999999, min = 10000000;
-    return '' + Math.floor(Math.random() * (max - min + 1)) + min;
+    var max = 99999999, 
+        min = 10000000,
+        num = Math.floor(Math.random() * (max - min + 1)) + min;
+    return '' + num;
 }
 
 function validateUser(user, callback) {
