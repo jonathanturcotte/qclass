@@ -21,16 +21,17 @@ StudentTable.prototype = Object.create(Table.prototype);
 StudentTable.prototype.constructor = StudentTable;
 
 StudentTable.prototype.update = function (data) {
-    var tableData = [],
-        students  = data.students,
-        enrolled  = data.enrolled;
+    var tableData    = [],
+        students     = data.students,
+        enrolled     = data.enrolled,
+        sortEnrolled = _.sortBy(enrolled, 'lName');
 
     // Persist/update the data
     this.data = data;
 
     // Add a student row for each enrolled student
-    for (var i = 0; i < enrolled.length; i++) {
-        var student       = students[enrolled[i].sNetID],
+    for (var i = 0; i < sortEnrolled.length; i++) {
+        var student       = students[sortEnrolled[i].sNetID],
             $expandButton = $('<button>', { 
                 title: 'Expand', 
                 class: 'btn btn-default btn-sm',
@@ -128,22 +129,27 @@ function expandStudent(student) {
         height: 250,
         width: 460,
         columns: [
-            ['Date', 230],
-            ['Attendance', 115],
-            ['Rate', 115]
+            ['Date', 190],
+            ['Attendance', 100  ],
+            ['Rate', 90],
+            ['Attended', 80]
         ],
         $appendTarget: modal.$body
     });
 
-    var tableData = [];
-    for (var i in student.sessions) {
-        var session = sessions[student.sessions[i]];
-        if (session.students[student.netID].attended) {
+    var tableData = [],
+        enrollAtTime;
+    for (var i in sessions) {
+        enrolledAtTime = sessions[i].students[student.netID];
+        if (enrolledAtTime){
+            var attended     = enrolledAtTime.attended,
+                attendedText = attended ? '\u2714' : '\u2716';
             tableData.push([
-                sessions[student.sessions[i]].formattedDate,
-                sessions[student.sessions[i]].attendanceFormatted,
-                sessions[student.sessions[i]].attendancePercentFormatted]);  
-        }
+                sessions[i].formattedDate,
+                sessions[i].attendanceFormatted,
+                sessions[i].attendancePercentFormatted,
+                attendedText]);
+        }  
     }
     $table.fill(tableData);
     modal.show();
