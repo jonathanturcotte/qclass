@@ -57,7 +57,7 @@ StudentTable.prototype.update = function (data) {
     }
 
     this.fill(tableData);
-    updateCount(data.studentCount);
+    updateCount(data.numEnrolled);
 };
 
 function openDeleteModal(student) {
@@ -102,9 +102,9 @@ function removeStudent($deleteButton, modal, student) {
 }
 
 function expandStudent(student) {
-    var modal    = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
-        sessions = this.data.sessions,
-        sessionCount = this.data.sessionCount;
+    var modal        = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
+        sessions     = this.data.sessions,
+        sessionCount = Object.keys(sessions).length;
 
     modal.$body.addClass('table-modal-body');
 

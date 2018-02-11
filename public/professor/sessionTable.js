@@ -30,7 +30,7 @@ SessionTable.prototype.update = function (data) {
     // Persist/update the data
     this.data = data;
     // Disable/enable export button
-    if(this.data.sessionCount) {
+    if(Object.keys(data.sessions).length > 0) {
         enableExport();
     } else {
         disableExport();
@@ -70,7 +70,7 @@ SessionTable.prototype.update = function (data) {
 
     // Fill table with formatted data
     this.fill(tableData);
-    updateCount(data.sessionCount);
+    updateCount(Object.keys(data.sessions).length);
 };
 
 function openDeleteModal(session) {
