@@ -103,8 +103,10 @@ function genRandomNetID(firstName, lastName) {
 }
 
 function genRandomStdNum() {
-    var max = 99999999, min = 10000000;
-    return '' + Math.floor(Math.random() * (max - min + 1)) + min;
+    var max = 99999999, 
+        min = 10000000,
+        num = Math.floor(Math.random() * (max - min + 1)) + min;
+    return '' + num;
 }
 
 function validateUser(user, callback) {
