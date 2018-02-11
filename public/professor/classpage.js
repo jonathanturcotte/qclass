@@ -159,7 +159,7 @@ function build () {
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
 
-    $('<h5>', { text: 'Sessions', style: 'text-align: center'})
+    $('<h4>', { text: 'Sessions', style: 'text-align: center'})
         .prependTo($sessionDiv);
 
     $sessBottom.appendTo($sessionDiv);
@@ -175,7 +175,7 @@ function build () {
     // The student table and associated buttons
     this.studentTable = new StudentTable(this.course, $studentDiv);
 
-    $('<h5>', { text: 'Students', style: 'text-align: center'})
+    $('<h4>', { text: 'Students', style: 'text-align: center'})
         .prependTo($studentDiv);
 
     $studentBottom.appendTo($studentDiv);
@@ -193,10 +193,7 @@ function build () {
 
     // Initialize the tableUpdater and fill the tables
     this.tableUpdater = new TableUpdater(this.course.cID, this.sessionTable, this.studentTable);
-    this.tableUpdater.updateTables(function() {
-        $sessionTotal.text("Total: " + this.app.classPage.sessionTable.data.sessionCount + " sessions");
-        $studentTotal.text("Total: " + this.app.classPage.studentTable.data.studentCount + " students");
-    });
+    this.tableUpdater.updateTables();
 
    
 
@@ -209,7 +206,7 @@ function build () {
  * using the pre-defined durationOptions array
  */
 function getDurationSelect(classID) {
-    var $select = $('<select>', { class: 'class-duration-select' }),
+    var $select = $('<select>', { class: 'class-duration-select custom-select' }),
         prevChoiceCookie = Cookies.get('last-duration-' + classID),
         prevChoice = null;
 
@@ -252,5 +249,7 @@ function sessionOnChanges($delButton, $delDiv, $startButton) {
     $delButton.addClass('disabled')
         .css('pointer-events','none');    
 }
+
+
 
 module.exports = ClassPage;

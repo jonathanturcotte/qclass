@@ -59,6 +59,10 @@ var Table = function (options) {
     this.$element.show();
 };
 
+Table.prototype.clear = function () {
+    this.$tbody.empty();
+};
+
 /**
  * Fills the table based on the nested data object.
  * 

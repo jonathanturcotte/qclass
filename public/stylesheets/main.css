@@ -93,10 +93,10 @@ body {
 }
 
 .classpage {
-    padding-top: 15px;
+    padding-top: 20px;
     padding-left: 30px;
     padding-right: 15px;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
     max-height: calc(100vh - 56px);
     min-height: calc(100vh - 56px);
     width: calc(100vw - 300px);
@@ -340,6 +340,15 @@ body {
 .table-modal-bodytitle {
     text-align: center;
     margin-bottom: 20px;
+}
+
+.table-row-expand {
+    font-size: 1.00rem;
+    transform: rotate(90deg);
+}
+
+.table-row-delete {
+    font-size: 1.00rem;
 }
 
 .attendance-modal-table th, td {

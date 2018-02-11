@@ -30,7 +30,7 @@ SessionTable.prototype.update = function (data) {
     // Persist/update the data
     this.data = data;
     // Disable/enable export button
-    if(this.data.sessionCount) {
+    if(Object.keys(data.sessions).length > 0) {
         enableExport();
     } else {
         disableExport();
@@ -43,10 +43,10 @@ SessionTable.prototype.update = function (data) {
         // Create main row
         var $date = $('<td>', { title: session.date.toString(), text: session.formattedDate }),
             $expandButton = $('<button>', { class: 'btn btn-default btn-sm', style: 'margin-right: 3px;', title: 'Expand' })
-                .append($('<i>', { class: 'fas fa-external-link-alt' })
+            .append($('<div>', { class: 'table-row-expand', text: '\u21f1' }) // Unicode arrow icon
                     .attr('aria-hidden', 'true')),
             $deleteButton = $('<button>', { class: 'btn btn-default btn-sm', title: 'Delete' })
-                .append($('<i>', { class: 'fas fa-times' })
+                .append($('<b>', { class: 'table-row-delete', text: '\u2715' }) // Unicode multiplication icon
                         .attr('aria-hidden', 'true'))
                 .click(openDeleteModal.bind(this, session)),
             $actions = $('<td>')
@@ -70,7 +70,7 @@ SessionTable.prototype.update = function (data) {
 
     // Fill table with formatted data
     this.fill(tableData);
-    updateCount(data.sessionCount);
+    updateCount(Object.keys(data.sessions).length);
 };
 
 function openDeleteModal(session) {
@@ -79,7 +79,7 @@ function openDeleteModal(session) {
 
     $deleteButton.click(tryRemoveSession.bind(this, $deleteButton, modal, session));
 
-    modal.$body.append($('<p>', { text: 'Are you sure you want to remove the session run on ' + session.date +
+    modal.$body.append($('<p>', { text: 'Are you sure you want to remove the session run on ' + session.formattedDate +
         ' with ' + session.attendanceFormatted + ' students in attendance?' }));
     modal.$footer.prepend($deleteButton);
     modal.$closeButton.text('Cancel');
@@ -99,7 +99,7 @@ function removeSession($deleteButton, modal, session) {
         done: function(data, status, xhr) {
             modal.$title.text('Session Removed');
             modal.$header.addClass('modal-header-success');
-            modal.$body.empty().append($('<p>', { text: 'Session run on ' + session.date + ' was removed!' }));
+            modal.$body.empty().append($('<p>', { text: 'Session run on ' + session.formattedDate + ' was removed!' }));
             window.app.classPage.refreshTables();
         }.bind(this),
         fail: function(xhr, status, errorThrown) {
@@ -107,7 +107,7 @@ function removeSession($deleteButton, modal, session) {
             modal.$header.addClass('modal-header-danger');
             modal.$body.empty().append($('<p>', { text: xhr.responseStatus !== 500 && xhr.responseText ? xhr.responseText : 'Something went wrong while removing the session' }));
         }.bind(this),
-        always: function(a, status, b) {
+            always: function(a, status, b) {
             $deleteButton.remove();
             modal.$closeButton.text('Close');
         }

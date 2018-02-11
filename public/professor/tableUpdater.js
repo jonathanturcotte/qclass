@@ -5,16 +5,22 @@ var TableUpdater = function (classID, sessionTable, studentTable) {
 };
 
 TableUpdater.prototype.updateTables = function () {
+    // Clear the tables first
+    this.sessionTable.clear();
+    this.studentTable.clear();
+
     this.sessionTable.spin();
     this.studentTable.spin();
     ci.ajax({
         method: 'GET',
         url: '/professor/' + this.classID + '/session-data',
         done: function(data, status, xhr) {
-            processData(data);
-            annotateSessions(data.sessions);
-            this.sessionTable.update(data);
-            this.studentTable.update(data);
+            _.defer(function (data) {
+                processData(data);
+                annotateSessions(data.sessions);
+                _.defer(this.sessionTable.update.bind(this.sessionTable, data));
+                _.defer(this.studentTable.update.bind(this.studentTable, data));
+            }.bind(this, data));
         }.bind(this),
         fail: function (xhr, status, errorThrown) {
             toastr.error(status, 'Error getting attendance sessions: ');
@@ -34,8 +40,7 @@ TableUpdater.prototype.updateTables = function () {
 function processData(data) {
     var sessions     = {},
         students     = {},
-        sessionCount = 0,
-        studentCount = 0;
+        numEnrolled  = 0;
 
     // Add every enrolled student to students
     for (var i = 0; i < data.enrolled.length; i++) {
@@ -48,7 +53,6 @@ function processData(data) {
             totalAttendance: 0,
             sessions:        []
         };
-        studentCount++;
     }
 
     // Iterate session entries to fill sessions and create session-student links
@@ -63,7 +67,6 @@ function processData(data) {
                 attendance:    0,
                 students:      []
             };
-            sessionCount++;
         }
 
         // Create link between student and session if the entry was not for an empty session
@@ -78,7 +81,6 @@ function processData(data) {
                     totalAttendance: 0,
                     sessions:        []
                 };
-                studentCount++;
             }
 
             // Up the enrollment counters for this session
@@ -102,8 +104,7 @@ function processData(data) {
     // Append values to data object
     data.sessions     = sessions;
     data.students     = students;
-    data.sessionCount = sessionCount;
-    data.studentCount = studentCount;
+    data.numEnrolled  = data.enrolled.length;
 }
 
 /**

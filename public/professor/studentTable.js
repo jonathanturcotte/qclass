@@ -21,25 +21,27 @@ StudentTable.prototype = Object.create(Table.prototype);
 StudentTable.prototype.constructor = StudentTable;
 
 StudentTable.prototype.update = function (data) {
-    var tableData = [],
-        students  = data.students,
-        enrolled  = data.enrolled;
+    var tableData    = [],
+        students     = data.students,
+        enrolled     = data.enrolled,
+        sortEnrolled = _.sortBy(enrolled, 'lName');
 
     // Persist/update the data
     this.data = data;
 
     // Add a student row for each enrolled student
-    for (var i = 0; i < enrolled.length; i++) {
-        var student       = students[enrolled[i].sNetID],
-            $expandButton = $('<button>', {
-                title: 'Expand',
+    for (var i = 0; i < sortEnrolled.length; i++) {
+        var student       = students[sortEnrolled[i].sNetID],
+            $expandButton = $('<button>', { 
+                title: 'Expand', 
                 class: 'btn btn-default btn-sm',
                 style: 'margin-right: 3px;'
-            }).append($('<i>', { class: 'fas fa-external-link-alt' })
+            })
+            .append($('<div>', { class: 'table-row-expand', text: '\u21f1' }) // Unicode arrow icon
                     .attr('aria-hidden', 'true'))
                 .click(expandStudent.bind(this, student)),
             $deleteButton = $('<button>', { title: 'Delete', class: 'btn btn-default btn-sm' })
-                .append($('<i>', { class: 'fas fa-times' })
+                .append($('<b>', { class: 'table-row-delete', text: '\u2715' }) // Unicode multiplication icon
                         .attr('aria-hidden', 'true'))
                 .click(openDeleteModal.bind(this, student)),
             $actions      = $('<td>')
@@ -56,7 +58,7 @@ StudentTable.prototype.update = function (data) {
     }
 
     this.fill(tableData);
-    updateCount(data.studentCount);
+    updateCount(data.numEnrolled);
 };
 
 function openDeleteModal(student) {
@@ -101,9 +103,10 @@ function removeStudent($deleteButton, modal, student) {
 }
 
 function expandStudent(student) {
-    var modal    = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
-        sessions = this.data.sessions,
-        sessionCount = this.data.sessionCount;
+    var modal            = new ModalWindow({ id: 'student-modal', title: 'Student Summary' }),
+        sessions         = this.data.sessions,
+        sessionCount     = Object.keys(sessions).length,
+        $informationLine = $('<p>', { style: 'text-align: center;'});
 
     modal.$body.addClass('table-modal-body');
 
@@ -113,37 +116,42 @@ function expandStudent(student) {
         class: 'table-modal-bodytitle'
     }));
 
-    // Total percent attendance of the student
-    var percentAttendance = 0;
-    if (sessionCount !== 0)
-        percentAttendance = student.totalAttendance / sessionCount * 100;
-    modal.$body.append($('<p>', {
-        style: 'text-align: center;',
-        text: 'Total attendance: ' + student.totalAttendance + '/' + sessionCount + ' (' + percentAttendance.toFixed(1) + '%)'
-    }));
+    modal.$body.append($informationLine);
 
     // Table
     var $table = new Table({ 
         height: 250,
         width: 460,
         columns: [
-            ['Date', 230],
-            ['Attendance', 115],
-            ['Rate', 115]
+            ['Date', 190],
+            ['Attendance', 100  ],
+            ['Rate', 90],
+            ['Attended', 80]
         ],
         $appendTarget: modal.$body
     });
 
-    var tableData = [];
-    for (var i in student.sessions) {
-        var session = sessions[student.sessions[i]];
-        if (session.students[student.netID].attended) {
+    var tableData = [],
+        enrolledAtTime,
+        enrolledAtTimeCount = 0;
+    for (var i in sessions) {
+        enrolledAtTime = sessions[i].students[student.netID];
+        if (enrolledAtTime){
+            var attended     = enrolledAtTime.attended,
+                attendedText = attended ? '\u2714' : '\u2716';
             tableData.push([
-                sessions[student.sessions[i]].formattedDate,
-                sessions[student.sessions[i]].attendanceFormatted,
-                sessions[student.sessions[i]].attendancePercentFormatted]);  
-        }
+                sessions[i].formattedDate,
+                sessions[i].attendanceFormatted,
+                sessions[i].attendancePercentFormatted,
+                attendedText]);
+
+            enrolledAtTimeCount++;
+        }  
     }
+    var percentAttendance = 0;
+    if (enrolledAtTimeCount !== 0)
+        percentAttendance = student.totalAttendance / enrolledAtTimeCount * 100;
+    $informationLine.text('Total attendance: ' + student.totalAttendance + '/' + enrolledAtTimeCount + ' (' + percentAttendance.toFixed(1) + '%)')
     $table.fill(tableData);
     modal.show();
 }

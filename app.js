@@ -36,9 +36,6 @@ var express       = require('express'),
     http         = http.createServer(app).listen(80),
     https        = https.createServer(sslOptions, app).listen(443);
 
-// Setup and configure our authentication strategy
-require('./sso/auth.js')(passport, config);
-
 // Use Helmet to help cover some common header security issues
 app.use(helmet(config.helmet));
 
@@ -49,6 +46,9 @@ app.use(cookieParser());
 app.use(cookieSession({
     secret: 'Whocansaywherethewindblows'
 }));
+
+// Setup and configure our authentication strategy
+require('./sso/auth.js')(passport, config);
 app.use(passport.initialize());
 app.use(passport.session());
 
