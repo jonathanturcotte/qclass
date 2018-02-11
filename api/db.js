@@ -386,6 +386,18 @@ exports.isAdmin = function (netID, classID, callback) {
     runExistenceQuery('SELECT 1 FROM administrators WHERE pNetID = ? AND cID = ?', [netID, classID], callback);
 };
 
+// DB calls added for demo
+
+exports.addStudentToSession_demo = function (classID, attTime, sNetID, callback) {
+    var query = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES ?';
+    runQuery(query, [classID, attTime, sNetID, 0]);
+};
+
+exports.getDemoRunningSession_demo = function(classID, callback) {
+    var query = 'SELECT * FROM attendanceSession WHERE completed = 0 AND cID = ?';
+    runQuery(query, [classID], callback);
+};
+
 /**
  * Runs the given query, checks if the result returned any values and returns its findings as a boolean to the callback
  * @param {string} query
