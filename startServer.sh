@@ -7,8 +7,8 @@
 # Webpack and uglify the JS
 
 ### RUN AS SUDO ###
-sudo git checkout passport-saml
-sudo git pull origin master passport-saml
+sudo git checkout master
+sudo git pull origin master
 mysql -u root -ppassword < SISystem.sql
 npm run release
 npm start
