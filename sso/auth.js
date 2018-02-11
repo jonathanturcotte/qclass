@@ -69,8 +69,8 @@ module.exports = function (passport, config) {
                             db.enroll('boo49eb2-0630-4382-98b5-moofd40627b8', new EnrollStudent({
                                 netID:     user.netID,
                                 stdNum:    user.studentNum,
-                                firstName: user.firstName,
-                                lastName:  user.lastName
+                                firstName: user.fName,
+                                lastName:  user.lName
                             }), function (err, results) {
                                 if (err) return callback(err);
                                 shouldContinue = false;
