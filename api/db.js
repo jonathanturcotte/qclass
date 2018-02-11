@@ -389,8 +389,8 @@ exports.isAdmin = function (netID, classID, callback) {
 // DB calls added for demo
 
 exports.addStudentToSession_demo = function (classID, attTime, sNetID, callback) {
-    var query = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES ?';
-    runQuery(query, [classID, attTime, sNetID, 0]);
+    var query = 'INSERT INTO attendance (cID, attTime, sNetID, attended) VALUES (?, ?, ?, ?)';
+    runQuery(query, [classID, attTime, sNetID, 0], callback);
 };
 
 exports.getDemoRunningSession_demo = function(classID, callback) {
