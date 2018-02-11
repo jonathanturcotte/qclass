@@ -13,9 +13,12 @@ var ClassList = function () {
  * classlist and selects the first class
  */
 ClassList.prototype.updateClasses = function () {
-    $.get('/professor/classes')
-        .done(updateSuccess.bind(this))
-        .fail(updateFail.bind(this));
+    ci.ajax({
+        url: '/professor/classes',
+        method: 'GET',
+        done: updateSuccess.bind(this),
+        fail: updateFail.bind(this)
+    });
 };
 
 /**

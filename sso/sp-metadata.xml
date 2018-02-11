@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://qclass.ca" ID="https___qclass_ca">
+  <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <KeyDescriptor>
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>MIIE9TCCA92gAwIBAgISAxOwV8owUR50YDezp2CAUTA0MA0GCSqGSIb3DQEBCwUA
+MEoxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MSMwIQYDVQQD
+ExpMZXQncyBFbmNyeXB0IEF1dGhvcml0eSBYMzAeFw0xODAyMDgwMjIwNThaFw0x
+ODA1MDkwMjIwNThaMBQxEjAQBgNVBAMTCXFjbGFzcy5jYTCCASIwDQYJKoZIhvcN
+AQEBBQADggEPADCCAQoCggEBAJx8iWfvxg4DPrPPpQJ1s9UjeUlSakKD/43DSOLa
+YaekRj11Tt1QDAEHGDkM9TP51H60A9MOXs4zgKJdOpVqocsM6cs8P6E1OD3p1xwH
+8A0IX9zpYHpqQ0P1clVcL4oWbX86UttWCX7+ArlcW4aIodTttl3tSO7/v7puzz25
+tkZXdy8zazm6SNeqC5vMySgMOAPUGz492Z5fOu8CfQJrKbVLHIvjpkMDXjbRhR8N
+Ymn2mJaTyqEHAyVo4V/gYefDu8H+0+NUszfzTxxjL5AIjolECXbFDTkGD3Gtm/qi
+BapHmdldvcrL42v6mVD0CExM5y4k+S4Y0O2Pz6mYLF5T+SMCAwEAAaOCAgkwggIF
+MA4GA1UdDwEB/wQEAwIFoDAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIw
+DAYDVR0TAQH/BAIwADAdBgNVHQ4EFgQUUoAanQgeG0wR3AXj5sSDxwZ29MgwHwYD
+VR0jBBgwFoAUqEpqYwR93brm0Tm3pkVl7/Oo7KEwbwYIKwYBBQUHAQEEYzBhMC4G
+CCsGAQUFBzABhiJodHRwOi8vb2NzcC5pbnQteDMubGV0c2VuY3J5cHQub3JnMC8G
+CCsGAQUFBzAChiNodHRwOi8vY2VydC5pbnQteDMubGV0c2VuY3J5cHQub3JnLzAU
+BgNVHREEDTALgglxY2xhc3MuY2Ewgf4GA1UdIASB9jCB8zAIBgZngQwBAgEwgeYG
+CysGAQQBgt8TAQEBMIHWMCYGCCsGAQUFBwIBFhpodHRwOi8vY3BzLmxldHNlbmNy
+eXB0Lm9yZzCBqwYIKwYBBQUHAgIwgZ4MgZtUaGlzIENlcnRpZmljYXRlIG1heSBv
+bmx5IGJlIHJlbGllZCB1cG9uIGJ5IFJlbHlpbmcgUGFydGllcyBhbmQgb25seSBp
+biBhY2NvcmRhbmNlIHdpdGggdGhlIENlcnRpZmljYXRlIFBvbGljeSBmb3VuZCBh
+dCBodHRwczovL2xldHNlbmNyeXB0Lm9yZy9yZXBvc2l0b3J5LzANBgkqhkiG9w0B
+AQsFAAOCAQEAYoxlG56ngJo76sbVnSAUxiUJD3VEnaaa0tpf2IjBC8IF54Y3idyu
+1v5DKrSwr3EtFQT+zUbr0BKs36KAL0Azu8YB/KLhQHNLx/lMbq4H9h+lR9BWwB0F
+wGiLJ/aAx9aK+haUuGw4/gakypaPtA12/BJmPfW5xrISpB81wApy22JVSAOg0uqN
+pKYEAmhzMVmwd/VW62JuUKTwPyZ/BpveVDjDw2E4miTTCvlHr3FPyVzR2rJK08c/
+CYbiGoOl7mi7BSK5ic+iBom6PXj/KX7Gnt7iFFmF+Lypw7USnHYUXCazYDF511Of
+/tFZgMExz/R49GplsmlhCBsORcbSmA+Veg==
+</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+      <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"/>
+      <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/>
+      <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#tripledes-cbc"/>
+    </KeyDescriptor>
+    <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://qclass.ca/logout/callback"/>
+    <NameIDFormat/>
+    <AssertionConsumerService index="1" isDefault="true" Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://qclass.ca/login/callback"/>
+  </SPSSODescriptor>
+</EntityDescriptor>

@@ -1,32 +1,34 @@
-var express      = require('express'),
-    path         = require('path'),
-    http         = require('http'),
-    https        = require('https'),
-    fs           = require('fs'),
-    favicon      = require('serve-favicon'),
-    logger       = require('morgan'),
-    cookieParser = require('cookie-parser'),
-    bodyParser   = require('body-parser'),
-    helmet       = require('helmet'),
-    csv          = require('express-csv'),
-    auth         = require('./api/auth'),
-    sessions     = require('./api/data/attendanceSessions'),
+var express       = require('express'),
+    path          = require('path'),
+    http          = require('http'),
+    https         = require('https'),
+    fs            = require('fs'),
+    favicon       = require('serve-favicon'),
+    logger        = require('morgan'),
+    cookieParser  = require('cookie-parser'),
+    cookieSession = require('cookie-session'),
+    bodyParser    = require('body-parser'),
+    helmet        = require('helmet'),
+    csv           = require('express-csv'),
+    passport      = require('passport'),
+    checkins      = require('./api/data/attendanceSessions'),
 
-    keyPath      = '/etc/letsencrypt/live/qclass.ca/privkey.pem',
-    certPath     = '/etc/letsencrypt/live/qclass.ca/fullchain.pem',
+    // Require our configuration options
+    config        = require('./config.js'),
 
     // Setup SSL options, checking to see if the real certs exist
     // before falling back to our unsigned ones. This is so that
     // we can continue developing locally without having to change anything.
     sslOptions = {
-        key:  fs.readFileSync(fs.existsSync(keyPath)  ? keyPath  : 'app.key'),
-        cert: fs.readFileSync(fs.existsSync(certPath) ? certPath : 'app.cert')
+        key:  config.ssl.key,
+        cert: config.ssl.fullchain
     },
 
     // Require our routes and APIs
+    auth         = require('./routes/auth'),
+    general      = require('./routes/general'),
     professor    = require('./routes/professor'),
     student      = require('./routes/student'),
-    general      = require('./routes/general'),
     db           = require('./api/db'),
 
     // Create the app and servers
@@ -35,40 +37,34 @@ var express      = require('express'),
     https        = https.createServer(sslOptions, app).listen(443);
 
 // Use Helmet to help cover some common header security issues
-app.use(helmet({
-    referrerPolicy: { policy: 'no-referrer' },
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'",
-                'data:',
-                'https://code.jquery.com',              // jQuery
-                'https://cdnjs.cloudflare.com',         // Popper (Bootstrap), Toastr, Underscore
-                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
-                'https://use.fontawesome.com'],         // Font Awesome
-            styleSrc: ["'self'",
-                "'unsafe-inline'",
-                'https://maxcdn.bootstrapcdn.com',      // Bootstrap
-                'https://cdnjs.cloudflare.com'],        // Toastr
-            imgSrc: ["'self'", 'data:']
-        }
-    }
-}));
-
-// Ensure that all traffic is being routed through https
-app.all('*', function (req, res, next) {
-    if (req.secure)
-        return next();
-    else
-        res.redirect('https://' + req.hostname + req.url);
-});
+app.use(helmet(config.helmet));
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cookieSession({
+    secret: 'Whocansaywherethewindblows'
+}));
+
+// Setup and configure our authentication strategy
+require('./sso/auth.js')(passport, config);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Force browsers not to store our webpage, even on back-button press
+app.use(function (req, res, next) {
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, max-age=0');
+    next();
+});
+
+// Always use the authentication middleware before considering any other routes
+require('./routes/auth.js')(app, config, passport);
+
+// Serve the static pages
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(auth.authenticate); // Run authentication first when any route is called
+// Our routes
 app.use('/', general);
 app.use('/student', student);
 app.use('/professor', professor);
@@ -91,7 +87,7 @@ app.use(function(err, req, res, next) {
     res.json(err);
 });
 
-// Reset the sessions upon server startup
-sessions.sessionRecovery();
+// Reset the attendance sessions upon server startup
+checkins.sessionRecovery();
 
 module.exports = app;

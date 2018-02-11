@@ -28,8 +28,8 @@ TableUpdater.prototype.updateTables = function () {
 };
 
 /**
- * Process the data object to aggregate the provided entries into a list of 
- * students and a list of sessions, each entry having a list of IDs to 
+ * Process the data object to aggregate the provided entries into a list of
+ * students and a list of sessions, each entry having a list of IDs to
  * the entries of the other to which it is related.
  * @param {Object} data
  * @param {[]} data.entries
@@ -52,7 +52,7 @@ function processData(data) {
         };
     }
 
-    // Iterate session entries to fill sessions and create session-student links 
+    // Iterate session entries to fill sessions and create session-student links
     for (var j in data.entries) {
         var entry = data.entries[j];
         if (!sessions[entry.attTime]) {
@@ -90,8 +90,8 @@ function processData(data) {
                 students[entry.sNetID].totalAttendance++;
 
             // Relate sessions and students
-            sessions[entry.attTime].students[entry.sNetID] = { 
-                netID: entry.sNetID, 
+            sessions[entry.attTime].students[entry.sNetID] = {
+                netID: entry.sNetID,
                 attended: attended
             };
             students[entry.sNetID].sessions.push(entry.attTime);
@@ -105,8 +105,8 @@ function processData(data) {
 }
 
 /**
- * Add necessary calculations and formatting 
- * to data in preparation for use with the tables 
+ * Add necessary calculations and formatting
+ * to data in preparation for use with the tables
  * @param {*} sessions
  */
 function annotateSessions(sessions) {
@@ -120,7 +120,7 @@ function annotateSessions(sessions) {
 
 /**
  * Formats the date into DD/MM/YY hh:mm:ss
- * @param {Date} date 
+ * @param {Date} date
  */
 function formatDate(date) {
     var day    = formatDateEntry(date.getDate()),
@@ -134,7 +134,7 @@ function formatDate(date) {
 
 /**
  * Converts a number to a string and prepends a 0 if the value is not already 2-digit
- * @param {number} num 
+ * @param {number} num
  */
 function formatDateEntry(num) {
     if (num < 10) return '0' + num;

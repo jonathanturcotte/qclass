@@ -1,6 +1,6 @@
 bundle.js
 bundle.js.map
-
+*.swp
 .vscode/
 node_modules/
 package-lock.json

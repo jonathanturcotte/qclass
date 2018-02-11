@@ -130,32 +130,36 @@ Importer.prototype.createAddStudentModal = function (course) {
             modal.$body
                 .spin()
                 .addClass('spin-min-height');
-            $.post({
+            ci.ajax({
+                method: 'POST',
                 url: '/professor/class/enrollStudent/' + course.cID,
                 data: { netID: netID, stdNum: stdNum, firstName: fName, lastName: lName },
-                dataType: 'json'
-            }).done(function(data, status, xhr) {
-                modal.success('Success', 'Student successfully added!'); 
-                modal.$window.on('hidden.bs.modal', function (e) {
-                    window.app.classPage.refreshTables();
-                });     
-            }).fail(function(xhr, status, errorThrown) {
-                var msg, hasStatus, title = 'Failed';
-
-                if (xhr.status === 409)
-                    title += ' - Conflict';
-
-                hasStatus = xhr.responseJSON && xhr.responseJSON.customStatus;
-                if (hasStatus && xhr.responseJSON.customStatus === 1) 
-                    msg = 'Student is already enrolled';
-                else if (hasStatus && xhr.responseJSON.customStatus === 2)
-                    msg = 'The provided NetID is already registered to a different student';
-                else 
-                    msg = 'Something went wrong - student was not added';
-
-                modal.error(title, msg);
-            }).always(function(a, status, b) {
-                modal.$body.spin(false);
+                dataType: 'json',
+                done: function(data, status, xhr) {
+                    modal.success('Success', 'Student successfully added!'); 
+                    modal.$window.on('hidden.bs.modal', function (e) {
+                        window.app.classPage.refreshTables();
+                    });     
+                },
+                fail: function(xhr, status, errorThrown) {
+                    var msg, hasStatus, title = 'Failed';
+    
+                    if (xhr.status === 409)
+                        title += ' - Conflict';
+    
+                    hasStatus = xhr.responseJSON && xhr.responseJSON.customStatus;
+                    if (hasStatus && xhr.responseJSON.customStatus === 1) 
+                        msg = 'Student is already enrolled';
+                    else if (hasStatus && xhr.responseJSON.customStatus === 2)
+                        msg = 'The provided NetID is already registered to a different student';
+                    else 
+                        msg = 'Something went wrong - student was not added';
+    
+                    modal.error(title, msg);
+                },
+                always: function(a, status, b) {
+                    modal.$body.spin(false);
+                }
             });
         });
 
@@ -213,20 +217,24 @@ function importXLSX(course, modal, $file, $errorDiv, $inputDiv, $errorMsg) {
             }                    
             // if no error, send formatted sheet
             formattedSheet = result.sheet;
-            $.post({
+            ci.ajax({
+                method: 'POST',
                 url: 'professor/class/enrollClass/' + cID,
                 data: JSON.stringify(formattedSheet),
-                contentType: 'application/json'
-            }).done(function(status, xhr) {
-                modal.success('Success', 'Classlist successfully added!');
-                modal.$window.on('hidden.bs.modal', function (e) {
-                    window.app.classPage.refreshTables();
-                });
-            }).fail(function(xhr, status, errorThrown) {
-                //modal.error("Error", xhr.responseText);
-                fileErrorHandler($errorDiv, $inputDiv, $errorMsg, xhr.responseText, modal);
-            }).always(function(a, status, b) {
-                modal.$body.spin(false);
+                contentType: 'application/json',
+                done: function(status, xhr) {
+                    modal.success('Success', 'Classlist successfully added!');
+                    modal.$window.on('hidden.bs.modal', function (e) {
+                        window.app.classPage.refreshTables();
+                    });
+                },
+                fail: function(xhr, status, errorThrown) {
+                    //modal.error("Error", xhr.responseText);
+                    fileErrorHandler($errorDiv, $inputDiv, $errorMsg, xhr.responseText, modal);
+                },
+                always: function(a, status, b) {
+                    modal.$body.spin(false);
+                }
             });
         };
         reader.readAsArrayBuffer(file);
