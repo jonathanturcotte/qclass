@@ -159,7 +159,7 @@ function build () {
     // The session table and export button
     this.sessionTable = new SessionTable(this.course, $sessionDiv);
 
-    $('<h5>', { text: 'Sessions', style: 'text-align: center'})
+    $('<h4>', { text: 'Sessions', style: 'text-align: center'})
         .prependTo($sessionDiv);
 
     $sessBottom.appendTo($sessionDiv);
@@ -175,7 +175,7 @@ function build () {
     // The student table and associated buttons
     this.studentTable = new StudentTable(this.course, $studentDiv);
 
-    $('<h5>', { text: 'Students', style: 'text-align: center'})
+    $('<h4>', { text: 'Students', style: 'text-align: center'})
         .prependTo($studentDiv);
 
     $studentBottom.appendTo($studentDiv);
