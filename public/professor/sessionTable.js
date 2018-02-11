@@ -79,7 +79,7 @@ function openDeleteModal(session) {
 
     $deleteButton.click(tryRemoveSession.bind(this, $deleteButton, modal, session));
 
-    modal.$body.append($('<p>', { text: 'Are you sure you want to remove the session run on ' + session.date +
+    modal.$body.append($('<p>', { text: 'Are you sure you want to remove the session run on ' + session.formattedDate +
         ' with ' + session.attendanceFormatted + ' students in attendance?' }));
     modal.$footer.prepend($deleteButton);
     modal.$closeButton.text('Cancel');
