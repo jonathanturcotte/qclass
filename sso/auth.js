@@ -100,7 +100,7 @@ function genRandomDigit() {
 }
 
 function genRandomNetID(firstName, lastName) {
-    return '' + genRandomDigit() + genRandomDigit() + firstName[0] || 'a' + lastName[0] || 'a' + genRandomDigit();
+    return '' + genRandomDigit() + genRandomDigit() + (firstName || 'a')[0] + (lastName || 'a')[0] + genRandomDigit();
 }
 
 function genRandomStdNum() {
