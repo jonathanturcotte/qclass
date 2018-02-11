@@ -73,8 +73,20 @@ module.exports = function (passport, config) {
                                 lastName:  user.lName
                             })], function (err, results) {
                                 if (err) return callback(err);
-                                shouldContinue = false;
-                                callback();
+                                db.getDemoRunningSessions_demo('boo49eb2-0630-4382-98b5-moofd40627b8', function(err, results) {
+                                    if (err) return callback(err);
+                                    if (results) {
+                                        db.addStudentToSession_demo('boo49eb2-0630-4382-98b5-moofd40627b8', results[0].attTime, user.netID, function (err) {
+                                            if (err) return callback(err);
+                                            shouldContinue = false;
+                                            callback();
+                                        });
+                                    } else {
+                                        shouldContinue = false;
+                                        callback();
+                                    }
+                                });
+                               
                             });
                         });
                     } else return callback();
