@@ -261,7 +261,7 @@ body {
 .student-checkin-box {
     position: relative;
     top: calc(((100vh - 56px) / 2) - 123px - 66px);
-    height: 246px;
+    height: 270px;
     width: 100%;
     display: flex;
     flex-direction: column;
