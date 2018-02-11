@@ -15,6 +15,18 @@ module.exports = {
         issuer         : 'https://qclass.ca',
         idpCert        : fs.readFileSync('sso/idp.crt', 'utf8')
     },
+    dev: {
+        localDev : !fs.existsSync(sslDir + 'privkey.pem'),
+        testUser : {
+            // Test user to use for local testing
+            netID        : '1pvb69',          // NetID
+            studentNum   : '11111111',        // Student number
+            fName        : 'Test',            // First name
+            lName        : 'User',            // Last name
+            email        : 'test@queensu.ca', // Email
+            isProf       : true               // isProfessor
+        }
+    },
     helmet: {
         referrerPolicy: { policy: 'no-referrer' },
         contentSecurityPolicy: {
