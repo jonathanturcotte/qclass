@@ -276,7 +276,7 @@ body {
 }
 
 .student-input {
-    width: 200px;
+    width: 245px;
     height: 100px;
     font-size: 60px;
     font-family: Consolas,Monaco,"Lucida Console","Liberation Mono","DejaVu Sans Mono","Bitstream Vera Sans Mono","Courier New", monospace;
@@ -310,7 +310,7 @@ body {
 
 .qtable tbody {
     display: block;
-    overflow: auto;    
+    overflow: auto;
 }
 
 .qtable td {
@@ -318,7 +318,7 @@ body {
 }
 
 .table-div {
-    text-align: right; 
+    text-align: right;
     display: inline-block;
 }
 
@@ -358,7 +358,7 @@ body {
 
  .attendance-modal-table thead {
     border-bottom: rgb(43, 43, 43)
-} 
+}
 
 #toast-container {
     z-index: 1039;
@@ -391,7 +391,7 @@ body {
 }
 
 .admin-add-form-msg {
-    display: none; 
+    display: none;
     text-align: right;
     margin-bottom: 0;
 }
