@@ -7,7 +7,7 @@ var Importer = function () {};
 
 Importer.prototype.createImportModal = function (course) {
     var modal         = new ModalWindow({ id: 'importModal', title: 'Import Classlist'}),
-        $file         = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '.xlsx' }),
+        $file         = $('<input>', {type: 'file', id: 'fileName', name: 'fileName', class: 'form-control', accept: '' }),
         $errorDiv     = $('<div>', { class: 'alert alert-danger', style: 'display: none; margin-top: 20px;' }),
         $inputDiv     = $('<div>'),
         $errorMsg     = $('<span>');
@@ -15,6 +15,17 @@ Importer.prototype.createImportModal = function (course) {
     modal.$importButton = $('<button>', { type: 'submit', class: 'btn btn-primary', text: 'Import', id: 'importButton' });
     modal.$body
         .append($inputDiv
+            .append($('<div>', { class : 'alert alert-info alert-dismissible fade show', role: 'alert' })
+                .append($('<button>', { class: 'close' })
+                .attr('data-dismiss', 'alert')
+                .attr('aria-label', 'Close')
+                .append($('<span>')
+                    .attr('aria-hidden', 'true')
+                    .html('&times;')))
+                .append($('<p>', { text: "Provide the official .xlsx file from the school that contains the list of students for your class, or a file with the same formatting." } ))
+                .append($('<p>')
+                    .append($('<strong>', { text: 'Note' }))
+                    .append(": This will not replace any existing students - it will only add entries that don't already exist.")))
             .append($('<p>', { text: "Please submit your .xlsx classlist file:" }))
             .append($file))
         .append($errorDiv
