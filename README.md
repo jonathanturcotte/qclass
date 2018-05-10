@@ -1,7 +1,11 @@
 # QClass
 QClass is an educational attendance tool designed to provide professors with the ability to better track student attendance. This web-application is a management interface for professors looking to setup, run, and report on class attendance sessions. It also doubles as the check-in website for students looking to report that they are in attendance.
 
+QClass works on any modern browser that supports JavaScript ES5 and common HTML5 features. Supported browsers include Firefox, Chrome, IE11, Edge, and Safari. The student check-in site works with small screen sizes and most mobile browsers.
+
 Created as a Queen's University ELEC 498 project.
+
+<img src="https://user-images.githubusercontent.com/6924367/39879652-6c83db34-5449-11e8-831b-bb83870c0ae6.png" height="325"/> <img src="https://user-images.githubusercontent.com/6924367/39879813-d4c847de-5449-11e8-8e9d-9aa11e405d1f.png" height="325"/>
 
 ## Development and Testing
 ### Webpack
@@ -13,13 +17,20 @@ Other commands that are available to change the behaviour of webpack are `npm ru
  which builds the bundle once without watching for changes, and `npm run release`,
  which runs uglifyjs on the source, and then bundles it once.
 
-### Cookies
-A goal of this project is to integrate it with Queen's Single Sign-On system. Until then, however, authentication has been stubbed using a cookie with a 'netID' field. 
+### Integration with Queen's SSO
+This project was designed to be integrated with the Queen's Single Sign-On system for authentication.
 
-To set the cookie from the client side, just run Cookies.set('netID', 'NETID'); with whatever netID you actually want in place of NETID.
-Cookies is a global, so either manual setting through the developer console or calling it in client code works
+#### Bypassing SSO for Local Development
+SSO is automatically bypassed if the configuration can't detect the qclass SSL certificate. 
+To change which test user is when this happens change the values for testUser found in `config.js`.
 
-Currently valid netIDs are:
+#### Stubbing SSO for Remote Development
+The current implementation has been integrated with the test SSO system, which does not return all of the required
+fields of data about a user. Most importantly, it does not return whether the user is a student or professor. As a
+result, the NetID and isProf values need to be stubbed in `sso\auth.js`.
+
+### Testing NetIDs
+Several testing users have been added to the database.
 
 #### Professor NetIDs
 1pvb69,
