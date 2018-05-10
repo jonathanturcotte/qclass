@@ -5,7 +5,8 @@ QClass works on any modern browser that supports JavaScript ES5 and common HTML5
 
 Created as a Queen's University ELEC 498 project.
 
-<img src="https://user-images.githubusercontent.com/6924367/39879652-6c83db34-5449-11e8-831b-bb83870c0ae6.png" height="325"/> <img src="https://user-images.githubusercontent.com/6924367/39879813-d4c847de-5449-11e8-8e9d-9aa11e405d1f.png" height="325"/>
+
+<img src="public/images/professor.png" height="325"/> <img src="public/images/checkin.png" height="325"/>
 
 ## Development and Testing
 ### Webpack
